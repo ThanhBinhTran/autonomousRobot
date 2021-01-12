@@ -1,0 +1,131 @@
+import numpy as np
+import math
+
+def intersection(x, y, radius, ls_points): # line segment points
+
+    """ find the two points where a secant intersects a circle """
+    p_is = []
+    p1x,p1y = ls_points[0]
+    p2x,p2y = ls_points[1]
+
+    dx, dy = np.subtract(p2x,p1x), np.subtract(p2y, p1y)
+
+    a = dx**2 + dy**2
+    b = 2 * (dx * (p1x - x) + dy * (p1y - y))
+    c = (p1x - x)**2 + (p1y - y)**2 - radius**2
+
+    discriminant = b**2 - 4 * a * c
+    if discriminant > 0:
+        t1 = (-b + discriminant**0.5) / (2 * a)
+        t2 = (-b - discriminant**0.5) / (2 * a)
+        p_is.append([dx * t1 + p1x, dy * t1 + p1y])
+        p_is.append([dx * t2 + p1x, dy * t2 + p1y])
+    return p_is
+
+def is_inside_line_segment(point, ls_points): # line segment points
+    """
+    check if a point is whether inside give line segment 
+    return a point if it is inside, otherwise return None 
+    """
+    d1 = np.subtract(point, ls_points[0])
+    d2 = np.subtract(point, ls_points[1])
+    position = np.dot (d1, d2)
+    #print (position, point, ls_points)
+    if position <= 0:
+        return point
+    return None
+    
+def rotate_around_point_lowperf(v, radians, cpoint=(0, 0)):
+    """Rotate a point around a given point.
+    
+    I call this the "low performance" version since it's recalculating
+    the same values more than once [cos(radians), sin(radians), x-cx, y-cy).
+    It's more readable than the next function, though.
+    """
+    x, y = v
+    cx, cy = cpoint
+
+    rx = cx + math.cos(radians) * (x - cx) + math.sin(radians) * (y - cy)
+    ry = cy + -math.sin(radians) * (x - cx) + math.cos(radians) * (y - cy)
+
+    return (rx, ry)
+    
+def rotate_origin_only( v, radians):
+    """Only rotate a point around the origin (0, 0)."""
+    x, y = v
+    rx = x * math.cos(radians) + y * math.sin(radians)
+    ry = -x * math.sin(radians) + y * math.cos(radians)
+
+    return rx, ry
+    
+def unit_vector(vector):
+    """ Returns the unit vector of the vector."""
+    return vector / np.linalg.norm(vector)
+
+def angle_between(v1, v2):
+    """Finds angle between two vectors"""
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    angle =  np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+    return angle * 180 / math.pi
+    
+def cal_angle(v1, v2):
+    """Finds angle between two vectors"""
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    angle = np.arccos(np.dot(v1_u, v2_u))
+    return angle * 180 / math.pi
+
+def cal_signed_angle_base(v1, v2):
+    """
+    Finds angle between two vectors
+    return signed angle (+) for anti clockwise, and (-) for clockwise
+    it works when base vector is (1,0)
+    """
+    angleB = math.atan2(v2[1],v2[0])
+    angleA = math.atan2(v1[1],v1[0])
+    return angleB - angleA
+    
+def cal_signed_angle(v1, v2):
+    """
+    Finds angle between two vectors
+    return signed angle (+) for anti clockwise, and (-) for clockwise
+    """
+    angle = cal_signed_angle_base(v1, [1,0]) # cal angle between vector (A) and ox axis
+    v_a = rotate_origin_only(v1, -angle)  # rotate vector A to ox axis
+    v_b = rotate_origin_only(v2, -angle)  # rotate vector B according to rotation_radians       
+    signed_angle = cal_signed_angle_base(v_a, v_b)
+    return signed_angle  * 180 / math.pi
+
+    
+def is_inside_area(point, center, boundaries):
+    """ check if a point is where inside boundaries area
+        return 1 if inside
+        return 0 if at the boundary line
+        return 1 if outside
+    """
+    vector_a = np.subtract(boundaries[0], center)
+    vector_b = np.subtract(boundaries[1], center)
+    vector_p = np.subtract(point, center)
+    
+    angle_sight = cal_signed_angle(vector_a, vector_b)
+    angle_point = cal_signed_angle(vector_a, vector_p)
+
+    if angle_point == 0 or angle_sight == angle_point:
+        print ("at boundaries_: point {0}, boundaries{1}".format(point, boundaries) )
+        return 0
+    elif angle_sight * angle_point < 0: # diff side
+        print ("diff side: point {0}, boundaries{1}".format(point, boundaries) )
+        return -1
+    else:
+        # compare angles in unsigned
+        abs_angle_sight = abs(angle_sight)
+        abs_angle_point = abs(angle_point)
+        if abs_angle_sight > abs_angle_point:
+            print ("inside: point {0}, boundaries{1}".format(point, boundaries) )
+            return 1
+        else:
+            print ("outside: point {0}, boundaries{1}".format(point, boundaries) )
+            return -1
+            
+    return -1  
