@@ -1,6 +1,7 @@
 import numpy as np
 import math
 
+
 def intersection(x, y, radius, ls_points): # line segment points
 
     """ find the two points where a secant intersects a circle """
@@ -30,7 +31,7 @@ def is_inside_line_segment(point, ls_points): # line segment points
     d1 = np.subtract(point, ls_points[0])
     d2 = np.subtract(point, ls_points[1])
     position = np.dot (d1, d2)
-    #print (position, point, ls_points)
+    ##print (position, point, ls_points)
     if position <= 0:
         return point
     return None
@@ -112,20 +113,58 @@ def is_inside_area(point, center, boundaries):
     angle_point = cal_signed_angle(vector_a, vector_p)
 
     if angle_point == 0 or angle_sight == angle_point:
-        print ("at boundaries_: point {0}, boundaries{1}".format(point, boundaries) )
+        #print ("at boundaries_: point {0}, boundaries{1}".format(point, boundaries) )
         return 0
     elif angle_sight * angle_point < 0: # diff side
-        print ("diff side: point {0}, boundaries{1}".format(point, boundaries) )
+        #print ("diff side: point {0}, boundaries{1}".format(point, boundaries) )
         return -1
     else:
         # compare angles in unsigned
         abs_angle_sight = abs(angle_sight)
         abs_angle_point = abs(angle_point)
         if abs_angle_sight > abs_angle_point:
-            print ("inside: point {0}, boundaries{1}".format(point, boundaries) )
+            #print ("inside: point {0}, boundaries{1}".format(point, boundaries) )
             return 1
         else:
-            print ("outside: point {0}, boundaries{1}".format(point, boundaries) )
+            ##print ("outside: point {0}, boundaries{1}".format(point, boundaries) )
             return -1
             
     return -1  
+
+def lineFromPoints(P, Q):
+ 
+    a = Q[1] - P[1]
+    b = P[0] - Q[0]
+    c = a*(P[0]) + b*(P[1])
+    ##print (a,b,c)
+    #m = -a/b
+    #n =  c/b
+    # ax + by = c
+    # y = mx + n  
+    return [a, b, c]
+
+def point_dist(p, q):
+    """ calculate distance of 2 point """
+    return math.sqrt((p[0]-q[0])**2 + (p[1]-q[1])**2)
+    #return math.dist(p, q)
+    
+    
+def line_intersection(line1, line2):
+    xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
+    ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])
+
+    def det(a, b):
+        return a[0] * b[1] - a[1] * b[0]
+
+    div = det(xdiff, ydiff)
+    if div == 0:
+       raise Exception('lines do not intersect')
+
+    d = (det(*line1), det(*line2))
+    x = det(d, xdiff) / div
+    y = det(d, ydiff) / div
+    return [x, y]
+def print_sight(message_ID, pairs):
+    print (message_ID)
+    for pair in pairs:
+        print (pair[0],pair[1])

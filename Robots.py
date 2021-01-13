@@ -15,6 +15,8 @@ import numpy as np
 
 from Robot_lib import *
 from Robot_paths_lib import *
+from Robot_draw_lib import *
+from Robot_sight_lib import *
 show_animation = True
 
 
@@ -236,12 +238,7 @@ def plot_arrow(x, y, yaw, length=0.5, width=0.1):  # pragma: no cover
     plt.arrow(x, y, length * math.cos(yaw), length * math.sin(yaw),
               head_length=width, head_width=width)
     plt.plot(x, y)
-
-   
-def plot_sight(x, y, sight, cl = "g", alpha = 0.3):
-    plt.fill([x, sight[0][0],sight[1][0]], [y, sight[0][1], sight[1][1]], color = cl, alpha = alpha, linestyle = ":")
-    
-    
+  
 def plot_robot(x, y, yaw, config):  # pragma: no cover
     if config.robot_type == RobotType.rectangle:
         outline = np.array([[-config.robot_length / 2, config.robot_length / 2,
@@ -263,200 +260,7 @@ def plot_robot(x, y, yaw, config):  # pragma: no cover
         out_x, out_y = (np.array([x, y]) +
                         np.array([np.cos(yaw), np.sin(yaw)]) * config.robot_radius)
         plt.plot([x, out_x], [y, out_y], "-k")
-def devide_sight_A_B_C_D(center, A, B, C, D): # A - B - C - D
-    # divide sight into 3 different parts [R_C0_R]
-    AC_BO_point = line_intersection([A,C], [B, center])
-    BD_CO_point = line_intersection([B,D], [C, center])
-    plt.plot (AC_BO_point[0],AC_BO_point[1], "ob")
-    plt.plot (BD_CO_point[0],BD_CO_point[1], "ob")
-    mid_sight_t = []
-    blind_sight_t = []
-    if point_dist(center, AC_BO_point) < point_dist(center, B): # A - C is closer center than B - DeprecationWarning
-        mid_sight_t = [AC_BO_point, C]
-        blind_sight_t = [B,BD_CO_point]
-    else:
-        mid_sight_t = [B, BD_CO_point]
-        blind_sight_t = [AC_BO_point,C]
-    devided_sight = [[A,AC_BO_point], mid_sight_t, [D,BD_CO_point]]
-    return [devided_sight, blind_sight_t]
-def detect_blind_sight(center, ref_sight, check_sight):
-    """ check sight  --> C0, C1
-        reference sight -->  R0 R1 """
-    true_sight = []
-    blind_sight = []
-    
-    ref_blind = False
-    c_blind = False  
-
-    pointC_0 = is_inside_area(check_sight[0], center, ref_sight)
-    pointC_1 = is_inside_area(check_sight[1], center, ref_sight)
-    print ("=== ref {0} check {1} c1 c2 {2}, {3}".format (ref_sight, check_sight, pointC_0, pointC_1))
-    if pointC_0 >= 0:
-        plt.plot(check_sight[0][0], check_sight[0][1], "*r")
-    if pointC_1 >= 0:
-        plt.plot(check_sight[1][0], check_sight[1][1], "*r")
-
-
-    if pointC_0 >= 0 and pointC_1 >= 0: # whole check_sight are inside ref_sight, true blind
-        print ("____1")
-        true_sight.append(ref_sight)
-        blind_sight.append(check_sight)
-        c_blind = True
-
-    elif pointC_0 == 0 or pointC_1 == 0: # ether C0 or C1 is at the boundary segment
-        """ check if C0 C1 coverages ref_sight """
-        print ("____2")
-        pointR_0 = is_inside_area(ref_sight[0], center, check_sight)
-        pointR_1 = is_inside_area(ref_sight[1], center, check_sight)
-        if pointR_0 < 0 or pointR_1 < 0: # ref sight is outside of the area of AB
-            print ("____2 1")
-            true_sight.append(ref_sight)
-            true_sight.append(check_sight)
-        else: # C1/C0 R0 [R1|C0/C1]
-            print ("____2 1")
-            true_sight.append(check_sight)
-            blind_sight.append(ref_sight)
-            ref_blind = True
-    elif pointC_0 > 0 and pointC_1 < 0: # C0 inside, C1 outside
-        """ check if R0 is inside area of [R1, C1]
-            if R0 is outside then R1 is inside area of [R0, C1] for sure
-        """
-        print ("____3")
-        pointR_0 = is_inside_area(ref_sight[0], center, [ref_sight[1], check_sight[1]])
-        if pointR_0 >=0 :  # R1 C0 R0 C1 
-            print ("____3    1")
-            [devided_sight, blind_sight_t] = devide_sight_A_B_C_D(center, ref_sight[1], check_sight[0], ref_sight[0], check_sight[1]) # A - B - C - D
-            
-            true_sight.append([ref_sight[0], check_sight[1]])
-            blind_sight.append([check_sight[0], ref_sight[0]])
-        else: # R0 C0 R1 C1 
-            print ("____3     2")
-            [devided_sight, blind_sight_t] = devide_sight_A_B_C_D(center, ref_sight[0], check_sight[0], ref_sight[1], check_sight[1]) # A - B - C - D
-            
-            true_sight.append([ref_sight[1], check_sight[1]])
-            blind_sight.append([check_sight[0], ref_sight[1]])
-            
-    elif pointC_0 < 0 and pointC_1 > 0: # C1 inside, C0 outside
-        print ("____4")
-        """ check if R0 is inside area of [R1, C0]
-            if R0 is outside then R1 is inside area of [R0, C0] for sure
-        """
-        pointR_0 = is_inside_area(ref_sight[0], center, [ref_sight[1], check_sight[0]])
-        if pointR_0 >=0 :  # R1 C1 R0 C0
-            print ("____4      1")
-            [devided_sight, blind_sight_t] = devide_sight_A_B_C_D(center, ref_sight[1], check_sight[1], ref_sight[0], check_sight[0]) # A - B - C - D
-            
-            true_sight.append([ref_sight[0], check_sight[0]])
-            blind_sight.append([check_sight[1], ref_sight[0]])
-        else: # R0 C1 R1 C0
-            print ("____4       2")
-            [devided_sight, blind_sight_t] = devide_sight_A_B_C_D(center, ref_sight[0], check_sight[1], ref_sight[1], check_sight[0]) # A - B - C - D
-            
-            true_sight.append([ref_sight[1], check_sight[0]])
-            blind_sight.append([check_sight[1], ref_sight[1]])
-            
-    else:   # both Check C0 C1 are outside
-        # Check if ref_sight is insde Check_sight,
-        pointR_0 = is_inside_area(ref_sight[0], center, [ref_sight[1], check_sight[0]])
-        if pointR_0 >=0:
-            true_sight.append (check_sight)
-            blind_sight.append (ref_sight)
-        else:  # 2 distinct sight
-            true_sight.append (ref_sight)
-            true_sight.append (check_sight)
-            ref_blind
-        print ("____5")
-        
-        
-    return [true_sight, blind_sight, ref_blind, c_blind]
-    
-def remove_blind_sight(center, boundary_points):
-    true_sight = []
-    blind_sight = []
-    i = 0 # start with index = 0
-    while i < len(boundary_points) -1:
-        #print ("NEW I", i, boundary_points)
-        j = i + 1
-        while j < len(boundary_points) :
-            #print ("BEFORE ", i,j,  len(boundary_points),boundary_points)
-            [true_sight_t, blind_sight_t, ref_blind, c_blind] = detect_blind_sight(center, boundary_points[i], boundary_points[j])
-            blind_sight.extend(blind_sight_t)
-            for sight in true_sight_t:
-                if (sight not in blind_sight) and (sight not in true_sight):
-                    true_sight.append(sight)
-
-            if c_blind: # remove (lager index of check sight) first if its true blind
-                #print ("  remove j")
-                boundary_points.pop(j)
-                j = j - 1
-            elif ref_blind:
-                #print ("  remove I")
-                boundary_points.pop(i)
-                i = i - 1
-            #print ("->AFTER ", i,j,  len(boundary_points), boundary_points) 
-            j += 1
-        i += 1 
-    return [true_sight, blind_sight]
-
-def get_all_boardary_pairs(x, y, config, ox_b, oy_b):
-    """ find all boundary pairs among all obstacle line segments and circle """
-    boundary_points = []
-    for i in range(len(ox_b)-1):
-        is_points = intersection(x, y, config.robot_vision, [[ox_b[i], oy_b[i]], [ox_b[i+1], oy_b[i+1]]])
-        if len(is_points) > 0:
-            # draw intersection points
-            #for point in is_points:
-            #plt.plot(point[0],point[1], ".g"
-        
-            """ find boundary pair between a single of line segment and circle """
-            boundary_point = []
-            for point in is_points:
-                b_point = is_inside_line_segment(point, [[ox_b[i],oy_b[i]], [ox_b[i+1], oy_b[i+1]]])
-                if b_point is not None:            # found intersection point is inside the line segment
-                    boundary_point.append(b_point)
-                else:                               # intersection point is not inside the line segment
-                    b_point = is_inside_line_segment([ox_b[i],oy_b[i]], is_points)
-                    if b_point is not None:            # found intersection point is inside the line segment
-                        boundary_point.append(b_point)
-
-                    b_point = is_inside_line_segment([ox_b[i+1],oy_b[i+1]], is_points)
-                    if b_point is not None:            # found intersection point is inside the line segment
-                        boundary_point.append(b_point)
-            if len (boundary_point) > 0:
-                #print ("boundary_points ", boundary_point)
-                boundary_points.append( [boundary_point[0],boundary_point[1]])
-    print ("boundary_points: ", boundary_points)
-    return boundary_points   
-def get_true_sight(x, y, boundary_points):
-    true_sight = []
-    blind_sight = []
-    if len( boundary_points ) >=2:
-        [true_sight, blind_sight] = remove_blind_sight([x, y], boundary_points)
-    else: # only 1 sight then no collision in the given sight
-        true_sight = boundary_points
-    return [true_sight, blind_sight]
-
-def draw_true_sight(x, y, true_sight, blind_sight):
-    for point in true_sight:
-        plot_sight(x, y, point)
-        
-def draw_vision_area(x, y, config):
-    """ draw a circle that limits the vision of robot """ 
-    vision = plt.Circle((x, y), config.robot_vision, color="red", linestyle  = "--", fill=False)
-    #alpha = 0.3
-    #vision = plt.Circle((x, y), config.robot_vision, color="red", linestyle  = "--", alpha = 0.3)
-    plt.gcf().gca().add_artist(vision)
-    
-def plot_vision(x, y, config, ox_b, oy_b):
-    
-    draw_vision_area(x, y, config)
-                
-    boundary_points = get_all_boardary_pairs(x, y, config, ox_b, oy_b)
-    [true_sight, blind_sight] = get_true_sight(x, y, boundary_points)
-    print ("true_sight", true_sight)
-    print ("blind_sight", blind_sight)
-    draw_true_sight(x, y, true_sight, blind_sight) 
-        
+                  
 def plot_AH_paths(AH_paths, goal):
     for path in AH_paths:
         AH_sp = path[0]       # start point
@@ -481,7 +285,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     (gx, gy) = np.random.randint(30, size=(2,1))
     start_point = (50.0, 70.0)
     start_point = (0.0, 0.0)
-    start_point = (10.0, 5.0)
+    start_point = (10.09384834 , 5.05120879)
     x = np.array([start_point[0], start_point[1], math.pi / 8.0, 0.0, 0.0])
     #x = np.array([55.0, 60.0, math.pi / 8.0, 0.0, 0.0])
     # goal position [x(m), y(m)]
@@ -491,8 +295,9 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     
     o_b = []
     ox_b = [ 0.0, 15.0, 50.0, 10.0, 35.0, 20.0, 60.0,  0.0]
-    oy_b = [11.0, 10.0, 20.0, 30.0, 40.0, 50.0, 90.0, 80.0]
-   
+    oy_b = [10.0, 10.0, 20.0, 30.0, 40.0, 50.0, 90.0, 80.0]
+    #ox_b = [ 0.0, 50.0, 10.0, 35.0, 20.0, 60.0,  0.0]
+    #oy_b = [10.0, 20.0, 30.0, 40.0, 50.0, 90.0, 80.0]   
     direction = []
     boundary_points =  []
     config.robot_type = robot_type
@@ -507,6 +312,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         trajectory = np.vstack((trajectory, x))  # store state history
 
         if show_animation:
+            print ("______",x)
             plt.cla()
             # for stopping simulation with the esc key.
             plt.gcf().canvas.mpl_connect(
@@ -526,14 +332,15 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             plt.plot(ob[:, 0], ob[:, 1], "ok")
             plot_robot(x[0], x[1], x[2], config)
             
-            plot_vision(x[0], x[1], config, ox_b, oy_b)
+            [true_sight, blind_sight] = get_true_sight(x[0], x[1], config, ox_b, oy_b)
+            plot_vision(plt, x[0], x[1], config, ox_b, oy_b, true_sight, blind_sight)
 
             #plot_arrow(x[0], x[1], x[2])
             plt.axis("equal")
             plt.grid(True)
             plt.pause(0.0001)
         
-        # for debug
+        # Run once for debugging
         break
         
         # check reaching goal
