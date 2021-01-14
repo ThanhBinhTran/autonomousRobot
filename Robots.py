@@ -12,13 +12,11 @@ from enum import Enum
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 from Robot_lib import *
 from Robot_paths_lib import *
 from Robot_draw_lib import *
 from Robot_sight_lib import *
 show_animation = True
-
 
 def dwa_control(x, config, goal, ob):
     """
@@ -30,11 +28,9 @@ def dwa_control(x, config, goal, ob):
 
     return u, trajectory
 
-
 class RobotType(Enum):
     circle = 0
     rectangle = 1
-
 
 class Config:
     """
@@ -94,9 +90,7 @@ class Config:
             raise TypeError("robot_type must be an instance of RobotType")
         self._robot_type = value
 
-
 config = Config()
-
 
 def motion(x, u, dt):
     """
@@ -110,7 +104,6 @@ def motion(x, u, dt):
     x[4] = u[1]
 
     return x
-
 
 def calc_dynamic_window(x, config):
     """
@@ -133,7 +126,6 @@ def calc_dynamic_window(x, config):
 
     return dw
 
-
 def predict_trajectory(x_init, v, y, config):
     """
     predict trajectory with an input
@@ -148,7 +140,6 @@ def predict_trajectory(x_init, v, y, config):
         time += config.dt
 
     return trajectory
-
 
 def calc_control_and_trajectory(x, dw, config, goal, ob):
     """
@@ -186,7 +177,6 @@ def calc_control_and_trajectory(x, dw, config, goal, ob):
                     best_u[1] = -config.max_delta_yaw_rate
     return best_u, best_trajectory
 
-
 def calc_obstacle_cost(trajectory, ob, config):
     """
     calc obstacle cost inf: collision
@@ -219,7 +209,6 @@ def calc_obstacle_cost(trajectory, ob, config):
     min_r = np.min(r)
     return 1.0 / min_r  # OK
 
-
 def calc_to_goal_cost(trajectory, goal):
     """
         calc to goal cost with angle difference
@@ -232,7 +221,6 @@ def calc_to_goal_cost(trajectory, goal):
     cost = abs(math.atan2(math.sin(cost_angle), math.cos(cost_angle)))
 
     return cost
-
 
 def plot_arrow(x, y, yaw, length=0.5, width=0.1):  # pragma: no cover
     plt.arrow(x, y, length * math.cos(yaw), length * math.sin(yaw),
@@ -284,8 +272,9 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     # initial state [x(m), y(m), yaw(rad), v(m/s), omega(rad/s)]
     (gx, gy) = np.random.randint(30, size=(2,1))
     start_point = (50.0, 70.0)
-    start_point = (0.0, 0.0)
-    start_point = (10.09384834 , 5.05120879)
+    start_point = (34.0, 43.0)
+    #start_point = (10.09384834 , 5.05120879)
+    #start_point = (34.6, 43.5)
     x = np.array([start_point[0], start_point[1], math.pi / 8.0, 0.0, 0.0])
     #x = np.array([55.0, 60.0, math.pi / 8.0, 0.0, 0.0])
     # goal position [x(m), y(m)]
@@ -333,7 +322,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             plot_robot(x[0], x[1], x[2], config)
             
             [true_sight, blind_sight] = get_true_sight(x[0], x[1], config, ox_b, oy_b)
-            plot_vision(plt, x[0], x[1], config, ox_b, oy_b, true_sight, blind_sight)
+            plot_vision(plt, x[0], x[1], config.robot_vision, ox_b, oy_b, true_sight, blind_sight)
 
             #plot_arrow(x[0], x[1], x[2])
             plt.axis("equal")
@@ -356,7 +345,6 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
 
     plt.show()
 
-
 if __name__ == '__main__':
-    #main(robot_type=RobotType.rectangle)
-    main(robot_type=RobotType.circle)
+    main(robot_type=RobotType.rectangle)
+    #main(robot_type=RobotType.circle)

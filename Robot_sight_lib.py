@@ -1,13 +1,12 @@
 from Robot_lib import *
 from Robot_draw_lib import *
 import matplotlib.pyplot as plt
-
 def devide_sight_ABCD(center, A, B, C, D): #  line [A,C], [B, D]
     # divide sight into 3 different parts [R_C0_R]
     AC_BO_point = line_intersection([A,C], [B, center])
     BD_CO_point = line_intersection([B,D], [C, center])
-    plt.plot (AC_BO_point[0],AC_BO_point[1], "1r")
-    plt.plot (BD_CO_point[0],BD_CO_point[1], "1r")
+    plt.plot (AC_BO_point[0],AC_BO_point[1], "+b")
+    plt.plot (BD_CO_point[0],BD_CO_point[1], "+b")
     mid_sight = []
     blind_sight = []
     if point_dist(center, AC_BO_point) < point_dist(center, B): # A - C is closer center than B
@@ -40,17 +39,14 @@ def detect_blind_sight(center, ref_sight, check_sight):
     
     print ("_ ref {0} check {1} c1 c2 {2}, {3}".format (ref_sight, check_sight, pointC_0, pointC_1))
     if pointC_0 >= 0:
-        plt.plot(check_sight[0][0], check_sight[0][1], "*r")
+        plt.plot(check_sight[0][0], check_sight[0][1], "1r")
     if pointC_1 >= 0:
-        plt.plot(check_sight[1][0], check_sight[1][1], "*r")
-
-
+        plt.plot(check_sight[1][0], check_sight[1][1], "1r")
     if pointC_0 >= 0 and pointC_1 >= 0: # whole check_sight are inside ref_sight, true blind
         #print ("____1")
         true_sight.append(ref_sight)
         blind_sight.append(check_sight)
         c_blind = True
-
     elif pointC_0 == 0 or pointC_1 == 0: # ether C0 or C1 is at the boundary segment
         """ check if C0 C1 coverages ref_sight """
         #print ("____2")
@@ -126,7 +122,6 @@ def remove_blind_sight(center, boundary_points):
         while j < len(boundary_points) :
             #print ("BEFORE ", i,j,  len(boundary_points),boundary_points)
             [ts, bs, ds, r_blind, c_blind, d_sight] = detect_blind_sight(center, boundary_points[i], boundary_points[j])
-
             print_sight ("__true sight:", ts)
             print_sight ("__blind sight:", bs)
             print_sight ("__divide sight:", ds)
@@ -141,13 +136,16 @@ def remove_blind_sight(center, boundary_points):
                     true_sight.append(sight)
                     
             if d_sight:
-                #print ("replace ref, check by new ref check")
-                #print ("replace ref check", boundary_points[i], boundary_points[j])
-                #print ("by ", ds)
+                # remove ref, check sight in true sight if any
+                # replace ref, check sight by new ref, check in boundary_points
+                try:
+                    true_sight.remove(boundary_points[i])
+                    true_sight.remove(boundary_points[j])
+                except:
+                    print("Not in list")
                 boundary_points[i] = ds[0]
                 boundary_points[j] = ds[1]
-                #for b_pairs in boundary_points:
-                    #print (b_pairs)
+                #print_sight("new boundary_points", boundary_points)
                 i = i - 1
                 break
             elif c_blind: # remove (lager index of check sight) first if its true blind
@@ -186,15 +184,14 @@ def get_all_boardary_pairs(x, y, config, ox_b, oy_b):
             """ find boundary pair between a single of line segment and circle """
             boundary_point = []
             for point in is_points:
-                b_point = is_inside_line_segment(point, [[ox_b[i],oy_b[i]], [ox_b[i+1], oy_b[i+1]]])
+                b_point = is_inside_ls(point, [[ox_b[i],oy_b[i]], [ox_b[i+1], oy_b[i+1]]])
                 if b_point is not None:            # found intersection point is inside the line segment
                     boundary_point.append(b_point)
                 else:                               # intersection point is not inside the line segment
-                    b_point = is_inside_line_segment([ox_b[i],oy_b[i]], is_points)
+                    b_point = is_inside_ls([ox_b[i],oy_b[i]], is_points)
                     if b_point is not None:            # found intersection point is inside the line segment
                         boundary_point.append(b_point)
-
-                    b_point = is_inside_line_segment([ox_b[i+1],oy_b[i+1]], is_points)
+                    b_point = is_inside_ls([ox_b[i+1],oy_b[i+1]], is_points)
                     if b_point is not None:            # found intersection point is inside the line segment
                         boundary_point.append(b_point)
             if len (boundary_point) > 0:

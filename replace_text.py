@@ -32,8 +32,6 @@ from pathlib import Path
 # import input/output handling
 import io
 
-
-
 print ("Finding ", patternStr)
 
 searchdir = Path(r".")
@@ -52,12 +50,13 @@ for texfile in tex_file_lists:
 for texfile in resultfile:
     f = open(texfile, encoding='utf-8')
     data = f.readlines()
+    rlines = []
     for line in data:
-        rline.append(line.replace(patternStr,replace))
+        rlines.append(line.replace(patternStr,replace))
     
     #write file
     with io.open(texfile, 'w', encoding='utf8') as fw:
-        for filename in results:
-            fw.write(filename + "\n")
+        for update_line in rlines:
+            fw.write(update_line)
     fw.close()
 

@@ -29,8 +29,6 @@ from pathlib import Path
 # import input/output handling
 import io
 
-
-
 print ("Finding ", patternStr)
 
 searchdir = Path(r".")
