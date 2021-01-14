@@ -174,6 +174,7 @@ def get_true_blind_sight(x, y, boundary_points):
 def get_all_boardary_pairs(x, y, config, ox_b, oy_b):
     """ find all boundary pairs among all obstacle line segments and circle """
     boundary_points = []
+    print_point("Map obstacle", ox_b, oy_b)
     for i in range(len(ox_b)-1):
         is_points = intersection(x, y, config.robot_vision, [[ox_b[i], oy_b[i]], [ox_b[i+1], oy_b[i+1]]])
         if len(is_points) > 0:
@@ -205,5 +206,6 @@ def get_all_boardary_pairs(x, y, config, ox_b, oy_b):
     
 def get_true_sight(x, y, config, ox_b, oy_b):
     boundary_points = get_all_boardary_pairs(x, y, config, ox_b, oy_b)
+    print ("debug:", boundary_points)
     [true_sight, blind_sight] = get_true_blind_sight(x, y, boundary_points)
     return [true_sight, blind_sight]

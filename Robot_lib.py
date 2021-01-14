@@ -141,3 +141,8 @@ def print_sight(message_ID, pairs):
     print (message_ID)
     for pair in pairs:
         print (pair[0],pair[1])
+
+def print_point(message_ID, point_x, point_y):
+    print (message_ID)
+    for i in range(len(point_x)):
+        print ("{0} {1}".format(point_x[i],point_y[i]))

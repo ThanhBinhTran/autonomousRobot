@@ -16,6 +16,9 @@ from Robot_lib import *
 from Robot_paths_lib import *
 from Robot_draw_lib import *
 from Robot_sight_lib import *
+from Robot_map_lib import map_display
+from Robot_csv_lib import read_map_csv
+
 show_animation = True
 
 def dwa_control(x, config, goal, ob):
@@ -53,7 +56,7 @@ class Config:
         self.obstacle_cost_gain = 1.0
         self.robot_stuck_flag_cons = 0.001  # constant to prevent robot stucked
         self.robot_type = RobotType.circle
-        self.robot_vision = 40 # the range of input vision
+        self.robot_vision = 20 # the range of input vision
         # if robot_type == RobotType.circle
         # Also used to check if goal is reached in both types
         self.robot_radius = 1.0  # [m] for collision check
@@ -271,8 +274,9 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     print(__file__ + " start!!")
     # initial state [x(m), y(m), yaw(rad), v(m/s), omega(rad/s)]
     (gx, gy) = np.random.randint(30, size=(2,1))
-    start_point = (50.0, 70.0)
-    start_point = (34.0, 43.0)
+    #start_point = (50.0, 70.0)
+    #start_point = (34.0, 43.0)
+    start_point = (0.0, 0.0)
     #start_point = (10.09384834 , 5.05120879)
     #start_point = (34.6, 43.5)
     x = np.array([start_point[0], start_point[1], math.pi / 8.0, 0.0, 0.0])
@@ -281,12 +285,14 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     goal = np.array([gx, gy])
     goal = np.array([60, 80])
     # input [forward speed, yaw_rate]
-    
-    o_b = []
-    ox_b = [ 0.0, 15.0, 50.0, 10.0, 35.0, 20.0, 60.0,  0.0]
-    oy_b = [10.0, 10.0, 20.0, 30.0, 40.0, 50.0, 90.0, 80.0]
+
+    #ox_b = [ 0.0, 15.0, 50.0, 10.0, 35.0, 20.0, 60.0,  0.0]
+    #oy_b = [10.0, 10.0, 20.0, 30.0, 40.0, 50.0, 90.0, 80.0]
     #ox_b = [ 0.0, 50.0, 10.0, 35.0, 20.0, 60.0,  0.0]
-    #oy_b = [10.0, 20.0, 30.0, 40.0, 50.0, 90.0, 80.0]   
+    #oy_b = [10.0, 20.0, 30.0, 40.0, 50.0, 90.0, 80.0]
+    mapname = "_mapriver.csv" 
+    [ox_b,oy_b] = read_map_csv(mapname)    
+
     direction = []
     boundary_points =  []
     config.robot_type = robot_type
@@ -308,9 +314,8 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                 'key_release_event',
                 lambda event: [exit(0) if event.key == 'escape' else None])
             
-            # draw obstacles 
-            #plt.plot(ox_b, oy_b, "-xb")
-            plt.plot(ox_b, oy_b, "-y")
+            # draw map obstacles 
+            map_display(plt, mapname, ox_b, oy_b)
             
             # draw all AH paths
             #plot_AH_paths(AH_paths, goal)
@@ -330,7 +335,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             plt.pause(0.0001)
         
         # Run once for debugging
-        break
+        #break
         
         # check reaching goal
         dist_to_goal = math.hypot(x[0] - goal[0], x[1] - goal[1])
