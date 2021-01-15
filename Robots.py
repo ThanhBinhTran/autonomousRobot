@@ -18,8 +18,8 @@ from Robot_draw_lib import *
 from Robot_sight_lib import *
 from Robot_map_lib import map_display
 from Robot_csv_lib import read_map_csv
+from Program_config import *
 
-show_animation = True
 
 def dwa_control(x, config, goal, ob):
     """
@@ -272,30 +272,12 @@ def plot_AH_paths(AH_paths, goal):
             
 def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     print(__file__ + " start!!")
-    # initial state [x(m), y(m), yaw(rad), v(m/s), omega(rad/s)]
-    (gx, gy) = np.random.randint(30, size=(2,1))
-    #start_point = (50.0, 70.0)
-    #start_point = (34.0, 43.0)
-    #start_point = (0.0, 0.0)
-    #start_point = (10.09384834 , 5.05120879)
-    start_point = (31, 32)
-    x = np.array([start_point[0], start_point[1], math.pi / 8.0, 0.0, 0.0])
-    #x = np.array([55.0, 60.0, math.pi / 8.0, 0.0, 0.0])
-    # goal position [x(m), y(m)]
-    goal = np.array([gx, gy])
-    goal = np.array([80, 80])
-    # input [forward speed, yaw_rate]
 
-    #ox_b = [ 0.0, 15.0, 50.0, 10.0, 35.0, 20.0, 60.0,  0.0]
-    #oy_b = [10.0, 10.0, 20.0, 30.0, 40.0, 50.0, 90.0, 80.0]
-    #ox_b = [ 0.0, 50.0, 10.0, 35.0, 20.0, 60.0,  0.0]
-    #oy_b = [10.0, 20.0, 30.0, 40.0, 50.0, 90.0, 80.0]
-    mapname = "_mapriver.csv" 
-    mapname = "_map.csv"
+    # initial state [x(m), y(m), yaw(rad), v(m/s), omega(rad/s)]
+    x = np.array([start_point[0], start_point[1], math.pi / 8.0, 0.0, 0.0])
+
     [ox_b,oy_b] = read_map_csv(mapname)    
 
-    direction = []
-    boundary_points =  []
     config.robot_type = robot_type
     trajectory = np.array(x)
     ob = config.ob
@@ -308,7 +290,9 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         trajectory = np.vstack((trajectory, x))  # store state history
 
         if show_animation:
-            print ("______",x)
+            if print_current_position:
+                print ("___________current position: ", x[0], x[1])
+                
             plt.cla()
             # for stopping simulation with the esc key.
             plt.gcf().canvas.mpl_connect(
@@ -336,7 +320,8 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             plt.pause(0.0001)
         
         # Run once for debugging
-        break
+        if run_once:
+            break
         
         # check reaching goal
         dist_to_goal = math.hypot(x[0] - goal[0], x[1] - goal[1])

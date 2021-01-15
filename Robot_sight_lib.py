@@ -1,6 +1,8 @@
 from Robot_lib import *
 from Robot_draw_lib import *
+from Program_config import *
 import matplotlib.pyplot as plt
+
 def devide_sight_ABCD(center, A, B, C, D): #  line [A,C], [B, D]
     # divide sight into 3 different parts [R_C0_R]
     AC_BO_point = line_intersection([A,C], [B, center])
@@ -17,9 +19,8 @@ def devide_sight_ABCD(center, A, B, C, D): #  line [A,C], [B, D]
         #print ("AC is closer", point_dist(center, AC_BO_point), "<>", point_dist(center, B))
         devided_sight = [[A,AC_BO_point], [B,D]]
         blind_sight = [AC_BO_point,C]
-    #draw_true_blind_sight(plt,center[0], center[1], devided_sight, [blind_sight]) 
-    
-    return [devided_sight, blind_sight]
+
+    return devided_sight, blind_sight
         
 def detect_blind_sight(center, ref_sight, check_sight):
     """ check sight  --> C0, C1
@@ -34,130 +35,107 @@ def detect_blind_sight(center, ref_sight, check_sight):
                       #             then remove ref, check sight , and create 2 new sight 
     divided_sight = []
     
-    pointC_0 = is_inside_area(check_sight[0], center, ref_sight)
-    pointC_1 = is_inside_area(check_sight[1], center, ref_sight)
+    pointC_0 = inside_angle_area(check_sight[0], center, ref_sight)
+    pointC_1 = inside_angle_area(check_sight[1], center, ref_sight)
     
     print ("-->ref {0} check {1} c1 c2 {2}, {3}".format (ref_sight, check_sight, pointC_0, pointC_1))
-    if pointC_0 >= 0:
-        plt.plot(check_sight[0][0], check_sight[0][1], "1r")
-    if pointC_1 >= 0:
-        plt.plot(check_sight[1][0], check_sight[1][1], "1r")
-    if pointC_0 >= 0 and pointC_1 >= 0: # whole check_sight are inside ref_sight, true blind
-        #print ("____1")
-        true_sight.append(ref_sight)
-        blind_sight.append(check_sight)
+    #if pointC_0 >= 0:
+    #    plt.plot(check_sight[0][0], check_sight[0][1], "1r")
+    #if pointC_1 >= 0:
+    #    plt.plot(check_sight[1][0], check_sight[1][1], "1r")
+    
+    """ 
+        reference sight fully coverages check sight
+            -> if case
+        reference sight and check sight have mutual edge: 
+            -> elif pointC_0 == 0 or pointC_1 == 0
+        reference sight and check sight have mutual area 
+        # C0 inside, C1 outside
+            -> elif pointC_0 > 0 and pointC_1 < 0:
+        reference sight and check sight have mutual area 
+        # C1 inside, C0 outside
+            -->elif pointC_0 < 0 and pointC_1 > 0:
+        reference sight and check sight are 2 distinct area 
+            ---> else:   # both Check C0 C1 are outside
+    """
+    if pointC_0 >= 0 and pointC_1 >= 0: # reference sight fully coverages check_sight
         c_blind = True
+        blind_sight.append(check_sight)
+
     elif pointC_0 == 0 or pointC_1 == 0: # ether C0 or C1 is at the boundary segment
-        """ check if C0 C1 coverages ref_sight """
-        #print ("____2")
-        pointR_0 = is_inside_area(ref_sight[0], center, check_sight)
-        pointR_1 = is_inside_area(ref_sight[1], center, check_sight)
-        if pointR_0 < 0 or pointR_1 < 0: # ref sight is outside of the area of check
-            #print ("____2 1")
-            true_sight.append(ref_sight)
-            true_sight.append(check_sight)
-        else: # C1/C0 R0 [R1|C0/C1]
-            #print ("____2 1")
-            true_sight.append(check_sight)
-            blind_sight.append(ref_sight)
+        """ check if check sight fully coverages ref_sight """
+        pointR_0 = inside_angle_area(ref_sight[0], center, check_sight)
+        pointR_1 = inside_angle_area(ref_sight[1], center, check_sight)
+        if pointR_0 > 0 or pointR_1 > 0: # ref sight is inside check sight
             r_blind = True
-    elif pointC_0 > 0 and pointC_1 < 0: # C0 inside, C1 outside
+            blind_sight.append(ref_sight)
+        # else ref and check are 2 distinct 
+        
+    elif pointC_0 > 0 and pointC_1 < 0:
         """ check if R0 is inside area of [R1, C1]
             if R0 is outside then R1 is inside area of [R0, C1] for sure
         """
-        #print ("____3")
-        # remove 2 sights (ref, check) to create 3 new ones
         d_sight = True
-        
-        b_sight = []
-        
-        pointR_0 = is_inside_area(ref_sight[0], center, [ref_sight[1], check_sight[1]])
+    
+        pointR_0 = inside_angle_area(ref_sight[0], center, [ref_sight[1], check_sight[1]])
         if pointR_0 >=0 :  # R1 C0 R0 C1 
-            #print ("____3    1")
-            [divided_sight, b_sight] = devide_sight_ABCD(center, ref_sight[1], check_sight[0], ref_sight[0], check_sight[1])
+            divided_sight, b_sight = devide_sight_ABCD(center, ref_sight[1], check_sight[0], ref_sight[0], check_sight[1])
         else: # R0 C0 R1 C1 
-            #print ("____3     2")
-            [divided_sight, b_sight] = devide_sight_ABCD(center, ref_sight[0], check_sight[0], ref_sight[1], check_sight[1])
+            divided_sight, b_sight = devide_sight_ABCD(center, ref_sight[0], check_sight[0], ref_sight[1], check_sight[1])
         blind_sight.append (b_sight)  
-    elif pointC_0 < 0 and pointC_1 > 0: # C1 inside, C0 outside
+    
+    elif pointC_0 < 0 and pointC_1 > 0: 
         #print ("____4")
         """ check if R0 is inside area of [R1, C0]
             if R0 is outside then R1 is inside area of [R0, C0] for sure
         """
-        # remove 2 sights (ref, check) to create 3 new ones
         d_sight = True
-        b_sight = []
-        
-        pointR_0 = is_inside_area(ref_sight[0], center, [ref_sight[1], check_sight[0]])
+       
+        pointR_0 = inside_angle_area(ref_sight[0], center, [ref_sight[1], check_sight[0]])
         if pointR_0 >=0 :  # R1 C1 R0 C0
             #print ("____4      1")
-            [divided_sight, b_sight] = devide_sight_ABCD(center, ref_sight[1], check_sight[1], ref_sight[0], check_sight[0])
+            divided_sight, b_sight = devide_sight_ABCD(center, ref_sight[1], check_sight[1], ref_sight[0], check_sight[0])
         else: # R0 C1 R1 C0
-            #print ("____4       2")
-            [divided_sight, b_sight] = devide_sight_ABCD(center, ref_sight[0], check_sight[1], ref_sight[1], check_sight[0])
+            divided_sight, b_sight = devide_sight_ABCD(center, ref_sight[0], check_sight[1], ref_sight[1], check_sight[0])
         blind_sight.append (b_sight) 
+        
     else:   # both Check C0 C1 are outside
-        # Check if ref_sight is insde Check_sight,
-        pointR_0 = is_inside_area(ref_sight[0], center, [check_sight[1], check_sight[0]])
+        # Check if ref_sight is inside Check_sight,
+        pointR_0 = inside_angle_area(ref_sight[0], center, [check_sight[1], check_sight[0]])
         if pointR_0 >=0: # C R C
-            true_sight.append (check_sight)
-            blind_sight.append (ref_sight)
             r_blind = True
-        else:  # 2 distinct sights
-            true_sight.append (ref_sight)
-            true_sight.append (check_sight)
-            
-        #print ("____5")
-        
-        
-    return [true_sight, blind_sight, divided_sight, r_blind, c_blind, d_sight]
+
+    return blind_sight, divided_sight, r_blind, c_blind, d_sight
     
 def remove_blind_sight(center, boundary_points):
-    true_sight = []
+    true_sight = boundary_points
     blind_sight = []
+    
     i = 0 # start with index = 0
-    while i < len(boundary_points) -1:
-        #print ("NEW I", i, boundary_points)
+    while i < len(true_sight) -1:
         j = i + 1
-        while j < len(boundary_points) :
-            #print ("BEFORE ", i,j,  len(boundary_points),boundary_points)
-            [ts, bs, ds, r_blind, c_blind, d_sight] = detect_blind_sight(center, boundary_points[i], boundary_points[j])
-            #print_pairs (" [Local] true sight", ts)
-            #print_pairs (" [Local] blind sight", bs)
-            #print_pairs(" [Local] divide sight", ds)
+        while j < len(true_sight) :
+            print_pairs ("BEFORE: true sight", true_sight)
+            bs, ds, r_blind, c_blind, d_sight = detect_blind_sight(center, true_sight[i], true_sight[j])
+
+            print_pairs (" [Local] blind sight", bs)
+            print_pairs(" [Local] divide sight", ds)
+            print ("status of sight: r {0}, c {1}, d {2}".format(r_blind, c_blind, d_sight))
             blind_sight.extend(bs)
-            # if blind sight is in true sight, then remove it
-            for bsight in bs:
-                if bsight in true_sight:
-                    true_sight.remove(bsight)
-                    
-            for sight in ts:                                                   # real true sight isn't in blind_sight
-                if (sight not in blind_sight) and (sight not in true_sight): # prevent insert duplicate
-                    true_sight.append(sight)
-                    
-            if d_sight:
-                # remove ref, check sight in true sight if any
-                # replace ref, check sight by new ref, check in boundary_points
-                try:
-                    true_sight.remove(boundary_points[i])
-                    true_sight.remove(boundary_points[j])
-                except:
-                    print("Not in list")
-                boundary_points[i] = ds[0]
-                boundary_points[j] = ds[1]
-                #mapname("new boundary_points", boundary_points)
+            if d_sight:  # separate into 2 new sight
+                true_sight[i] = ds[0]
+                true_sight[j] = ds[1]
                 i = i - 1
                 break
-            elif c_blind: # remove (lager index of check sight) first if its true blind
-                #print ("remove check sight")
-                boundary_points.pop(j)
+            elif c_blind: # remove check sight cause it's blind sight
+                true_sight.pop(j)
                 j = j - 1
-            elif r_blind:
-                #print ("remove ref sight")
-                boundary_points.pop(i)
+            elif r_blind: # replace ref sight by check sight cause it's blind sight
+                get_check = true_sight.pop(j)
+                true_sight[i] = get_check
                 i = i - 1
                 break
-            #print ("->AFTER ", i,j,  len(boundary_points), boundary_points) 
+            #print_pairs ("AFTER: true sight", true_sight) 
             j += 1
         i += 1 
     return true_sight, blind_sight
@@ -165,9 +143,10 @@ def remove_blind_sight(center, boundary_points):
 def get_true_blind_sight(x, y, boundary_points):
     true_sight = []
     blind_sight = []
+    
     if len( boundary_points ) >=2:
         true_sight, blind_sight = remove_blind_sight([x, y], boundary_points)
-    else: # only 1 sight then no collision in the given sight
+    else: # only 1 sight then no collision (blind sight) in the given boundary_points
         true_sight = boundary_points
     return true_sight, blind_sight
     
@@ -175,40 +154,47 @@ def get_all_boardary_pairs(x, y, config, ox_b, oy_b):
     """ find all boundary pairs among all obstacle line segments and circle """
     boundary_points = []
     for i in range(len(ox_b)-1):
-        is_points = intersection(x, y, config.robot_vision, [[ox_b[i], oy_b[i]], [ox_b[i+1], oy_b[i+1]]])
-        if len(is_points) > 0:
-            # draw intersection points
-            #for point in is_points:
-            #plt.plot(point[0],point[1], ".g"
+        ptA = [ox_b[i], oy_b[i]]
+        ptB = [ox_b[i+1], oy_b[i+1]]
         
-            """ find boundary pair between a single of line segment and circle """
+        is_points = intersection(x, y, config.robot_vision, [ptA, ptB])
+        
+        if len(is_points) > 0:
+            if show_intersection_line:
+                plot_line(plt, is_points, ls_is)
+        
+            """ find boundary pair between a single line segment and circle """
             boundary_point = []
+            
             for point in is_points:
-                b_point = is_inside_ls(point, [[ox_b[i],oy_b[i]], [ox_b[i+1], oy_b[i+1]]])
-                if b_point is not None:            # found intersection point is inside the line segment
-                    boundary_point.append(b_point)
-                else:                               # intersection point is not inside the line segment
-                    b_point = is_inside_ls([ox_b[i],oy_b[i]], is_points)
-                    if b_point is not None:            # found intersection point is inside the line segment
-                        boundary_point.append(b_point)
-                    b_point = is_inside_ls([ox_b[i+1],oy_b[i+1]], is_points)
-                    if b_point is not None:            # found intersection point is inside the line segment
-                        boundary_point.append(b_point)
+                is_pt_in =  inside_ls(point, [ptA, ptB])
+                if is_pt_in is not None:  # found intersection point is inside the line segment
+                    boundary_point.append(is_pt_in)
+                else:                      # intersection point is not inside the line segment
+                    ptA_in = inside_ls(ptA, is_points)
+                    if ptA_in is not None: # found intersection point is inside the line segment
+                        boundary_point.append(ptA_in)
+                    ptB_in = inside_ls(ptB, is_points)
+                    if ptB_in is not None: # found intersection point is inside the line segment
+                        boundary_point.append(ptB_in)
+                        
             if len (boundary_point) > 0:
-                #print ("boundary_points ", boundary_point)
                 boundary_points.append( [boundary_point[0],boundary_point[1]])
-    
-    #print ("boundary_points: ")
-    #for bPair in boundary_points:
-        #print (bPair)
+
     return boundary_points
     
 def get_true_sight(x, y, config, ox_b, oy_b):
     # get boundary pairs, [start point x,  end point x], x start < x end
     boundary_points = get_all_boardary_pairs(x, y, config, ox_b, oy_b)
     
-    print_pairs ("boundary_points", boundary_points)
+    if print_boundary_points:
+        print_pairs ("boundary_points", boundary_points)
+    if show_boundary_points:
+        plot_pairs(plt, boundary_points, ls_bp)    
+    
     true_sight, blind_sight = get_true_blind_sight(x, y, boundary_points)
     print_pairs ("true_sight", true_sight)
     print_pairs ("blind_sight", blind_sight)
+    
+
     return true_sight, blind_sight

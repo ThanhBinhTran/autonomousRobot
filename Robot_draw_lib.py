@@ -1,27 +1,25 @@
 from Robot_lib import *
+from Program_config import *
 from matplotlib.patches import Arc
 
-def plot_sight(plt, x, y, sight, cl = "g", alpha = 0.3, linestyle = ":g"):
-    plt.fill([x, sight[0][0],sight[1][0]], [y, sight[0][1], sight[1][1]], color = cl, alpha = alpha, linestyle = linestyle)
+def plot_sight(plt, x, y, pair, cl = "g", alpha = 0.3, linestyle = ":"):
+    ptA, ptB = pair
+    plt.fill([x, ptA[0], ptB[0]], [y, ptA[1], ptB[1]], color = cl, alpha = alpha, linestyle = linestyle)
     
 def draw_true_sight(plt, x, y, true_sight):
     for point in true_sight:
-        plot_sight(plt, x, y, point, "m", 0.3, ":")
+        plot_sight(plt, x, y, point, "g", 0.3, "-")
         
-def draw_true_blind_sight(plt, x, y, true_sight, blind_sight):
-    print ("true_sight", true_sight)
-    for point in true_sight:
-        plot_sight(plt, x, y, point, "m", 0.3, ":")
-
-    print ("blind_sight",blind_sight)
-    for point in blind_sight:
-        plot_sight(plt, x, y, point, "g", 0.3, ":")
-
-    print ("DONE")
-
 def draw_blind_sight(plt, x, y, blind_sight):
     for point in blind_sight:
         plot_sight(plt, x, y, "g", 0.3, ":")
+        
+def draw_true_blind_sight(plt, x, y, true_sight, blind_sight):
+    draw_true_sight(plt, x, y, true_sight)
+    draw_blind_sight(plt, x, y, blind_sight)
+
+
+
         
 def draw_vision_area(plt, x, y, radius):
     """ draw a circle that limits the vision of robot """ 
@@ -55,20 +53,20 @@ def get_true_sight_circle(plt, x, y, radius, true_sight):
         spt0, spt1 = pair
         # process angle
         
-        angle0 = cal_signed_angle([1,0], [spt0[0]-x,spt0[1]-y])  # cal angle base on ox axis
-        angle1 = cal_signed_angle([1,0], [spt1[0]-x,spt1[1]-y])  # cal angle base on ox axis
+        angle0 = signed_angle_xAxis([spt0[0]-x,spt0[1]-y])  # cal angle base on ox axis
+        angle1 = signed_angle_xAxis([spt1[0]-x,spt1[1]-y])  # cal angle base on ox axis
 
         cpoints = []
         # circle point 0
         cpt_is = intersection(x, y, radius, [spt0, center])
-        if is_inside_ls(cpt_is[0], [spt0, center]):
+        if inside_ls(cpt_is[0], [spt0, center]):
             cpoints.append(cpt_is[0])
         else:
             cpoints.append(cpt_is[1])
         
         # circle point 1
         cpt_is = intersection(x, y, radius, [spt1,center])
-        if is_inside_ls(cpt_is[0], [spt1,center]):
+        if inside_ls(cpt_is[0], [spt1,center]):
             cpoints.append(cpt_is[0])
         else:
             cpoints.append(cpt_is[1])
@@ -106,14 +104,14 @@ def get_true_sight_circle(plt, x, y, radius, true_sight):
             
             # consider [start ref(i); start check(i)] region
             # check end ref (i) or end check(j) not inside [sr,sc] region
-            er_inside = is_inside_area(r_pt_e[0], center, [r_pt_s[0],c_pt_s[0]]) 
-            ec_inside = is_inside_area(c_pt_e[0], center, [r_pt_s[0],c_pt_s[0]]) 
+            er_inside = inside_angle_area(r_pt_e[0], center, [r_pt_s[0],c_pt_s[0]]) 
+            ec_inside = inside_angle_area(c_pt_e[0], center, [r_pt_s[0],c_pt_s[0]]) 
             inside = False
             if not er_inside and not ec_inside:
                 h = j + 1
                 while h < len(ref_cpairs) :
                     h_pt_s, h_pt_e = ref_cpairs[h] # remaining pairs
-                    if is_inside_area(h_pt_s[0], center, [r_pt_s[0],c_pt_s[0]]):
+                    if inside_angle_area(h_pt_s[0], center, [r_pt_s[0],c_pt_s[0]]):
                         inside = True
             if not inside:
                 open_cpairs.append((r_pt_s,c_pt_s))
@@ -124,14 +122,14 @@ def get_true_sight_circle(plt, x, y, radius, true_sight):
                 
             # consider [start ref(i); end check(i)] region
             # check end ref (i) or start check(j) not inside [sr,sc] region
-            er_inside = is_inside_area(r_pt_e[0], center, [r_pt_s[0],c_pt_e[0]]) 
-            sc_inside = is_inside_area(c_pt_s[0], center, [r_pt_s[0],c_pt_e[0]]) 
+            er_inside = inside_angle_area(r_pt_e[0], center, [r_pt_s[0],c_pt_e[0]]) 
+            sc_inside = inside_angle_area(c_pt_s[0], center, [r_pt_s[0],c_pt_e[0]]) 
             inside = False
             if not er_inside and not sc_inside:
                 h = j + 1
                 while h < len(ref_cpairs) :
                     h_pt_s, h_pt_e = ref_cpairs[h] # remaining pairs
-                    if is_inside_area(h_pt_s[0], center, [r_pt_s[0],c_pt_e[0]]):
+                    if inside_angle_area(h_pt_s[0], center, [r_pt_s[0],c_pt_e[0]]):
                         inside = True
             if not inside:
                 open_cpairs.append((r_pt_s,c_pt_e))
@@ -154,7 +152,8 @@ def plot_vision(plt, x, y, radius, ox_b, oy_b, true_sight, blind_sight):
     draw_vision_area(plt, x, y, radius)
     #draw_arc_area(plt, x, y, radius)
     true_sight_circle = get_true_sight_circle(plt, x, y, radius, true_sight)
-    draw_true_sight(plt, x, y, true_sight) 
+    if show_true_sight:
+        draw_true_sight(plt, x, y, true_sight) 
     
 def plot_point(plt, point, ls="xr"):
     plt.plot(point[0], point[1], ls)
@@ -165,4 +164,13 @@ def plot_line(plt, line, ls="-xr"):
 def plot_lines(plt, lines, ls="-xr"):
     xs = [i[0] for i in lines]
     ys = [i[1] for i in lines]
+    plt.plot(xs, ys, ls)
+
+def plot_pairs(plt, pairs, ls="-xr"):
+    for pair in pairs:
+        plot_lines(plt, pair, ls)
+    
+def plot_points(plt, points, ls="xr"):
+    xs = [i[0] for i in points]
+    ys = [i[1] for i in points]
     plt.plot(x, y, ls)

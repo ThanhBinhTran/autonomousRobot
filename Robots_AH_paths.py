@@ -101,7 +101,6 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     oy_b = [11.0, 10.0, 20.0, 30.0, 40.0, 50.0, 90.0, 80.0]
     
     direction = []
-    boundary_points =  []
     config.robot_type = robot_type
     trajectory = np.array(x)
     ob = config.ob

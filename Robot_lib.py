@@ -18,7 +18,7 @@ def intersection(x, y, radius, ls_points): # line segment points
         p_is.append([dx * t2 + p1x, dy * t2 + p1y])
     return p_is
     
-def is_inside_ls(point, ls_points): # line segment points
+def inside_ls(point, ls_points): # line segment points
     """
     check if a point is whether inside give line segment 
     return a point if it is inside, otherwise return None 
@@ -31,7 +31,7 @@ def is_inside_ls(point, ls_points): # line segment points
         return point
     return None
      
-def rotate_origin_only( v, radians):
+def rotate_vector( v, radians):
     """Only rotate a point around the origin (0, 0)."""
     x, y = v
     rx = x * math.cos(radians) + y * math.sin(radians)
@@ -41,14 +41,8 @@ def rotate_origin_only( v, radians):
 def unit_vector(vector):
     """ Returns the unit vector of the vector."""
     return vector / np.linalg.norm(vector)
-def angle_between(v1, v2):
-    """Finds angle between two vectors"""
-    v1_u = unit_vector(v1)
-    v2_u = unit_vector(v2)
-    angle =  np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
-    return angle * 180 / math.pi
     
-def cal_angle(v1, v2):
+def unsigned_angle(v1, v2):
     """Finds angle between two vectors"""
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
@@ -57,44 +51,45 @@ def cal_angle(v1, v2):
     return math.degrees(angle)
     #return angle
     
-def cal_signed_angle_base(v1, v2):
+def signed_angle_xAxis(point):
     """
     Finds angle between two vectors
     return signed angle (+) for anti clockwise, and (-) for clockwise
     it works when base vector is (1,0)
     """
-    angleB = math.atan2(v2[1],v2[0])
-    angleA = math.atan2(v1[1],v1[0])
-    return math.degrees(angleB - angleA)
-    #return angleB - angleA
+    
+    angle = math.atan2(point[1], point[0])
+    #print (math.degrees(angle))
+    return angle
 
     
-def cal_signed_angle(v1, v2):
+def signed_angle(v1, v2):
     """
     Finds angle between two vectors
     return signed angle (+) for anti clockwise, and (-) for clockwise
     """
-    angle = cal_signed_angle_base(v1, [1,0]) # cal angle between vector (A) and ox axis
-    v_a = rotate_origin_only(v1, -angle)  # rotate vector A to ox axis
-    v_b = rotate_origin_only(v2, -angle)  # rotate vector B according to rotation_radians       
-    signed_angle = cal_signed_angle_base(v_a, v_b)
-    return signed_angle  
+    angle = signed_angle_xAxis(v1)  # cal angle between vector (A) and ox axis
+    v_b = rotate_vector(v2, angle)  # rotate vector B according to rotation_radians 
+    return signed_angle_xAxis(v_b)*1000  
     
-def is_inside_area(check_pt, center, ref_bd): # is check point inside reference boundaries
+def inside_angle_area(check_pt, center, ref_bd): # is check point inside reference boundaries
     """ check if a check_pt is where inside (ref[start]- center - ref[end]) area
         return 1 if inside
         return 0 if at the boundary line
         return 1 if outside
         using math.isclose to avoid the error of floating check_pt computation
     """
-    print ("is_inside_area check {0}, center{1}, ref{2}".format( check_pt, center, ref_bd))
+    #print ("inside_angle_area check {0}, center{1}, ref{2}".format( check_pt, center, ref_bd))
     vector_a = np.subtract(ref_bd[0], center)
     vector_b = np.subtract(ref_bd[1], center)
     vector_p = np.subtract(check_pt, center)
     
-    angle_sight = cal_signed_angle(vector_a, vector_b)
-    angle_check_pt = cal_signed_angle(vector_a, vector_p)
-    if math.isclose(angle_check_pt, 0.0) or math.isclose(angle_check_pt, angle_sight):
+    angle_sight = signed_angle(vector_a, vector_b)
+    angle_check_pt = signed_angle(vector_a, vector_p)
+    diff_angle = abs(angle_sight - angle_check_pt)
+    rel_tol = 0.0000001
+    if abs(angle_check_pt) < rel_tol or  diff_angle < rel_tol:
+    #if math.isclose(abs(angle_check_pt), 0.0, rel_tol = rel_tol) or math.isclose(diff_angle, 0, rel_tol= rel_tol):
         #print ("at ref_bd_: check_pt {0}, ref_bd{1}".format(check_pt, ref_bd) )
         return 0
     elif angle_sight * angle_check_pt < 0: # diff side
