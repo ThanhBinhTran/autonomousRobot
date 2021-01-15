@@ -53,7 +53,10 @@ def cal_angle(v1, v2):
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
     angle = np.arccos(np.dot(v1_u, v2_u))
-    return angle * 180 / math.pi
+
+    return math.degrees(angle)
+    #return angle
+    
 def cal_signed_angle_base(v1, v2):
     """
     Finds angle between two vectors
@@ -62,7 +65,9 @@ def cal_signed_angle_base(v1, v2):
     """
     angleB = math.atan2(v2[1],v2[0])
     angleA = math.atan2(v1[1],v1[0])
-    return angleB - angleA
+    return math.degrees(angleB - angleA)
+    #return angleB - angleA
+
     
 def cal_signed_angle(v1, v2):
     """
@@ -73,43 +78,46 @@ def cal_signed_angle(v1, v2):
     v_a = rotate_origin_only(v1, -angle)  # rotate vector A to ox axis
     v_b = rotate_origin_only(v2, -angle)  # rotate vector B according to rotation_radians       
     signed_angle = cal_signed_angle_base(v_a, v_b)
-    return signed_angle  * 180 / math.pi
+    return signed_angle  
     
-def is_inside_area(point, center, boundaries):
-    """ check if a point is where inside boundaries area
+def is_inside_area(check_pt, center, ref_bd): # is check point inside reference boundaries
+    """ check if a check_pt is where inside (ref[start]- center - ref[end]) area
         return 1 if inside
         return 0 if at the boundary line
         return 1 if outside
+        using math.isclose to avoid the error of floating check_pt computation
     """
-    tiny_diff_angle = 0.00000008 # there is not accuracy computational computer on floating point   
-                                 # then accept very tiny diff result
-    vector_a = np.subtract(boundaries[0], center)
-    vector_b = np.subtract(boundaries[1], center)
-    vector_p = np.subtract(point, center)
+    print ("is_inside_area check {0}, center{1}, ref{2}".format( check_pt, center, ref_bd))
+    vector_a = np.subtract(ref_bd[0], center)
+    vector_b = np.subtract(ref_bd[1], center)
+    vector_p = np.subtract(check_pt, center)
     
     angle_sight = cal_signed_angle(vector_a, vector_b)
-    angle_point = cal_signed_angle(vector_a, vector_p)
-    print ("angle_sight", angle_sight)
-    print ("angle_point", angle_point)
-    abs_diff_angle = abs(angle_point - angle_sight)
-    if abs(angle_point) <= tiny_diff_angle or abs_diff_angle < tiny_diff_angle:
-        #print ("at boundaries_: point {0}, boundaries{1}".format(point, boundaries) )
+    angle_check_pt = cal_signed_angle(vector_a, vector_p)
+    if math.isclose(angle_check_pt, 0.0) or math.isclose(angle_check_pt, angle_sight):
+        #print ("at ref_bd_: check_pt {0}, ref_bd{1}".format(check_pt, ref_bd) )
         return 0
-    elif angle_sight * angle_point < 0: # diff side
-        #print ("diff side: point {0}, boundaries{1}".format(point, boundaries) )
+    elif angle_sight * angle_check_pt < 0: # diff side
+        #print ("diff side: check_pt {0}, ref_bd{1}".format(check_pt, ref_bd) )
         return -1
     else:
         # compare angles in unsigned
         abs_angle_sight = abs(angle_sight)
-        abs_angle_point = abs(angle_point)
-        if abs_angle_sight > abs_angle_point:
-            #print ("inside: point {0}, boundaries{1}".format(point, boundaries) )
+        abs_angle_check_pt = abs(angle_check_pt)
+        if abs_angle_sight > abs_angle_check_pt:
+            #print ("inside: check_pt {0}, ref_bd{1}".format(check_pt, ref_bd) )
             return 1
         else:
-            ##print ("outside: point {0}, boundaries{1}".format(point, boundaries) )
+            ##print ("outside: check_pt {0}, ref_bd{1}".format(check_pt, ref_bd) )
             return -1
             
     return -1 
+    
+def midpoint(P, Q):
+    """ return mid point of Q,P """
+    x = (P[0] + Q[0])/2
+    y = (P[1] + Q[1])/2
+    return [x, y]
     
 def lineFromPoints(P, Q):
  
@@ -137,8 +145,8 @@ def line_intersection(line1, line2):
     y = det(d, ydiff) / div
     return [x, y]
     
-def print_sight(message_ID, pairs):
-    print (message_ID)
+def print_pairs(message_ID, pairs):
+    print ("{0}, len: {1}".format(message_ID, len(pairs)))
     for pair in pairs:
         print (pair[0],pair[1])
 
@@ -146,3 +154,11 @@ def print_point(message_ID, point_x, point_y):
     print (message_ID)
     for i in range(len(point_x)):
         print ("{0} {1}".format(point_x[i],point_y[i]))
+                
+def print_cpairs(message_ID, cpairs): # print circle pairs
+    print ("{0}, len: {1}".format(message_ID, len(cpairs)))
+    for pairs in cpairs:
+        print ("pair start {0} of true sight {1}, angle {2}"
+                 .format(pairs[0][0],pairs[0][1],pairs[0][2]) )
+        print ("pair end {0} of true sight {1}, angle {2}"
+                 .format(pairs[1][0],pairs[1][1],pairs[1][2]) )        

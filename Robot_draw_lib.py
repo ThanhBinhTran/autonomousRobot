@@ -42,51 +42,127 @@ def draw_arc_area(plt, x, y, radius):
     plt.axes().add_patch(arc)
 
 def is_inside_angle_area(check_angle, angle_circle):
-    diff_angle_1 = abs(check_angle - angle_circle[0])
-    diff_angle_2 = abs(check_angle - angle_circle[1])
-    if diff_angle_1 <= 0.000005:
-        return 0
-    elif check_angle > angle_circle[0] and check_angle < angle_circle[1]:
-        return 1
     return -1
 
 def get_true_sight_circle(plt, x, y, radius, true_sight):
+    center = [x,y]
     true_sight_circle = []
     true_angle_circle = [[0,180]]
     #get_circle_point()
-    cpoints=[]
-    print ("Passed here")
+    close_cpairs=[] # all close circle pairs from true_sight 
+                    # close_cpairs contains [circle point, its true point, its angle] 
     for pair in true_sight:
+        spt0, spt1 = pair
         # process angle
-        angle1 = cal_signed_angle([pair[0][0]-x,pair[0][1]-y],[1,0])  # cal angle base on ox axis
-        angle2 = cal_signed_angle([pair[1][0]-x,pair[1][1]-y],[1,0])  # cal angle base on ox axis
-        # if angle1 is inside and angle2 is inside
         
-        in_a1 = is_inside_angle_area(angle1, true_angle_circle[0])
-        in_a2 = is_inside_angle_area(angle2, true_angle_circle[0])
-        #if in_a1 >= 0 and in_a2 >= 0: # both true sight points are inside circle_point, then remove that sight from circle
-        #    # remove 1 - 2 from true_angle_circle
-        #
-        #if angle1 > 0 and angle2 > 0:
+        angle0 = cal_signed_angle([1,0], [spt0[0]-x,spt0[1]-y])  # cal angle base on ox axis
+        angle1 = cal_signed_angle([1,0], [spt1[0]-x,spt1[1]-y])  # cal angle base on ox axis
+
+        cpoints = []
+        # circle point 0
+        cpt_is = intersection(x, y, radius, [spt0, center])
+        if is_inside_ls(cpt_is[0], [spt0, center]):
+            cpoints.append(cpt_is[0])
+        else:
+            cpoints.append(cpt_is[1])
+        
+        # circle point 1
+        cpt_is = intersection(x, y, radius, [spt1,center])
+        if is_inside_ls(cpt_is[0], [spt1,center]):
+            cpoints.append(cpt_is[0])
+        else:
+            cpoints.append(cpt_is[1])
+        if angle0 < angle1:
+            close_cpairs.append(([cpoints[0], spt0, angle0],[cpoints[1], spt1, angle1])) 
+        else:
+            close_cpairs.append(([cpoints[1], spt1, angle1],[cpoints[0], spt0, angle0]))
+    
+    print_cpairs("Close circle pairs", close_cpairs)
+    
+    for pairs in close_cpairs:
+        plt.plot( (pairs[0][0][0],pairs[1][0][0]),(pairs[0][0][1],pairs[1][0][1]), "-b")
+        
+    open_cpairs =  []# its complementary of close_cpairs
+                               # open_cpairs contains [circle point, its angle]
+    ref_cpairs = close_cpairs
+    i = 0
+    while i < len(ref_cpairs) -1:
+        r_pt_s, r_pt_e = ref_cpairs[i] # reference pair
+        j = i + 1
+        while j < len(ref_cpairs) :
+            c_pt_s, c_pt_e = ref_cpairs[j] # check pair
+            # check if 2 sight have mutual point by comparing angle
+            # check start point (smaller angle) of ref and end point of 
+            if math.isclose(r_pt_s[2],c_pt_e[2]): 
+                ref_cpairs[i] = c_pt_s,r_pt_e   # extend ref to check
+                ref_cpairs.pop(j)              # remove check region
+                i = i - 1
+                break
+            elif math.isclose(r_pt_e[2],c_pt_s[2]): 
+                ref_cpairs[i] = r_pt_s,c_pt_e   # extend ref to check
+                ref_cpairs.pop(j)              # remove check region
+                i = i - 1
+                break
             
-        for point in pair:
-            cPoints = intersection(x, y, radius, [point,[x, y]])
-            if is_inside_ls(cPoints[0], [point,[x, y]]):
-                cpoints.append(cPoints[0])
-            else:
-                cpoints.append(cPoints[1])
-    print ("Passed here  11111")
-    for point in cpoints:
-        plt.plot(point[0],point[1], "*r")
+            # consider [start ref(i); start check(i)] region
+            # check end ref (i) or end check(j) not inside [sr,sc] region
+            er_inside = is_inside_area(r_pt_e[0], center, [r_pt_s[0],c_pt_s[0]]) 
+            ec_inside = is_inside_area(c_pt_e[0], center, [r_pt_s[0],c_pt_s[0]]) 
+            inside = False
+            if not er_inside and not ec_inside:
+                h = j + 1
+                while h < len(ref_cpairs) :
+                    h_pt_s, h_pt_e = ref_cpairs[h] # remaining pairs
+                    if is_inside_area(h_pt_s[0], center, [r_pt_s[0],c_pt_s[0]]):
+                        inside = True
+            if not inside:
+                open_cpairs.append((r_pt_s,c_pt_s))
+                ref_cpairs[i] = (c_pt_s,r_pt_e)   # extend ref to check
+                ref_cpairs.pop(j)              # remove check region
+                i = i - 1
+                break
+                
+            # consider [start ref(i); end check(i)] region
+            # check end ref (i) or start check(j) not inside [sr,sc] region
+            er_inside = is_inside_area(r_pt_e[0], center, [r_pt_s[0],c_pt_e[0]]) 
+            sc_inside = is_inside_area(c_pt_s[0], center, [r_pt_s[0],c_pt_e[0]]) 
+            inside = False
+            if not er_inside and not sc_inside:
+                h = j + 1
+                while h < len(ref_cpairs) :
+                    h_pt_s, h_pt_e = ref_cpairs[h] # remaining pairs
+                    if is_inside_area(h_pt_s[0], center, [r_pt_s[0],c_pt_e[0]]):
+                        inside = True
+            if not inside:
+                open_cpairs.append((r_pt_s,c_pt_e))
+                ref_cpairs[i] = (c_pt_s,r_pt_e)   # extend ref to check
+                ref_cpairs.pop(j)              # remove check region
+                i = i - 1
+                break
+                
+            j += 1
+        i += 1
+    #for pairs in ref_cpairs:
+    #    plt.plot( (pairs[0][0][0],pairs[1][0][0]),(pairs[0][0][1],pairs[1][0][1]), "-<r")
+        
+    print_cpairs("reference circle pairs", ref_cpairs) 
+    print_cpairs("Open circle pairs", open_cpairs)
+    
     return true_sight_circle
         
 def plot_vision(plt, x, y, radius, ox_b, oy_b, true_sight, blind_sight):
-    
     draw_vision_area(plt, x, y, radius)
-    draw_arc_area(plt, x, y, radius)
-    print_sight ("true_sight_p1:", true_sight)
-    print_sight ("blind_sight_p2:", blind_sight)
-
+    #draw_arc_area(plt, x, y, radius)
     true_sight_circle = get_true_sight_circle(plt, x, y, radius, true_sight)
     draw_true_sight(plt, x, y, true_sight) 
     
+def plot_point(plt, point, ls="xr"):
+    plt.plot(point[0], point[1], ls)
+    
+def plot_line(plt, line, ls="-xr"):
+    plt.plot((line[0][0],line[1][0]), (line[0][1],line[1][1]), ls)
+    
+def plot_lines(plt, lines, ls="-xr"):
+    xs = [i[0] for i in lines]
+    ys = [i[1] for i in lines]
+    plt.plot(x, y, ls)

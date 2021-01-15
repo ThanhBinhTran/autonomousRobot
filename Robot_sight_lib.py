@@ -37,7 +37,7 @@ def detect_blind_sight(center, ref_sight, check_sight):
     pointC_0 = is_inside_area(check_sight[0], center, ref_sight)
     pointC_1 = is_inside_area(check_sight[1], center, ref_sight)
     
-    print ("_ ref {0} check {1} c1 c2 {2}, {3}".format (ref_sight, check_sight, pointC_0, pointC_1))
+    print ("-->ref {0} check {1} c1 c2 {2}, {3}".format (ref_sight, check_sight, pointC_0, pointC_1))
     if pointC_0 >= 0:
         plt.plot(check_sight[0][0], check_sight[0][1], "1r")
     if pointC_1 >= 0:
@@ -122,9 +122,9 @@ def remove_blind_sight(center, boundary_points):
         while j < len(boundary_points) :
             #print ("BEFORE ", i,j,  len(boundary_points),boundary_points)
             [ts, bs, ds, r_blind, c_blind, d_sight] = detect_blind_sight(center, boundary_points[i], boundary_points[j])
-            print_sight ("__true sight:", ts)
-            print_sight ("__blind sight:", bs)
-            print_sight ("__divide sight:", ds)
+            #print_pairs (" [Local] true sight", ts)
+            #print_pairs (" [Local] blind sight", bs)
+            #print_pairs(" [Local] divide sight", ds)
             blind_sight.extend(bs)
             # if blind sight is in true sight, then remove it
             for bsight in bs:
@@ -145,7 +145,7 @@ def remove_blind_sight(center, boundary_points):
                     print("Not in list")
                 boundary_points[i] = ds[0]
                 boundary_points[j] = ds[1]
-                #print_sight("new boundary_points", boundary_points)
+                #mapname("new boundary_points", boundary_points)
                 i = i - 1
                 break
             elif c_blind: # remove (lager index of check sight) first if its true blind
@@ -160,21 +160,20 @@ def remove_blind_sight(center, boundary_points):
             #print ("->AFTER ", i,j,  len(boundary_points), boundary_points) 
             j += 1
         i += 1 
-    return [true_sight, blind_sight]
+    return true_sight, blind_sight
     
 def get_true_blind_sight(x, y, boundary_points):
     true_sight = []
     blind_sight = []
     if len( boundary_points ) >=2:
-        [true_sight, blind_sight] = remove_blind_sight([x, y], boundary_points)
+        true_sight, blind_sight = remove_blind_sight([x, y], boundary_points)
     else: # only 1 sight then no collision in the given sight
         true_sight = boundary_points
-    return [true_sight, blind_sight]
+    return true_sight, blind_sight
     
 def get_all_boardary_pairs(x, y, config, ox_b, oy_b):
     """ find all boundary pairs among all obstacle line segments and circle """
     boundary_points = []
-    print_point("Map obstacle", ox_b, oy_b)
     for i in range(len(ox_b)-1):
         is_points = intersection(x, y, config.robot_vision, [[ox_b[i], oy_b[i]], [ox_b[i+1], oy_b[i+1]]])
         if len(is_points) > 0:
@@ -205,7 +204,11 @@ def get_all_boardary_pairs(x, y, config, ox_b, oy_b):
     return boundary_points
     
 def get_true_sight(x, y, config, ox_b, oy_b):
+    # get boundary pairs, [start point x,  end point x], x start < x end
     boundary_points = get_all_boardary_pairs(x, y, config, ox_b, oy_b)
-    print ("debug:", boundary_points)
-    [true_sight, blind_sight] = get_true_blind_sight(x, y, boundary_points)
-    return [true_sight, blind_sight]
+    
+    print_pairs ("boundary_points", boundary_points)
+    true_sight, blind_sight = get_true_blind_sight(x, y, boundary_points)
+    print_pairs ("true_sight", true_sight)
+    print_pairs ("blind_sight", blind_sight)
+    return true_sight, blind_sight

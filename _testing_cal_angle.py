@@ -30,20 +30,19 @@ for i in range (len(vectors_t) -1):
         print (cal_signed_angle(vectors_t[j], vectors_t[i]), vectors_t[j], vectors_t[i])
     print ("_")    
 
-#for point in vectors_t:
-#    plt.plot([0,point[0]], [0, point[1]])
-#plt.plot([0,va[0]], [0, va[1]],'r.-.')
-#plt.plot([0,vb[0]], [0, vb[1]])
-#plt.show()
-#plt.grid(True)
+center = (34.6, 43.5)
+A = (10,0)
+B = (23, 28)
+ox_axis = A
+v1 = np.subtract(B, center)
+print ("signed angle")
+print (cal_signed_angle(ox_axis, v1))
+
+plt.plot([0,ox_axis[0]], [0, ox_axis[1]], 'b-')
+plt.plot([center[0],B[0]], [center[1], B[1]], 'r.-.')
+plt.plot([0,v1[0]], [0, v1[1]], 'b.-')
 
 
-vec = [1,0,0]
-vec1 = [1,0]
-A = [0,3]
-B = [1,4]
+plt.grid(True)
+plt.show()
 
-rotation_degrees = -45
-rotation_radians = np.radians(rotation_degrees)
-
-print (rotate_around_point_lowperf(B, rotation_radians, A))
