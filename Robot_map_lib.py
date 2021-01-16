@@ -1,5 +1,5 @@
 win_size = 100
-
+from Program_config import ls_map
 def map_generator(plt, N):
     # displaying the title 
     plt.title("click on plot to generate {0} points of map".format(N))
@@ -10,4 +10,4 @@ def map_generator(plt, N):
 def map_display(plt, mapname, ox, oy):
     # displaying the title 
     plt.title("Display map: {0}".format(mapname))
-    plt.plot(ox, oy, "-k")
+    plt.plot(ox, oy, ls_map)

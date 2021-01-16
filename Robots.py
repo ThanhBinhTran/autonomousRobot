@@ -7,8 +7,6 @@ author: Atsushi Sakai (@Atsushi_twi), Göktuğ Karakaşlı
 """
 
 import math
-from enum import Enum
-
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -31,67 +29,6 @@ def dwa_control(x, config, goal, ob):
 
     return u, trajectory
 
-class RobotType(Enum):
-    circle = 0
-    rectangle = 1
-
-class Config:
-    """
-    simulation parameter class
-    """
-
-    def __init__(self):
-        # robot parameter
-        self.max_speed = 10.0  # [m/s]
-        self.min_speed = -0.5  # [m/s]
-        self.max_yaw_rate = 40.0 * math.pi / 180.0  # [rad/s]
-        self.max_accel = 0.2  # [m/ss]
-        self.max_delta_yaw_rate = 40.0 * math.pi / 180.0  # [rad/ss]
-        self.v_resolution = 0.01  # [m/s]
-        self.yaw_rate_resolution = 0.1 * math.pi / 180.0  # [rad/s]
-        self.dt = 0.1  # [s] Time tick for motion prediction
-        self.predict_time = 3.0  # [s]
-        self.to_goal_cost_gain = 0.15
-        self.speed_cost_gain = 1.0
-        self.obstacle_cost_gain = 1.0
-        self.robot_stuck_flag_cons = 0.001  # constant to prevent robot stucked
-        self.robot_type = RobotType.circle
-        self.robot_vision = 20 # the range of input vision
-        # if robot_type == RobotType.circle
-        # Also used to check if goal is reached in both types
-        self.robot_radius = 1.0  # [m] for collision check
-
-        # if robot_type == RobotType.rectangle
-        self.robot_width = 0.5  # [m] for collision check
-        self.robot_length = 1.2  # [m] for collision check
-        # obstacles [x(m) y(m), ....]
-        #self.ob = np.array([[-1, -1],
-        #                    [0, 2],
-        #                    [4.0, 2.0],
-        #                    [5.0, 4.0],
-        #                    [5.0, 5.0],
-        #                    [5.0, 6.0],
-        #                    [5.0, 9.0],
-        #                    [8.0, 9.0],
-        #                    [7.0, 9.0],
-        #                    [8.0, 10.0],
-        #                    [9.0, 11.0],
-        #                    [12.0, 13.0],
-        #                    [12.0, 12.0],
-        #                    [15.0, 15.0],
-        #                    [13.0, 13.0]
-        #                    ])
-        #
-        self.ob = np.random.randint(100, size=(1,2))
-    @property
-    def robot_type(self):
-        return self._robot_type
-
-    @robot_type.setter
-    def robot_type(self, value):
-        if not isinstance(value, RobotType):
-            raise TypeError("robot_type must be an instance of RobotType")
-        self._robot_type = value
 
 config = Config()
 
@@ -270,6 +207,12 @@ def plot_AH_paths(AH_paths, goal):
         if goal_appear:
             plt.plot((AH_sp[0],goal[0]), (AH_sp[1], goal[1]), "-r")
             
+def saw_goal(center, radius, true_sight, goal):
+    return inside_true_sight(goal, center, radius, true_sight)
+
+def reached_goal(center, goal, config):
+    return point_dist(center, goal) <= config.robot_radius
+    
 def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     print(__file__ + " start!!")
 
@@ -282,17 +225,45 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     trajectory = np.array(x)
     ob = config.ob
     
+    radius = config.robot_vision
+    
     # find AH paths            
     #AH_paths = find_AH_paths(ox_b, oy_b, start_point, goal)
     while True:
+        # scan around robot
+        center = [x[0], x[1]]
+        true_sight, blind_sight = get_true_sight(x[0], x[1], config, ox_b, oy_b)
+        true_sight_circle = get_true_sight_circle(plt, x[0], x[1], radius, true_sight)
+        
+        r_goal = reached_goal(center, goal, config)
+        s_goal = saw_goal(center, radius, true_sight, goal)
+        
+        pt_visible = [inside_true_sight(pt, center, radius, true_sight) for pt in g_t]
+        ao_points = get_open_points(center, radius, true_sight_circle)        # active open_points
+        ao_points = np.array(ao_points)
+        print ("g_t", g_t)
+        print (ao_points)
+        io_points = g_t[np.where(not pt_visible)]    # inactive open_points
+        ranks = [ranking(center, pt, goal) for pt in ao_points]
+        
+        # make a move
         u, predicted_trajectory = dwa_control(x, config, goal, ob)
         x = motion(x, u, config.dt)  # simulate robot
         trajectory = np.vstack((trajectory, x))  # store state history
+        
+        center = [x[0], x[1]]
+        
 
+        
+        if len(ranks) > 0:
+            pick_idx = ranks.index(max(ranks))
+            next_pt = ao_points[pick_idx]
+        
         if show_animation:
             if print_current_position:
-                print ("___________current position: ", x[0], x[1])
-                
+                print ("Current position: ", x[0], x[1])
+            
+            
             plt.cla()
             # for stopping simulation with the esc key.
             plt.gcf().canvas.mpl_connect(
@@ -302,18 +273,41 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             # draw map obstacles 
             map_display(plt, mapname, ox_b, oy_b)
             
+            # reached/saw goal
+            if r_goal:
+                plt.text(goal[0], goal[1] + 5, "reached goal!",bbox=dict(facecolor='red', alpha=0.3))
+            elif s_goal:
+                plt.text(goal[0], goal[1] + 5, "saw goal!",bbox=dict(facecolor='red', alpha=0.3))
+            
             # draw all AH paths
             #plot_AH_paths(AH_paths, goal)
             
+            # draw temp point 
+            plt.plot(g_t[:, 0], g_t[:, 1], ".b")
+            
             plt.plot(predicted_trajectory[:, 0], predicted_trajectory[:, 1], "-g")
             plt.plot(x[0], x[1], "xr")
-            plt.plot(goal[0], goal[1], "xb")
+            plt.plot(goal[0], goal[1], ls_goal)
             plt.plot(ob[:, 0], ob[:, 1], "ok")
             plot_robot(x[0], x[1], x[2], config)
             
-            [true_sight, blind_sight] = get_true_sight(x[0], x[1], config, ox_b, oy_b)
-            plot_vision(plt, x[0], x[1], config.robot_vision, ox_b, oy_b, true_sight, blind_sight)
-
+            
+            plot_vision(plt, x[0], x[1], radius, ox_b, oy_b, true_sight, blind_sight, true_sight_circle)
+            
+            #print ("pt_visible", pt_visible)
+            #print ("ao_points", ao_points)
+            #print ("io_points", io_points)
+            #print ("ranks", ranks)
+            #print ("g_t", g_t)
+            # draw temp point
+            if show_active_openpt:
+                plt.plot(ao_points[:, 0], ao_points[:, 1], ls_aopt)
+            if show_inactive_openpt: 
+                plt.plot(io_points[:, 0], io_points[:, 1], ls_iopt)
+            
+            if len(ranks) > 0:
+                plt.plot(next_pt[0], next_pt[1], ls_nextpt)
+            
             #plot_arrow(x[0], x[1], x[2])
             plt.axis("equal")
             plt.grid(True)
@@ -324,8 +318,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             break
         
         # check reaching goal
-        dist_to_goal = math.hypot(x[0] - goal[0], x[1] - goal[1])
-        if dist_to_goal <= config.robot_radius:
+        if r_goal:
             print("Goal!!")
             break
 

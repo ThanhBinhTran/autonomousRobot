@@ -3,6 +3,8 @@ from Robot_draw_lib import *
 from Program_config import *
 import matplotlib.pyplot as plt
 
+rel_tol = 0.0000001
+    
 def devide_sight_ABCD(center, A, B, C, D): #  line [A,C], [B, D]
     # divide sight into 3 different parts [R_C0_R]
     AC_BO_point = line_intersection([A,C], [B, center])
@@ -38,7 +40,7 @@ def detect_blind_sight(center, ref_sight, check_sight):
     pointC_0 = inside_angle_area(check_sight[0], center, ref_sight)
     pointC_1 = inside_angle_area(check_sight[1], center, ref_sight)
     
-    print ("-->ref {0} check {1} c1 c2 {2}, {3}".format (ref_sight, check_sight, pointC_0, pointC_1))
+    #print ("-->ref {0} check {1} c1 c2 {2}, {3}".format (ref_sight, check_sight, pointC_0, pointC_1))
     #if pointC_0 >= 0:
     #    plt.plot(check_sight[0][0], check_sight[0][1], "1r")
     #if pointC_1 >= 0:
@@ -59,6 +61,7 @@ def detect_blind_sight(center, ref_sight, check_sight):
             ---> else:   # both Check C0 C1 are outside
     """
     if pointC_0 >= 0 and pointC_1 >= 0: # reference sight fully coverages check_sight
+        # if check 
         c_blind = True
         blind_sight.append(check_sight)
 
@@ -85,7 +88,6 @@ def detect_blind_sight(center, ref_sight, check_sight):
         blind_sight.append (b_sight)  
     
     elif pointC_0 < 0 and pointC_1 > 0: 
-        #print ("____4")
         """ check if R0 is inside area of [R1, C0]
             if R0 is outside then R1 is inside area of [R0, C0] for sure
         """
@@ -115,12 +117,12 @@ def remove_blind_sight(center, boundary_points):
     while i < len(true_sight) -1:
         j = i + 1
         while j < len(true_sight) :
-            print_pairs ("BEFORE: true sight", true_sight)
+            #print_pairs ("BEFORE: true sight", true_sight)
             bs, ds, r_blind, c_blind, d_sight = detect_blind_sight(center, true_sight[i], true_sight[j])
 
-            print_pairs (" [Local] blind sight", bs)
-            print_pairs(" [Local] divide sight", ds)
-            print ("status of sight: r {0}, c {1}, d {2}".format(r_blind, c_blind, d_sight))
+            #print_pairs (" [Local] blind sight", bs)
+            #print_pairs(" [Local] divide sight", ds)
+            #print ("status of sight: r {0}, c {1}, d {2}".format(r_blind, c_blind, d_sight))
             blind_sight.extend(bs)
             if d_sight:  # separate into 2 new sight
                 true_sight[i] = ds[0]
@@ -193,8 +195,43 @@ def get_true_sight(x, y, config, ox_b, oy_b):
         plot_pairs(plt, boundary_points, ls_bp)    
     
     true_sight, blind_sight = get_true_blind_sight(x, y, boundary_points)
-    print_pairs ("true_sight", true_sight)
-    print_pairs ("blind_sight", blind_sight)
+    #print_pairs ("true_sight", true_sight)
+    #print_pairs ("blind_sight", blind_sight)
     
 
     return true_sight, blind_sight
+
+def inside_true_sight(pt, center, radius, true_sight):
+    outside = True
+    if point_dist(pt, center) <= radius: # inside vision area
+        outside = False
+        # check if pt is inside true sight angle
+        inside_open_sight = True
+        visible = False
+        for ts_pair in true_sight:
+            pt_in = inside_angle_area(pt, center, ts_pair)
+            if pt_in >= 0:  # inside angle of true sight
+                inside_open_sight = False
+                pt_in = inside_angle_area( pt, ts_pair[0], (center, ts_pair[1]))
+                if pt_in >= 0: 
+                    visible = True
+                    #print ("found close ", pt, true_sight)
+                    return True
+                else:
+                    #print ("found in blind sight ", pt, true_sight)
+                    return False
+        #print ("found open", pt, true_sight)
+        return True
+    else:
+        #print ("Outside", pt)
+        return False
+    #return not outside and (inside_open_sight or visible)
+
+
+
+
+
+
+
+
+                    

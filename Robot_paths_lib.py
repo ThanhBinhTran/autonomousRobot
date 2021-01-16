@@ -1,5 +1,19 @@
 import numpy as np
+from sys import float_info
 from Robot_lib import *    
+
+def ranking(center, pt, goal):
+    # ranking = a/as + b/dist
+    a = 0.5
+    b = 0.5
+    sa =  signed_angle(goal-center, pt - center)
+    dist = point_dist (goal, pt)
+    
+    if sa != 0 :
+        return a/abs(sa) + b/dist
+    else:    
+        return float_info.max
+        
 def all_remaining_point_same_side(a, b, c, obstacle_list):
     ab = np.array([[a,b]])
     # ax + by = c

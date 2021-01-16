@@ -124,7 +124,8 @@ def lineFromPoints(P, Q):
 
 def point_dist(p, q):
     """ calculate distance of 2 point """
-    return math.sqrt((p[0]-q[0])**2 + (p[1]-q[1])**2)
+    return math.hypot(q[0] - p[0], q[1] - p[1])
+    #return math.sqrt((p[0]-q[0])**2 + (p[1]-q[1])**2)
     #return math.dist(p, q)
     
 def line_intersection(line1, line2):
@@ -153,7 +154,4 @@ def print_point(message_ID, point_x, point_y):
 def print_cpairs(message_ID, cpairs): # print circle pairs
     print ("{0}, len: {1}".format(message_ID, len(cpairs)))
     for pairs in cpairs:
-        print ("pair start {0} of true sight {1}, angle {2}"
-                 .format(pairs[0][0],pairs[0][1],pairs[0][2]) )
-        print ("pair end {0} of true sight {1}, angle {2}"
-                 .format(pairs[1][0],pairs[1][1],pairs[1][2]) )        
+        print ("pair start {0}, end {1}".format(pairs[0], pairs[0]) )
