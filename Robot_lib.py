@@ -30,7 +30,13 @@ def inside_ls(point, ls_points): # line segment points
     if position <= 0:
         return point
     return None
-     
+
+def rotate_vector_center(center, v, radians):
+    vector_vc = np.subtract(v, center)
+    r_vector_vc = rotate_vector(vector_vc, radians)
+    result =  np.add(center, r_vector_vc)
+    return np.add(center, r_vector_vc)
+    
 def rotate_vector( v, radians):
     """Only rotate a point around the origin (0, 0)."""
     x, y = v
@@ -48,8 +54,8 @@ def unsigned_angle(v1, v2):
     v2_u = unit_vector(v2)
     angle = np.arccos(np.dot(v1_u, v2_u))
 
-    return math.degrees(angle)
-    #return angle
+    #return math.degrees(angle)
+    return angle
     
 def signed_angle_xAxis(point):
     """
@@ -70,13 +76,31 @@ def signed_angle(v1, v2):
     """
     angle = signed_angle_xAxis(v1)  # cal angle between vector (A) and ox axis
     v_b = rotate_vector(v2, angle)  # rotate vector B according to rotation_radians 
-    return signed_angle_xAxis(v_b)*1000  
+    return signed_angle_xAxis(v_b)  
+    
+def get_angle_info(center, ptA, ptB):
+    """ return angle, start edge , end edge of given angle in anti-clockwise """
+    
+    vectorA = np.subtract(ptA, center)
+    vectorB = np.subtract(ptB, center)
+    
+    angle = signed_angle(vectorA, vectorB)
+   
+    if angle < 0:
+        vs = ptB # start 
+        ve = ptA # end
+    else:
+        vs = ptA # start
+        ve = ptB # end
+    return angle, vs, ve
     
 def inside_angle_area(check_pt, center, ref_bd): # is check point inside reference boundaries
     """ check if a check_pt is where inside (ref[start]- center - ref[end]) area
-        return 1 if inside
-        return 0 if at the boundary line
-        return 1 if outside
+        return True if inside
+                    additional code = 0, on the second of edge ref_bd
+                    additional code = 1, on the second of edge ref_bd
+                    additional code = 2, in among of 2 the edges of ref_bd
+        return Flase if outside
         using math.isclose to avoid the error of floating check_pt computation
     """
     #print ("inside_angle_area check {0}, center{1}, ref{2}".format( check_pt, center, ref_bd))
@@ -88,25 +112,24 @@ def inside_angle_area(check_pt, center, ref_bd): # is check point inside referen
     angle_check_pt = signed_angle(vector_a, vector_p)
     diff_angle = abs(angle_sight - angle_check_pt)
     rel_tol = 0.0000001
-    if abs(angle_check_pt) < rel_tol or  diff_angle < rel_tol:
-    #if math.isclose(abs(angle_check_pt), 0.0, rel_tol = rel_tol) or math.isclose(diff_angle, 0, rel_tol= rel_tol):
-        #print ("at ref_bd_: check_pt {0}, ref_bd{1}".format(check_pt, ref_bd) )
-        return 0
+    if abs(angle_check_pt) < rel_tol:
+        return True, 0
+    elif diff_angle < rel_tol:
+        return True, 1
     elif angle_sight * angle_check_pt < 0: # diff side
-        #print ("diff side: check_pt {0}, ref_bd{1}".format(check_pt, ref_bd) )
-        return -1
+        return False, 0
     else:
         # compare angles in unsigned
         abs_angle_sight = abs(angle_sight)
         abs_angle_check_pt = abs(angle_check_pt)
         if abs_angle_sight > abs_angle_check_pt:
-            #print ("inside: check_pt {0}, ref_bd{1}".format(check_pt, ref_bd) )
-            return 1
+            #print ("inside)
+            return True, 2
         else:
-            ##print ("outside: check_pt {0}, ref_bd{1}".format(check_pt, ref_bd) )
-            return -1
+            #print ("outside")
+            return False, 0
             
-    return -1 
+    return False, 0
     
 def midpoint(P, Q):
     """ return mid point of Q,P """
@@ -154,4 +177,4 @@ def print_point(message_ID, point_x, point_y):
 def print_cpairs(message_ID, cpairs): # print circle pairs
     print ("{0}, len: {1}".format(message_ID, len(cpairs)))
     for pairs in cpairs:
-        print ("pair start {0}, end {1}".format(pairs[0], pairs[0]) )
+        print ("pair ", pairs)

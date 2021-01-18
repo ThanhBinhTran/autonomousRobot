@@ -5,18 +5,21 @@ from enum import Enum
 rel_tol = 0.0000001
 
 show_animation = True
+run_once = False
 run_once = True
 
-
-show_boundary_points = True
-show_intersection_line = False
+show_traversal_path = False
 show_true_sight = True
-show_close_sight = False
-show_open_sight = False
-show_ref_sight = False
+show_open_sight = True
+show_close_sight = True
+show_ref_sight = True
+
+show_boundary_points = False
+show_intersection_line = False
+
+
 show_active_openpt = False
 show_inactive_openpt = False
-
 print_close_sight = False
 print_open_sight = False
 print_ref_sight = False
@@ -26,10 +29,11 @@ ls_is = "-*r"         # intersection
 ls_bp = "-r"          # boundary points
 ls_ts = "-"           # true sight
 cl_ts = "m"           # color true sight
+cl_os = "c"
 ls_bp = ":g"          # blind sight
 ls_map = "-b"         # map 
-ls_cs =  "-m"         # close sight
-ls_os =  "-g"         # open sight
+ls_cs =  ":m"         # close sight
+ls_os =  "c"         # open sight
 ls_goal = "*r"        # goal
 ls_nextpt = "xr"      # next points
 ls_aopt  = "ob"        # active open points
@@ -42,23 +46,28 @@ print_current_position = False
 
 
 (gx, gy) = np.random.randint(30, size=(2,1))
-start_point = (50, 50) # error for map _map.csv, fix later
+#start_point = (0, 100) # error for map _map.csv, fix later
 
-start_point = (0, 0)
+start_point = ( 0, 0)
 #goal = np.array([gx, gy])
-goal = np.array([60, 50])
+goal = np.array([50, 10])
 
 g_t = np.random.randint(20, size=(2,2))
 g_t = np.array([
-                [10, 0],
-                [10, 20],
-                [30, 40],
-                [60, 30],
-                [0, 20]
+                [0, 0],
+                [10, 10],
+                [20, 20],
+                [30, 30],
+                [40, 40],
+                [50, 50],
+                [60, 60],
+                [70, 70],
+                [80, 80],
+                [90, 90]
                 ])
 mapname = "_mapriver.csv" 
 mapname = "_map.csv"
-#mapname = "_binh.csv"
+#mapname = "_MuchMoreFun.csv"
 
 
 # Robots configuration
@@ -87,7 +96,7 @@ class Config:
         self.obstacle_cost_gain = 1.0
         self.robot_stuck_flag_cons = 0.001  # constant to prevent robot stucked
         self.robot_type = RobotType.circle
-        self.robot_vision = 40 # the range of input vision
+        self.robot_vision = 20 # the range of input vision
         # if robot_type == RobotType.circle
         # Also used to check if goal is reached in both types
         self.robot_radius = 1.0  # [m] for collision check
