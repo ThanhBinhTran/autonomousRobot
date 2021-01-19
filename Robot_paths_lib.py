@@ -9,10 +9,11 @@ def ranking(center, pt, goal):
     sa =  signed_angle(goal-center, pt - center)
     dist = point_dist (goal, pt)
     
-    if sa != 0 :
-        return a/abs(sa) + b/dist
+    if sa != 0 or dist != 0:
+        rank_score = a/abs(sa) + b/dist
     else:    
-        return float_info.max
+        rank_score = float_info.max
+    return [rank_score]
         
 def all_remaining_point_same_side(a, b, c, obstacle_list):
     ab = np.array([[a,b]])

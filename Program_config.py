@@ -5,25 +5,21 @@ from enum import Enum
 rel_tol = 0.0000001
 
 show_animation = True
-run_once = False
-run_once = True
 
 show_traversal_path = False
 show_true_sight = True
 show_open_sight = True
 show_close_sight = True
-show_ref_sight = True
-
+show_ref_sight = False
 show_boundary_points = False
 show_intersection_line = False
-
-
-show_active_openpt = False
+show_active_openpt = True
 show_inactive_openpt = False
-print_close_sight = False
-print_open_sight = False
-print_ref_sight = False
 
+print_close_sight = True
+print_open_sight = True
+print_ref_sight = True
+print_traversal_path = False
 # line style 
 ls_is = "-*r"         # intersection
 ls_bp = "-r"          # boundary points
@@ -43,32 +39,20 @@ ls_iopt  = "ok"       # inactive open_point
 print_boundary_points = False
 print_current_position = False
 
+start_point = [0, 0]
+(gx, gy) = np.random.randint(100, size=(2,1))
+goal = np.array([gx, gy])
+goal = np.array(
+        [np.random.randint(100),np.random.randint(100)]
+        )
+#goal = np.array(
+#        [20, 30]
+#        )
 
-
-(gx, gy) = np.random.randint(30, size=(2,1))
-#start_point = (0, 100) # error for map _map.csv, fix later
-
-start_point = ( 0, 0)
-#goal = np.array([gx, gy])
-goal = np.array([50, 10])
-
-g_t = np.random.randint(20, size=(2,2))
-g_t = np.array([
-                [0, 0],
-                [10, 10],
-                [20, 20],
-                [30, 30],
-                [40, 40],
-                [50, 50],
-                [60, 60],
-                [70, 70],
-                [80, 80],
-                [90, 90]
-                ])
 mapname = "_mapriver.csv" 
 mapname = "_map.csv"
-#mapname = "_MuchMoreFun.csv"
-
+mapname = "_MoreFun.csv"
+mapname = "_MuchMoreFun.csv"
 
 # Robots configuration
 class RobotType(Enum):

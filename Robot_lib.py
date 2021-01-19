@@ -107,29 +107,49 @@ def inside_angle_area(check_pt, center, ref_bd): # is check point inside referen
     vector_a = np.subtract(ref_bd[0], center)
     vector_b = np.subtract(ref_bd[1], center)
     vector_p = np.subtract(check_pt, center)
-    
+    #print ("___* input:" , check_pt, center, ref_bd)
+    #print ("___* vector abp:" , vector_a, vector_b, vector_p)
     angle_sight = signed_angle(vector_a, vector_b)
     angle_check_pt = signed_angle(vector_a, vector_p)
     diff_angle = abs(angle_sight - angle_check_pt)
     rel_tol = 0.0000001
+    ret_result = False
+    ret_code = 0
     if abs(angle_check_pt) < rel_tol:
-        return True, 0
+        #print ("____* same edge 1")
+        ret_result = True
+        ret_code = 0
     elif diff_angle < rel_tol:
-        return True, 1
+        #print ("____* same edge 2")
+        ret_result = True
+        ret_code = 1
+
     elif angle_sight * angle_check_pt < 0: # diff side
-        return False, 0
+        #print ("____* diff side")
+        ret_result = False
     else:
         # compare angles in unsigned
         abs_angle_sight = abs(angle_sight)
         abs_angle_check_pt = abs(angle_check_pt)
         if abs_angle_sight > abs_angle_check_pt:
-            #print ("inside)
-            return True, 2
+            #print ("____* inside")
+            ret_result = True
+            ret_code = 2
         else:
-            #print ("outside")
-            return False, 0
-            
-    return False, 0
+            #print ("____* outside")
+            ret_result = False
+    #print ("_____*", math.degrees(angle_sight), math.degrees(angle_check_pt), ret_result, ret_code)
+    return ret_result, ret_code
+    
+def inside_closed_angle_area(check_pt, center, ref_bd): # is check point inside reference boundaries
+    """ check if a check_pt is where inside closed angle of (ref[start]- center - ref[end]) area
+        return True if inside (not boundary)
+        return Flase if outside
+
+    """
+    in_status, in_code = inside_angle_area(check_pt, center, ref_bd)
+    #print ("___+ inside_closed_angle_area:", in_status, in_code, "Check point", check_pt )
+    return (in_status and in_code == 2 )
     
 def midpoint(P, Q):
     """ return mid point of Q,P """

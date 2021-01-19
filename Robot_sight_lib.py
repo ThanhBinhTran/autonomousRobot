@@ -53,15 +53,15 @@ def detect_blind_sight(center, ref_sight, check_sight):
         reference sight and check sight are 2 distinct area 
             ---> else:   # both Check C0 C1 are outside
     """
-    print ("check me ____",c[0], c0_in, c0_code,"-" ,c[1], c1_in, c1_code)
+    #print ("check me ____",c[0], c0_in, c0_code,"-" ,c[1], c1_in, c1_code)
     if c0_in and c1_in: # reference sight fully coverages check_sight
-        print ("check me  1")
+        #print ("check me  1")
         if c0_code <=1 and c1_code == 2: # mutual c0 while c1 inside
-            print ("check me  1  1")
+            #print ("check me  1  1")
             # check if c1 is inside (r0, center r1)
             c1_in  = inside_angle_area(c[1], r[0] , [center, r[1]])[0]
             if c1_in:
-                print ("check me  1  1 1")
+                #print ("check me  1  1 1")
                 is_pt = line_intersection([center, c[1]],[r[0], r[1]])
                 if c0_code == 0:
                     divided_sight = [ [is_pt, r[1]], [c[0], c[1]] ]
@@ -70,14 +70,14 @@ def detect_blind_sight(center, ref_sight, check_sight):
                 plt.plot((is_pt[0]),(is_pt[1]), "or")
                 d_sight = True
             else:
-                print ("check me  1  1 2")
+                #print ("check me  1  1 2")
                 c_blind = True
         elif c0_code == 2 and c1_code <=1: # mutual c1 while c0 inside
-            print ("check me  1  2")
+            #print ("check me  1  2")
             # check if c1 is inside (r0, center r1)
             c0_in  = inside_angle_area(c[0], r[0] , [center, r[1]])[0]
             if c0_in:
-                print ("check me  1  2   1")
+                #print ("check me  1  2   1")
                 is_pt = line_intersection([center, c[0]],[r[0], r[1]])
                 if c1_code == 0:
                     divided_sight = [[r[0], is_pt], [c[0], c[1]] ]
@@ -85,7 +85,7 @@ def detect_blind_sight(center, ref_sight, check_sight):
                     divided_sight = [[is_pt, r[1]], [c[0], c[1]] ]
                 d_sight = True
             else:
-                print ("check me  1  2   2")
+                #print ("check me  1  2   2")
                 c_blind = True
         elif (c0_code == 0 and c1_code == 1) or (c0_code == 1 and c1_code == 0):
             # exactly same 
@@ -96,20 +96,20 @@ def detect_blind_sight(center, ref_sight, check_sight):
             else:
                 c_blind = True
         else:
-            print ("check me8")
+            #print ("check me8")
             c_blind = True
             
     elif (c0_in and c0_code <2) or (c1_in and c1_code<2): # ether C0 or C1 is at the boundary segment
-        print ("check me  2  0   0", c0_in ,c0_code, c1_in, c1_code)
+        #print ("check me  2  0   0", c0_in ,c0_code, c1_in, c1_code)
         """ check if check sight fully coverages ref_sight """
         r0_in, r0_code = inside_angle_area(r[0], center, [c[0], c[1]])
         r1_in, r0_code = inside_angle_area(r[1], center, [c[0], c[1]])
         if r0_in and r1_in: # ref sight is inside check sight
-            print ("check me  2  1   0")
+            #print ("check me  2  1   0")
             r_blind = True
        
     elif c0_in and not c1_in :
-        print ("check me  3  0   0")
+        #print ("check me  3  0   0")
         """ check if R0 is inside area of [R1, C1]
             if R0 is outside then R1 is inside area of [R0, C1] for sure
         """
@@ -117,14 +117,14 @@ def detect_blind_sight(center, ref_sight, check_sight):
     
         r0_in, r0_code = inside_angle_area(r[0], center, [r[1], c[1]])
         if r0_in :  # R1 C0 R0 C1 
-            print ("check me  3  1   0")
+            #print ("check me  3  1   0")
             divided_sight = devide_sight_ABCD(center, r[1], c[0], r[0], c[1])
         else: # R0 C0 R1 C1 
-            print ("check me  3  2   0")
+            #print ("check me  3  2   0")
             divided_sight = devide_sight_ABCD(center, r[0], c[0], r[1], c[1])
 
     elif not c0_in  and c1_in: 
-        print ("check me  4  0   0")
+        #print ("check me  4  0   0")
         """ check if R0 is inside area of [R1, C0]
             if R0 is outside then R1 is inside area of [R0, C0] for sure
         """
@@ -132,19 +132,19 @@ def detect_blind_sight(center, ref_sight, check_sight):
        
         r0_in, r0_code = inside_angle_area(r[0], center, [r[1], c[0]])
         if r0_in :  # R1 C1 R0 C0
-            print ("check me  4  1   0")
+            #print ("check me  4  1   0")
             #print ("____4      1")
             divided_sight = devide_sight_ABCD(center, r[1], c[1], r[0], c[0])
         else: # R0 C1 R1 C0
-            print ("check me  4  2   0")
+            #print ("check me  4  2   0")
             divided_sight = devide_sight_ABCD(center, r[0], c[1], r[1], c[0])
        
     else:   # both Check C0 C1 are outside
-        print ("check me  5  0   0")
+        #print ("check me  5  0   0")
         # Check if ref_sight is inside Check_sight,
         r0_in, r0_code = inside_angle_area(r[0], center, [c[1], c[0]])
         if r0_in: # C R C
-            print ("check me  5  1   0")
+            #print ("check me  5  1   0")
             r_blind = True
 
     return divided_sight, r_blind, c_blind, d_sight
@@ -156,10 +156,10 @@ def remove_blind_sight(center, boundary_points):
     while i < len(true_sight) -1:
         j = i + 1
         while j < len(true_sight) :
-            print ("Checking ", true_sight[i], "-->", true_sight[j])
+            #print ("_+_Checking ", true_sight[i], "-->", true_sight[j])
             ds, r_blind, c_blind, d_sight = detect_blind_sight(center, true_sight[i], true_sight[j])
-            print_pairs(" [Local] divide sight", ds)
-            print ("status of sight: r {0}, c {1}, d {2}".format(r_blind, c_blind, d_sight))
+            #print_pairs(" [Local] divide sight", ds)
+            #print ("status of sight: r {0}, c {1}, d {2}".format(r_blind, c_blind, d_sight))
             if d_sight:  # separate into 2 new sight
                 true_sight[i] = ds[0]
                 true_sight[j] = ds[1]
@@ -231,20 +231,18 @@ def get_true_sight(x, y, config, ox_b, oy_b):
         plot_pairs(plt, boundary_points, ls_bp)    
     
     true_sight = get_true_blind_sight(x, y, boundary_points)
-    #print_pairs ("true_sight", true_sight)
+
     return true_sight
     
 def inside_global_true_sight(pt, radius, traversal_path):
-    print ("len(traversal_path) 123", len(traversal_path))
-    if len(traversal_path)>0:
-        result = [inside_local_true_sight(pt, x, radius, tsight) for x,tsight,notuse in traversal_path]
-        #print ("inside global sight result: ", result)
-        return np.sum(result) >= 0
-    else:
-        return True
+    result = [inside_local_true_sight(pt, x, radius, tsight) for x,tsight, nuse1, nuse2 in traversal_path]
+    ret_result = np.sum(result) > 0
+    print ("inside global sight result: ", result, ", return :", ret_result)
+    return ret_result
+    
 def inside_local_true_sight(pt, center, radius, true_sight):
     outside = True
-    if point_dist(pt, center) <= radius: # inside vision area
+    if point_dist(pt, center) < radius: # inside vision area
         outside = False
         # check if pt is inside true sight angle
         inside_open_sight = True
@@ -301,56 +299,68 @@ def get_true_is_circle_pairs( center, radius, true_pair):
     result = [cpoints[0],cpoints[1]]
     return result
 
-def get_close_cpairs(ref_cpairs):
-    rcp_len_b = len( ref_cpairs) # number of ref_cpairs at begin
-    i = 0
-    while i < len(ref_cpairs) -1:
-        r_cpairs = ref_cpairs[i] # reference pair
-        #print ("__________", r_cpairs)
-        j = i + 1
-        while j < len(ref_cpairs) :
-            c_cpairs = ref_cpairs[j]
-            #print ("__________", c_cpairs)
-            result = mutual_point(r_cpairs, c_cpairs) 
-            print (result)
-            new_cpairs = []
-            if   result[0][0]:
-                #print ("check me #213 0")
-                new_cpairs = [r_cpairs[1], c_cpairs[1]]
-            elif result[0][1]:
-                #print ("check me #213 1")
-                new_cpairs = [c_cpairs[0], r_cpairs[1]]
-            elif result[1][0]:
-                #print ("check me #213 2")
-                new_cpairs = [r_cpairs[0], c_cpairs[1]]
-            elif result[1][1]:
-                #print ("check me #213 3")
-                new_cpairs = [r_cpairs[0], c_cpairs[0]]
-            
-            if len( new_cpairs) > 0:
-                ref_cpairs[i] = new_cpairs
-                ref_cpairs.pop(j)
-                #ref_cpairs[j] = []
-                i = i - 1
-                break
-            j = j + 1
-        i = i + 1
-    rcp_len_e = len(ref_cpairs)
-    if rcp_len_e == 1:
-        if rcp_len_b > 1: # all compress into 1
-            return [[ref_cpairs[0][0], ref_cpairs[0][1], False]]
+def get_close_cpairs(center, ref_cpairs):
+    ret_result = []
+    #clone new reference circle pairs
+    rPairs = [] 
+    rPairs.extend(ref_cpairs)
+    if len(rPairs) == 1:
+        ret_result = [[rPairs[0][0], rPairs[0][1], True]]
+    else:
+        i = 0
+        while i < len(rPairs) -1:
+            r_cpairs = rPairs[i] # reference pair
+            #print ("__________", r_cpairs)
+            j = i + 1
+            while j < len(rPairs) :
+                c_cpairs = rPairs[j]
+                #print ("__________", c_cpairs)
+                result = mutual_point(r_cpairs, c_cpairs) 
+                #print (result)
+                new_cpairs = []
+                if   result[0][0]:
+                    #print ("check me #213 0")
+                    new_cpairs = [r_cpairs[1], c_cpairs[1]]
+                elif result[0][1]:
+                    #print ("check me #213 1")
+                    new_cpairs = [c_cpairs[0], r_cpairs[1]]
+                elif result[1][0]:
+                    #print ("check me #213 2")
+                    new_cpairs = [r_cpairs[0], c_cpairs[1]]
+                elif result[1][1]:
+                    #print ("check me #213 3")
+                    new_cpairs = [r_cpairs[0], c_cpairs[0]]
+                
+                if len( new_cpairs) > 0:
+                    rPairs[i] = new_cpairs
+                    rPairs.pop(j)
+                    #rPairs[j] = []
+                    i = i - 1
+                    break
+                j = j + 1
+            i = i + 1
+
+        
+        # once there is only one closed cpair
+        # check if its whether true or fake
+        if len(rPairs) == 1:
+            ios = is_open_sight(center, rPairs[0], ref_cpairs)
+            if ios: # closed cpair is true close
+                ret_result = [[rPairs[0][0], rPairs[0][1], False]]
+            else: # close cpair is complement area
+                ret_result = [[rPairs[0][0], rPairs[0][1], True]]
         else:
-            return [[ref_cpairs[0][0], ref_cpairs[0][1], True]]
-    return ref_cpairs
+            ret_result = rPairs
+    return ret_result
     
 def divide_open_cpair(center, inangle, vs, ve):
     return_pairs = []
-    print ("divide_open_cpair: ", math.degrees(inangle))
+    #print ("divide_open_cpair: ", math.degrees(inangle))
     angle = abs(inangle)
     if angle >= math.pi*4/3:      # 240 degree
     #divide into 3 parts
         r_angle = angle/ 3
-        print ("divide into 3 parts, with angle = ", math.degrees(r_angle))
+        #print ("divide into 3 parts, with angle = ", math.degrees(r_angle))
         v1 = rotate_vector_center(center, vs, -r_angle)
         v2 = rotate_vector_center(center, vs, -2*r_angle)
         return_pairs.append([vs, v1])
@@ -359,7 +369,7 @@ def divide_open_cpair(center, inangle, vs, ve):
     elif angle >= math.pi*2/3:      # 120 degree:
     #divide into 2 parts
         r_angle = angle/ 2
-        print ("divide into 2 parts, with angle = ", math.degrees(r_angle))
+        #print ("divide into 2 parts, with angle = ", math.degrees(r_angle))
         v1 = rotate_vector_center(center, vs, -r_angle)
         return_pairs.append([vs, v1])
         return_pairs.append([v1, ve])
@@ -387,7 +397,6 @@ def get_open_cpairs(center, radius, goal, close_cpairs):
     c_cpairs = [] 
     c_cpairs.extend(close_cpairs)
     
-    print (c_cpairs)
     if len(c_cpairs) == 0: # no obstacle detected
         print ("No obstacle detected")
         vector_cg_unit = unit_vector( np.subtract(goal, center))
@@ -401,20 +410,26 @@ def get_open_cpairs(center, radius, goal, close_cpairs):
                   
     elif len(c_cpairs) == 1: # only a obstacle detected
         print ("only 1 obstacle detected")
-        print ("c_cpairs", c_cpairs)
-        if c_cpairs[0][2]: # True close detected then divide open sight
+        print ("close cpairs", c_cpairs)
+        if c_cpairs[0][2]: # TRUE: True close detected then open_sight is its complement
             pairs_extend = divide_open_cpair_complement (center, c_cpairs[0])
-            for pair in pairs_extend:
-                o_cpairs.append(init_open_cpair(center, radius, pair[0], pair[1]))
-        else: # complement close_cpairs
-            o_cpairs.append(init_open_cpair(center, radius, c_cpairs[0][0], c_cpairs[0][1]))
+        else: # FALSE, this FAKE close sight is open_sight False
+            angle, vs, ve = get_angle_info(center, c_cpairs[0][0], c_cpairs[0][1])
+            pairs_extend = divide_open_cpair(center, angle, vs, ve)
+            
+        for pair in pairs_extend:
+            o_cpairs.append(init_open_cpair(center, radius, pair[0], pair[1]))
+            #o_cpairs.append(init_open_cpair(center, radius, c_cpairs[0][0], c_cpairs[0][1]))
+            
     else:
+        print ("more than 2 obstacles detected")
         i = 0
         while i < len(c_cpairs) -1:
             j = i + 1
             while j < len(c_cpairs) :
                 found, ridx, cidx = open_sight(center, i, j, c_cpairs) 
-                print ("Check me", i, j, found, ridx, cidx)
+                #print ("_Pair r {0} c {1}".format(c_cpairs[i], c_cpairs[i]) )
+                #print ("__Open result {0}, index {1} {2}\n".format(found, ridx, cidx) )
                 if found:
                     ptA = c_cpairs[i][ridx]
                     ptB = c_cpairs[j][cidx]
@@ -433,65 +448,70 @@ def get_open_cpairs(center, radius, goal, close_cpairs):
         if len(c_cpairs) > 0: # the last 1
             ptA, ptB = c_cpairs[0]
             # get all close point, which are from close pairs, but ptA, ptB
-            allPts = []
-            for pair in close_cpairs:
-                allPts.append(pair[0])
-                allPts.append(pair[1])
-            allPts.remove(ptA)
-            allPts.remove(ptB)
-            # check if sight [ptA, ptB] are true open sight or not
-            # if not revise sight is the true one
-            all_in = [inside_angle_area(pt, center, (ptA, ptB))[0] for pt in allPts]
-            print ("check me 012333", all_in)
+            ios = is_open_sight(center, [ptA, ptB], close_cpairs)
             
-            if np.sum(all_in) == 0: # true open pair
-                
+            if ios: # true open pair
                 angle, vs, ve = get_angle_info(center, ptA, ptB)
                 pairs_extend = divide_open_cpair(center, angle, vs, ve)
-                for pair in pairs_extend:
-                    o_cpairs.append(init_open_cpair(center, radius, pair[0], pair[1]))
             else:
                 pairs_extend = divide_open_cpair_complement (center, c_cpairs[0])
-                for pair in pairs_extend:
-                    o_cpairs.append(init_open_cpair(center, radius, pair[0], pair[1]))
-    print ("o_cpairs", o_cpairs)
+
+            for pair in pairs_extend:
+                o_cpairs.append(init_open_cpair(center, radius, pair[0], pair[1]))
+
     return o_cpairs
     
+def get_allpts_except(all_pairs, e_pairs):
+    """
+    get all points, which are from pairs, but except points from except pair
+    """
+    allPts = []
+    for pair in all_pairs:
+        allPts.append(pair[0])
+        allPts.append(pair[1])
+    allPts.remove(e_pairs[0])
+    allPts.remove(e_pairs[1])
+    return allPts
+
+
+            
+def is_open_sight(center, cpair, all_pairs):
+    #print ("___Pair {0}, all points {1}".format(cpair, all_pairs))
+    #print ("___Len checking point", len (all_pairs))
+    all_pts = []
+    for pair in all_pairs:
+        all_pts.append(pair[0])
+        all_pts.append(pair[1])
+    #for point in all_pts:
+    #    print ("___ points", point )
+    in_status = [inside_closed_angle_area(pt, center, cpair) for pt in all_pts]
     
-def is_open_sight(center, i, j, c_cpairs, r_cpairs, remaining_pts):
+    ret_result = sum(in_status) == 0 # sum true == 0, all must outside
+    
+    #print ("____inside status: ", in_status, " -> result: ", ret_result)
+    return ret_result
+    
+def is_open_sight_pairs(center, pt_i, pt_j, i, j, all_pairs):
     # i for ref, j for check
-    i_o = 1 - i # other
-    j_o = 1 -j  # other
-    in1 = inside_angle_area(r_cpairs[i_o], center, (c_cpairs[j],r_cpairs[i]))[0]
-    in2 = inside_angle_area(c_cpairs[j_o], center, (c_cpairs[j],r_cpairs[i]))[0]
-    in_result = [inside_angle_area(pt, center, (c_cpairs[j],r_cpairs[i]))[0] for pt in remaining_pts]
-    in3 = False
-    print ("check me ",i, j, in1, in2, in_result)
-    in3 = sum(in_result) > 0 # at least 1 inside -> failed
-    if in1  or in2 or  in3:
-        #print ("debug__________[NOT are open sight]",c_cpairs[j], r_cpairs[i])
-        return False
-    else:
-        #print ("debug__________[open sight]",c_cpairs[j], r_cpairs[i])
-        return True
+    r_cpairs = all_pairs[i]
+    c_cpairs = all_pairs[j]
+    ret_result = is_open_sight(center, [r_cpairs[pt_i],c_cpairs[pt_j]], all_pairs)
+
+    #print ("_Check pair (r, c): {0} {1}, index i: {2} j: {3}, result: {4}".format(r_cpairs[pt_i],c_cpairs[pt_j], pt_i, pt_j,  ret_result) )
+
+    return ret_result
+    
         
 def open_sight(center, i, j, close_cpairs):
     # i is always greater than j
-    r_cpairs = close_cpairs[i]
-    c_cpairs = close_cpairs[j]
-    
-    remaining_pts = []
-    for z in range(j+1, len( close_cpairs)):
-        remaining_pts.append(close_cpairs[z][0])
-        remaining_pts.append(close_cpairs[z][1])
     
     found = True
     ridx, cidx = (0,0)
     # i first for ref, j second for check
-    if   is_open_sight(center, 0, 1, c_cpairs, r_cpairs, remaining_pts): ridx, cidx = (0,1)
-    elif is_open_sight(center, 1, 0, c_cpairs, r_cpairs, remaining_pts): ridx, cidx = (1,0)
-    elif is_open_sight(center, 1, 1, c_cpairs, r_cpairs, remaining_pts): ridx, cidx = (1,1)
-    elif is_open_sight(center, 0, 0, c_cpairs, r_cpairs, remaining_pts): ridx, cidx = (0,0)
+    if   is_open_sight_pairs(center, 0, 1, i, j, close_cpairs): ridx, cidx = (0,1)
+    elif is_open_sight_pairs(center, 1, 0, i, j, close_cpairs): ridx, cidx = (1,0)
+    elif is_open_sight_pairs(center, 1, 1, i, j, close_cpairs): ridx, cidx = (1,1)
+    elif is_open_sight_pairs(center, 0, 0, i, j, close_cpairs): ridx, cidx = (0,0)
     else:
         found = False
     return found, ridx, cidx
@@ -521,18 +541,18 @@ def get_a_open_point_from_a_pair(center, radius, pair):
            
 def get_open_close_sight(plt, x, y, radius, goal, true_sight):
     center = [x,y]
-    print ("Center", center)
-    print ("true_sight", true_sight)
 
     ref_cpairs = [get_true_is_circle_pairs( (x, y), radius, true_pair) for true_pair in true_sight]
     
     if print_ref_sight:
-        print ("ref circle pairs", ref_cpairs)
-
-    close_cpairs = get_close_cpairs(ref_cpairs)
+        print ("\n_____ref circle pairs", ref_cpairs)
+    
+    print ("\n_____ get_close_cpairs")
+    close_cpairs = get_close_cpairs((x,y), ref_cpairs)
     if print_close_sight:
         print_cpairs("close circle pairs", close_cpairs)
 
+    print ("\n_____ get_open_cpairs")
         
     open_cpairs = get_open_cpairs(center, radius, goal, close_cpairs)
     if print_open_sight:
