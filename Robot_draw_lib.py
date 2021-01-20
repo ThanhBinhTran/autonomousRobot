@@ -1,6 +1,7 @@
 from Robot_lib import *
 from Program_config import *
 from matplotlib import patches
+
 rel_tol = 0.0000001
 #import matplotlib.pyplot as plt
 
@@ -37,16 +38,31 @@ def plot_vision(plt, x, y, radius, true_sight, osight, csight):
     
     if show_true_sight:
         draw_true_sight(plt, x, y, true_sight, cl_ts, ls_ts) 
-
+            
     if show_open_sight:
         draw_open_sight(plt, x, y, osight)
         
     if show_close_sight:
         plot_pairs(plt, csight, ls_cs)
         
+def plot_explored_map(plt, traversal_path, ls_em):
+    for step in traversal_path:
+        st_sight = step[1]
+        plot_pairs(plt, st_sight, ls_em)
+
+def plot_goal(plt, goal, r_goal, s_goal):
+    plt.plot(goal[0], goal[1], ls_goal)
+    if show_text_goal:
+        if r_goal:
+            plt.text(goal[0], goal[1] + 2, "reached goal!")
+        elif s_goal:
+            plt.text(goal[0], goal[1] + 2, "saw goal!")
+        else:
+            plt.text(goal[0], goal[1] + 2, "goal")
+            
 def plot_point(plt, point, ls="xr"):
     plt.plot(point[0], point[1], ls)
-    
+
 def plot_line(plt, line, ls="-xr"):
     plt.plot((line[0][0],line[1][0]), (line[0][1],line[1][1]), ls)
     
@@ -59,5 +75,5 @@ def plot_pairs(plt, pairs, ls="-xr"):
     for pair in pairs:
         plot_line(plt, pair, ls)
     
-def plot_points(plt, ls="xr"):
-    plt.plot(points[0,:], points[:,1], ls)
+def plot_points(plt, pts, ls="xr"):
+    plt.plot(pts[:, 0], pts[:, 1], ls)

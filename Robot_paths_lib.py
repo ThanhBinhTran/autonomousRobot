@@ -3,18 +3,40 @@ from sys import float_info
 from Robot_lib import *    
 
 def ranking(center, pt, goal):
+    '''
+    score the open point by its angle (from center to point and goal) and its distance (to goal)
+    '''
+    
     # ranking = a/as + b/dist
-    a = 0.5
-    b = 0.5
+    a = 1
+    b = 1
     sa =  signed_angle(goal-center, pt - center)
     dist = point_dist (goal, pt)
-    
+    sa = sa/math.pi
+    dist = dist/100
     if sa != 0 or dist != 0:
         rank_score = a/abs(sa) + b/dist
     else:    
         rank_score = float_info.max
     return [rank_score]
+    
+def pick_next(ao_gobal):
+    '''
+    return index and value of next point if there exist any active open point
+    otherwise -1
+    '''
+    pick_idx = -1
+    next_pt = []
+    if len(ao_gobal) > 0:
+        ranks = ao_gobal[:,2]
+        print ("global open points: ", ao_gobal[:,0:2])
+        print ("global ranks: ",ranks)
+        print ("pick index ", np.argmax(ranks))
+        print ("picked rank ", np.amax(ranks))
+        pick_idx = np.argmax(ranks)
+        next_pt = ao_gobal[pick_idx,0:2]
         
+    return pick_idx, next_pt 
 def all_remaining_point_same_side(a, b, c, obstacle_list):
     ab = np.array([[a,b]])
     # ax + by = c

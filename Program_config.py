@@ -11,17 +11,23 @@ show_true_sight = True
 show_open_sight = True
 show_close_sight = True
 show_ref_sight = False
-show_boundary_points = False
-show_intersection_line = False
+
+show_is_pts = False
+show_boundary_pts = True
 show_active_openpt = True
 show_inactive_openpt = False
 
-print_close_sight = True
-print_open_sight = True
-print_ref_sight = True
+show_explored_map = True
+
+show_text_goal = True
+
+print_close_sight = False
+print_open_sight = False
+print_ref_sight = False
 print_traversal_path = False
-# line style 
-ls_is = "-*r"         # intersection
+# line styl
+
+ls_is = ":.c"         # intersection
 ls_bp = "-r"          # boundary points
 ls_ts = "-"           # true sight
 cl_ts = "m"           # color true sight
@@ -35,11 +41,12 @@ ls_nextpt = "xr"      # next points
 ls_aopt  = "ob"        # active open points
 ls_iopt  = "ok"       # inactive open_point
 # print out
+ls_em = "-r"   # explored_map
+print_boundary_pts = False
+print_true_sight = False
 
-print_boundary_points = False
-print_current_position = False
-
-start_point = [0, 0]
+start_point = [51, 50]
+#start_point = [0, 0]
 (gx, gy) = np.random.randint(100, size=(2,1))
 goal = np.array([gx, gy])
 goal = np.array(
@@ -51,7 +58,7 @@ goal = np.array(
 
 mapname = "_mapriver.csv" 
 mapname = "_map.csv"
-mapname = "_MoreFun.csv"
+#mapname = "_MoreFun.csv"
 mapname = "_MuchMoreFun.csv"
 
 # Robots configuration
@@ -80,7 +87,7 @@ class Config:
         self.obstacle_cost_gain = 1.0
         self.robot_stuck_flag_cons = 0.001  # constant to prevent robot stucked
         self.robot_type = RobotType.circle
-        self.robot_vision = 20 # the range of input vision
+        self.robot_vision = 10 # the range of input vision
         # if robot_type == RobotType.circle
         # Also used to check if goal is reached in both types
         self.robot_radius = 1.0  # [m] for collision check

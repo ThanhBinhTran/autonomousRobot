@@ -5,7 +5,7 @@ def print_help():
     
 def menu():
 
-    run_times = -1
+    run_times = 1
 
     try:
         opts, args = getopt.getopt(sys.argv[1:],"hn:sx:sy:", ["run_time=","start_x=","start_y="])
@@ -38,5 +38,5 @@ def menu():
             except ValueError:
                 print('invalid start_point_y')
                 sys.exit(2)
-                
+    
     return run_times

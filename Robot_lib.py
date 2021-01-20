@@ -28,8 +28,8 @@ def inside_ls(point, ls_points): # line segment points
     position = np.dot (d1, d2)
     ##print (position, point, ls_points)
     if position <= 0:
-        return point
-    return None
+        return True
+    return False
 
 def rotate_vector_center(center, v, radians):
     vector_vc = np.subtract(v, center)
@@ -197,4 +197,4 @@ def print_point(message_ID, point_x, point_y):
 def print_cpairs(message_ID, cpairs): # print circle pairs
     print ("{0}, len: {1}".format(message_ID, len(cpairs)))
     for pairs in cpairs:
-        print ("pair ", pairs)
+        print ("- items ", pairs)
