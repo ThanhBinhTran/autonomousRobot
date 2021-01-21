@@ -27,21 +27,22 @@ print_ref_sight = False
 print_traversal_path = False
 # line styl
 
-ls_is = ":.c"         # intersection
-ls_bp = "-r"          # boundary points
-ls_ts = "-"           # true sight
-cl_ts = "m"           # color true sight
+ls_is = ":.c"    # intersection
+ls_bp = "-r"     # boundary points
+ls_ts = "-"      # true sight
+cl_ts = "m"      # color true sight
 cl_os = "c"
-ls_bp = ":g"          # blind sight
-ls_map = "-b"         # map 
-ls_cs =  ":m"         # close sight
-ls_os =  "c"         # open sight
-ls_goal = "*r"        # goal
-ls_nextpt = "xr"      # next points
-ls_aopt  = "ob"        # active open points
-ls_iopt  = "ok"       # inactive open_point
+ls_bp = ":g"     # blind sight
+ls_map = "-b"    # map 
+ls_cs = ":m"     # close sight
+ls_os = "c"      # open sight
+ls_goal = "*r"   # goal
+ls_nextpt = "xr" # next points
+ls_aopt = "ob"   # active open points
+ls_iopt = "ok"   # inactive open_point
+ls_em = "-m"     # explored_map
+
 # print out
-ls_em = "-r"   # explored_map
 print_boundary_pts = False
 print_true_sight = False
 
@@ -56,10 +57,6 @@ goal = np.array(
 #        [20, 30]
 #        )
 
-mapname = "_mapriver.csv" 
-mapname = "_map.csv"
-#mapname = "_MoreFun.csv"
-mapname = "_MuchMoreFun.csv"
 
 # Robots configuration
 class RobotType(Enum):

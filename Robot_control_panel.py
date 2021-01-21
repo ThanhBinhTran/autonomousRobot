@@ -1,14 +1,18 @@
 import sys, getopt
 def print_help():
-    print ('program -n <run_time> -s <start x y>')
-    print ('Example: program -n 1 -s 10 23')
+    print ('program -n <run times> -m <map name>')
+    print ('Example: program -n 1 -m _map.csv')
     
 def menu():
 
-    run_times = 1
-
+    runtimes = 1
+    
+    #mapname = "_river.csv" 
+    mapname = "_map.csv"
+    #mapname = "_MuchMoreFun.csv"
+    
     try:
-        opts, args = getopt.getopt(sys.argv[1:],"hn:sx:sy:", ["run_time=","start_x=","start_y="])
+        opts, args = getopt.getopt(sys.argv[1:],"hn:sx:sy:m:", ["runtimes=","start_x=","start_y=","mapname="])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -17,12 +21,18 @@ def menu():
         if opt == '-h':
             print_help()
             sys.exit()
-        elif opt in ("-n", "--run_time"):
+        elif opt in ("-n", "--runtimes"):
             try:
-                run_times = int(arg)
+                runtimes = int(arg)
             except ValueError:
-                run_times = 1
+                runtimes = 1
                 print('invalid run times, use default (1)')
+                sys.exit(2)
+        elif opt in ("-m", "--mapname"):
+            try:
+                mapname = arg
+            except:
+                print_help()
                 sys.exit(2)
         elif opt in ("-sx", "--start_x"):
             try:
@@ -39,4 +49,4 @@ def menu():
                 print('invalid start_point_y')
                 sys.exit(2)
     
-    return run_times
+    return runtimes, mapname
