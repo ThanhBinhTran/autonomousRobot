@@ -5,7 +5,7 @@ This project is to simulate an autonomousRobot :car: that try to find a way to r
 ```
 python Robots.py -n <number of run times> -m <map name> -s <start point> -g <goal point>
 ```
-1. number of run times:
+- number of run times:
     - < 0: run until meet the given goal
     - n: number of run times
     - default: 1
@@ -13,6 +13,7 @@ python Robots.py -n <number of run times> -m <map name> -s <start point> -g <goa
     - x_y: input x y of goal
     - r: random point for goal
 - start point: default 0,0
+
 Example: ``` python Robots.py -n 5 -m _MuchMoreFun.csv -s 10_10 -g 30.0_70.0```
 
 ###### To generate a map:
