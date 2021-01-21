@@ -9,6 +9,7 @@ python Robots.py -n <number of run times> -m <map name>
     - < 0: run until meet the given goal
     - n: number of run times
     - default: 1
+    
 Example: ``` python Robots.py -n 1 -m _MuchMoreFun.csv ```
 
 ###### To generate a map:
