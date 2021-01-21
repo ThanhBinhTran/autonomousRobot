@@ -1,0 +1,5 @@
+__pycache__/*
+*~
+venv/*
+debug.py
+simple_polygon_kernel/*
