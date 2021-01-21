@@ -1,7 +1,7 @@
 from Robot_lib import *
 from Robot_draw_lib import *
 from Program_config import *
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 rel_tol = 0.0000001
     
 def devide_sight_ABCD(center, A, B, C, D): #  line [A,C], [B, D], B inside AC but D outside
@@ -19,10 +19,10 @@ def devide_sight_ABCD(center, A, B, C, D): #  line [A,C], [B, D], B inside AC bu
     return devided_sight
         
 def detect_blind_sight(center, ref_sight, check_sight):
-    """ 
+    ''' 
     check sight  --> C0, C1
     reference sight -->  R0 R1 
-    """
+    '''
     r = ref_sight
     c = check_sight
     t_sight = []
@@ -37,8 +37,8 @@ def detect_blind_sight(center, ref_sight, check_sight):
     # get inside status of c1, c0
     c0_in, c0_code = inside_angle_area(c[0], center, [r[0], r[1]])
     c1_in, c1_code = inside_angle_area(c[1], center, [r[0], r[1]])
-    #print ("_^^_ inside status:", c0_in, c0_code, c1_in, c1_code)
-    """ 
+    print ("_^^_ inside status:", c0_in, c0_code, c1_in, c1_code)
+    ''' 
         reference sight fully coverages check sight
             -> if case
         reference sight and check sight have mutual edge: 
@@ -51,8 +51,7 @@ def detect_blind_sight(center, ref_sight, check_sight):
             -->elif pointC_0 < 0 and pointC_1 > 0:
         reference sight and check sight are 2 distinct area 
             ---> else:   # both Check C0 C1 are outside
-    """
-    #print ("check me ____",c[0], c0_in, c0_code,"-" ,c[1], c1_in, c1_code)
+    '''
     if c0_in and c1_in: 
     # check sight completely inside reference sight
         if c0_code <=1 and c1_code == 2: # mutual c0 while c1 inside
@@ -104,15 +103,17 @@ def detect_blind_sight(center, ref_sight, check_sight):
                 c_blind = True
             
     elif (c0_in and c0_code <2) or (c1_in and c1_code<2): # ether C0 or C1 is at the boundary segment
-        """
+        '''
         check if check sight fully coverages ref_sight
-        """
+        '''
         r0_in, r0_code = inside_angle_area(r[0], center, [c[0], c[1]])
-        r1_in, r0_code = inside_angle_area(r[1], center, [c[0], c[1]])
-        r_in, r_code = inside_angle_area(r[0], c[0], [center, c[1]])
+        r1_in, r1_code = inside_angle_area(r[1], center, [c[0], c[1]])
+        r0_inccc, r_code = inside_angle_area(r[0], c[0], [center, c[1]])
+        r1_inccc, r_code = inside_angle_area(r[1], c[0], [center, c[1]])
+        print ("_^^_ inside status[R]:", r0_in, r0_code, r1_in, r1_code, r0_inccc, r1_inccc)
         if r0_in and r1_in: # ref sight is inside check sight
             # check if r is closer than check sight
-            if r_in: # reference sight is closer
+            if r0_inccc and r1_inccc: # reference sight is closer
                 isR0C = line_intersection([center, r[0]],[c[0], c[1]])
                 isR1C = line_intersection([center, r[1]],[c[0], c[1]])
                 d_sight = True
@@ -131,10 +132,10 @@ def detect_blind_sight(center, ref_sight, check_sight):
             else:
                 r_blind = True
     elif c0_in and not c1_in :
-        """ 
+        ''' 
         check if R0 is inside area of [R1, C1]
         if R0 is outside then R1 is inside area of [R0, C1] for sure
-        """
+        '''
         d_sight = True
     
         r0_in, r0_code = inside_angle_area(r[0], center, [r[1], c[1]])
@@ -144,9 +145,9 @@ def detect_blind_sight(center, ref_sight, check_sight):
             divided_sight = devide_sight_ABCD(center, r[0], c[0], r[1], c[1])
 
     elif not c0_in  and c1_in: 
-        """ check if R0 is inside area of [R1, C0]
+        ''' check if R0 is inside area of [R1, C0]
             if R0 is outside then R1 is inside area of [R0, C0] for sure
-        """
+        '''
         d_sight = True
        
         r0_in, r0_code = inside_angle_area(r[0], center, [r[1], c[0]])
@@ -163,7 +164,7 @@ def detect_blind_sight(center, ref_sight, check_sight):
 
     return divided_sight, r_blind, c_blind, d_sight
     
-def remove_blind_sight(center, boundary_pts):
+def remove_blind_sight( center, boundary_pts):
     t_sight = boundary_pts
     
     i = 0 # start with index = 0
@@ -171,7 +172,7 @@ def remove_blind_sight(center, boundary_pts):
         j = i + 1
         while j < len(t_sight) :
         
-            #print ("_+_Checking ", t_sight[i], "-->", t_sight[j])
+            print ("_+_Checking ", t_sight[i], "-->", t_sight[j])
             ds, r_blind, c_blind, d_sight = detect_blind_sight(center, t_sight[i], t_sight[j])
             #print_pairs(" [Local] divide sight", ds)
             #print ("status of sight: r {0}, c {1}, d {2}".format(r_blind, c_blind, d_sight))
@@ -198,32 +199,32 @@ def remove_blind_sight(center, boundary_pts):
         #print_pairs ("true_sight loop[{0}]".format(i), boundary_pts)
     return t_sight
     
-def true_sight(x, y, boundary_pts):
+def true_sight(center, boundary_pts):
     '''
     get true sight from boundary points
     '''
     t_sight = []
     
     if len( boundary_pts ) >=2:
-        t_sight = remove_blind_sight([x, y], boundary_pts)
+        t_sight = remove_blind_sight(center, boundary_pts)
     else: # true sight is boundary_pt if there is only 1 pair
         t_sight = boundary_pts
     return t_sight
     
-def get_all_boundary_pairs(x, y, config, ox_b, oy_b):
-    """ find all boundary pairs among all obstacle line segments and circle """
+def get_all_boundary_pairs(center, robot_vision, ox_b, oy_b):
+    ''' find all boundary pairs among all obstacle line segments and circle '''
+    x,y = center
     boundary_pts = []
     for i in range(len(ox_b)-1):
         ptA = [ox_b[i], oy_b[i]]
         ptB = [ox_b[i+1], oy_b[i+1]]
         
-        is_points = intersection(x, y, config.robot_vision, [ptA, ptB])
+        is_points = intersection(x, y, robot_vision, [ptA, ptB])
         
         #print ("____+$: intersection point: ", is_points)
         if len(is_points) > 0:
-            if show_is_pts:
-                plot_line(plt, is_points, ls_is)
-            """ find boundary pair between a single line segment and circle """
+
+            ''' find boundary pair between a single line segment and circle '''
             boundary_point = []
             
             for point in is_points:
@@ -241,22 +242,20 @@ def get_all_boundary_pairs(x, y, config, ox_b, oy_b):
                         boundary_point.append(ptB)
                         
             if len (boundary_point) > 0:
-                #print ("___^%", boundary_point)
-                if show_boundary_pts:
-                    plot_line(plt, boundary_point, ls_bp)
-                boundary_pts.append( [boundary_point[0],boundary_point[1]])
+                if boundary_point[0] != boundary_point[1]: # make sure p1 != p2
+                    boundary_pts.append( [boundary_point[0],boundary_point[1]])
         
     return boundary_pts
     
-def get_true_sight(x, y, config, ox_b, oy_b):
+def get_true_sight( center, robot_vision, ox_b, oy_b):
     # get boundary pairs, [start point x,  end point x], x start < x end
-    boundary_pts = get_all_boundary_pairs( x, y, config, ox_b, oy_b)
+    boundary_pts = get_all_boundary_pairs( center, robot_vision, ox_b, oy_b)
     
     if print_boundary_pts:
         print_pairs ("boundary_pts", boundary_pts)
         
     
-    t_sight = true_sight(x, y, boundary_pts)
+    t_sight = true_sight(center, boundary_pts)
     if print_true_sight:
         print_pairs ("true_sight", t_sight)
         
@@ -295,7 +294,7 @@ def inside_local_true_sight(pt, center, radius, t_sight):
     #return not outside and (inside_open_sight or visible)
 
 def get_true_is_circle_pairs( center, radius, true_pair):
-    """ get true intersection between true sight and circle -> circle pairs """
+    ''' get true intersection between true sight and circle -> circle pairs '''
     spt0, spt1 = true_pair
     x, y = center
     # process angle
@@ -427,12 +426,16 @@ def get_open_cpairs(center, radius, goal, close_cpairs):
     
     if len(c_cpairs) == 0: # no obstacle detected
         #print ("No obstacle detected")
-        vector_cg_unit = unit_vector( np.subtract(goal, center))
+        #check if goal is at center
+        if not math.isclose(point_dist(goal, center), 0):
+            vector_cg_unit = unit_vector( np.subtract(goal, center))
+        else:
+            vector_cg_unit = [1,0]
+            
         vs = np.multiply (vector_cg_unit, radius) + center
         vs = rotate_vector_center(center, vs, math.pi/3)
 
         pairs_extend = divide_open_cpair_complement (center, [vs, vs])
-        print ("Check me 41023", center, (vs[0], vs[0]))
         for pair in pairs_extend:
             o_cpairs.append(init_open_cpair(center, radius, pair[0], pair[1]))
                   
@@ -490,9 +493,9 @@ def get_open_cpairs(center, radius, goal, close_cpairs):
     return o_cpairs
     
 def get_allpts_except(all_pairs, e_pairs):
-    """
+    '''
     get all points, which are from pairs, but except points from except pair
-    """
+    '''
     allPts = []
     for pair in all_pairs:
         allPts.append(pair[0])
@@ -561,13 +564,13 @@ def mutual_point(pts, ref_pts):
 def get_a_open_point_from_a_pair(center, radius, pair):
     midpt = midpoint(pair[0], pair[1])
     pt_is = intersection(center[0], center[1], radius, [center, midpt])
-    
+
     if inside_ls(midpt, [pt_is[0], center]):
         return pt_is[0]
     else:
         return pt_is[1]
            
-def get_open_close_sight(plt, x, y, radius, goal, t_sight):
+def get_open_close_sight(x, y, radius, goal, t_sight):
     center = [x,y]
 
     ref_cpairs = [get_true_is_circle_pairs( (x, y), radius, true_pair) for true_pair in t_sight]
@@ -583,4 +586,31 @@ def get_open_close_sight(plt, x, y, radius, goal, t_sight):
     if print_open_sight:
         print_cpairs("\n_open circle pairs", open_cpairs)
 
-    return open_cpairs, close_cpairs              
+    return open_cpairs, close_cpairs
+    
+def scan_around(center, robot_vision, ox_b, oy_b, goal):
+    '''
+    this function is to scan obstacle 
+    return true sight, closed sight, and open sight
+    '''
+    t_sight = get_true_sight(center, robot_vision, ox_b, oy_b)
+    osight, csight = get_open_close_sight(center[0], center[1], robot_vision, goal, t_sight)
+    
+    return t_sight, osight, csight
+    
+def explored_map(emap, ltsight):
+    '''
+    extend map from local true sights
+    '''
+    if len(emap) > 0:
+        new_map = np.array(ltsight)
+        if len(new_map) > 0:
+            emap = np.concatenate((emap, ltsight), axis=0)
+            emap = np.unique(emap, axis=0)
+        print ("new map", new_map)
+        #is_belongline = [belong_line(new_map, eline) for eline in emap]
+        #print ("is_belongline", is_belongline)
+    else:
+        emap = np.array(ltsight)
+    print ("___*@#", emap)
+    return emap

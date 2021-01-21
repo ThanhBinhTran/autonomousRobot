@@ -19,7 +19,7 @@ def draw_open_sight(plt, x, y, open_sight, cl="g", ls_ts="-"):
         plot_sight(plt, x, y, pair, cl, 0.3, ls_ts)
             
 def draw_vision_area(plt, x, y, radius):
-    """ draw a circle that limits the vision of robot """ 
+    ''' draw a circle that limits the vision of robot ''' 
     vision = plt.Circle((x, y), radius, color="red", linestyle  = ":", fill=False)
     plt.gcf().gca().add_artist(vision)
     
@@ -45,10 +45,8 @@ def plot_vision(plt, x, y, radius, true_sight, osight, csight):
     if show_close_sight:
         plot_pairs(plt, csight, ls_cs)
         
-def plot_explored_map(plt, traversal_path, ls_em):
-    for step in traversal_path:
-        st_sight = step[1]
-        plot_pairs(plt, st_sight, ls_em)
+def plot_explored_map(plt, explored_map, ls_em):
+        plot_pairs(plt, explored_map, ls_em)
 
 def plot_goal(plt, goal, r_goal, s_goal):
     plt.plot(goal[0], goal[1], ls_goal)

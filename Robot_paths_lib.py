@@ -2,22 +2,28 @@ import numpy as np
 from sys import float_info
 from Robot_lib import *    
 
+def ranking_score(angle, distance):
+        
+    # ranking = a/as + b/dist
+    a = 1
+    b = 1
+    angle = angle/math.pi
+    distance = distance/100
+    print ("Ranking score: angle {0}, distance {1}".format(angle, distance) )
+    if not math.isclose(angle, 0.0) and not math.isclose(distance, 0.0):
+        r_score = a/abs(angle**2) + b/(distance**2)
+    else:    
+        r_score = float_info.max
+    return r_score
+    
 def ranking(center, pt, goal):
     '''
     score the open point by its angle (from center to point and goal) and its distance (to goal)
     '''
-    
-    # ranking = a/as + b/dist
-    a = 1
-    b = 1
+
     sa =  signed_angle(goal-center, pt - center)
     dist = point_dist (goal, pt)
-    sa = sa/math.pi
-    dist = dist/100
-    if sa != 0 or dist != 0:
-        rank_score = a/abs(sa) + b/dist
-    else:    
-        rank_score = float_info.max
+    rank_score = ranking_score(sa, dist)
     return [rank_score]
     
 def pick_next(ao_gobal):
@@ -55,7 +61,7 @@ def get_possible_AH_next_points_from_point(AH_points, obstacle_list, startpoint,
     goal_apprear = False
     print ("start point .........", startpoint)
     for i in range (len(obstacle_list[0])): # get number of column
-        [a, b, c] = lineFromPoints(startpoint, obstacle_list[:,i])
+        [a, b, c] = line_from_points(startpoint, obstacle_list[:,i])
         #print ("From point ", obstacle_list[:,i])
         get_dist = all_remaining_point_same_side(a, b, c, obstacle_list)
         if get_dist:
@@ -74,7 +80,7 @@ def get_possible_AH_next_points_from_point(AH_points, obstacle_list, startpoint,
             #plt.plot((startpoint[0],obstacle_list[0][i]), (startpoint[1], obstacle_list[1][i]), "--g")
         #plt.pause(0.1)
         
-    [a, b, c] = lineFromPoints(startpoint, goal)
+    [a, b, c] = line_from_points(startpoint, goal)
     #print ("Check the goal ", obstacle_list[:,i])
     goal_apprear = all_remaining_point_same_side(a, b, c, obstacle_list)
     

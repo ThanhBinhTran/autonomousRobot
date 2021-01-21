@@ -1,8 +1,8 @@
-"""
+'''
 autonomousRobot
 This project is to simulate an autonomousRobot that try to find a way to reach a goal (target) 
 author: Binh Tran Thanh
-"""
+'''
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,9 +21,9 @@ from Robot_control_panel import *
 config = Config()
 
 def motion(x, u, dt):
-    """
+    '''
     motion model
-    """
+    '''
 
     #x[2] += u[1] * dt
     #x[0] += u[0] * math.cos(x[2]) * dt
@@ -86,13 +86,22 @@ def saw_goal(center, radius, t_sight, goal):
 def reached_goal(center, goal, config):
     return point_dist(center, goal) <= config.robot_radius
     
+def check_goal(center, goal, config, radius, t_sight):
+    s_goal = False
+    r_goal = point_dist(center, goal) <= config.robot_radius
+    if not r_goal:
+        s_goal = saw_goal(center, radius, t_sight, goal)
+    return r_goal, s_goal
+    
 def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     print(__file__ + " start!!")
 
     menu_result = menu()
     run_times = menu_result[0]
     mapname = menu_result[1]
-            
+    start_point = menu_result[2] 
+    goal = menu_result[3]
+    
     # initial state [x(m), y(m), yaw(rad), v(m/s), omega(rad/s)]
     x = np.array([start_point[0], start_point[1], math.pi / 8.0, 0.0, 0.0])
 
@@ -103,24 +112,32 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     ob = config.ob
     next_pt = np.array([0, 1])
     ao_gobal = [] # active open points [global]
-    radius = config.robot_vision
-
-    run_coint = 0
     
+    robotvision = config.robot_vision
+
+    run_count = 0
+    r_goal = True
+    s_goal = True
+    
+    emap = []
     no_way_togoal = False
-    print ("\n\n\n____Robot is reaching to goal: {0}____".format(goal))
+    
+    print ("\n____Robot is reaching to goal: {0} from start point {1}".format(goal, start_point))
     while True:
-        run_coint += 1
+        run_count += 1
         # scan around robot
-        
+        #if run_count == 2:
+        #    x[0], x[1] = 25, 35
         center = [x[0], x[1]]
         
-        print ("_____Run times:{0}, at {1}".format(run_coint, center))
+        print ("\n_____Run times:{0}, at {1}".format(run_count, center))
         
-        t_sight = get_true_sight(center[0], center[1], config, ox_b, oy_b)
-        osight, csight = get_open_close_sight(plt, center[0], center[1], radius, goal, t_sight)
-        r_goal = reached_goal(center, goal, config)
-        s_goal = saw_goal(center, radius, t_sight, goal)
+        t_sight, osight, csight = scan_around(center, robotvision, ox_b, oy_b, goal)
+
+        r_goal, s_goal = check_goal(center, goal, config, robotvision, t_sight)
+        print ("checking goal status ",r_goal, s_goal)
+        emap = explored_map(emap, t_sight)
+        
         print ("\n__open sights local:", osight)
         if not s_goal and not r_goal:
             osight = np.array(osight)
@@ -138,7 +155,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     print ("ao_local: ", ao_local)
                     ao_gobal = np.array(ao_local)
                 else:
-                    open_local_pts_status = [inside_global_true_sight(pt, radius, traversal_path) for pt in open_local_pts]
+                    open_local_pts_status = [inside_global_true_sight(pt, robotvision, traversal_path) for pt in open_local_pts]
                     print ("open_local_pts_status", open_local_pts_status)
                     print ("open_local_pts_status _ FALSE", open_local_pts[open_local_pts_status==False])
                     io_local_pts = open_local_pts[open_local_pts_status]
@@ -218,24 +235,18 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             # display goal
             plot_goal(plt, goal, r_goal, s_goal)
             
-            plot_vision(plt, center[0], center[1], radius, t_sight, osight, csight)
+            plot_vision(plt, center[0], center[1], robotvision, t_sight, osight, csight)
             
 
             if show_active_openpt:
                 plot_points(plt, ao_gobal, ls_aopt)
-                if len(ao_gobal)> 0:
-                    plt.plot(ao_gobal[:, 0], ao_gobal[:, 1], ls_aopt)
-            if show_inactive_openpt: 
-                plot_points(plt, io_points, ls_iopt)
-                if len(io_points)> 0:
-                    plt.plot(io_points[:, 0], io_points[:, 1], ls_iopt)
             
             # display next point if exist
             if picked_idx != -1:
                 plot_point(plt, next_pt, ls_nextpt)
 
             if show_explored_map:
-                plot_explored_map(plt, traversal_path, ls_em)
+                plot_explored_map(plt, emap, ls_em)
             #plot_arrow(x[0], x[1], x[2])
             plt.axis("equal") # make sure ox oy axises are same resolution open local points
             plt.grid(True)
@@ -243,7 +254,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             plt.pause(1)
         
         # Run once for debugging
-        if run_times == run_coint:
+        if run_times == run_count:
             break
         
         # check reaching goal

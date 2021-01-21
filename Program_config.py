@@ -12,8 +12,6 @@ show_open_sight = True
 show_close_sight = True
 show_ref_sight = False
 
-show_is_pts = False
-show_boundary_pts = True
 show_active_openpt = True
 show_inactive_openpt = False
 
@@ -43,20 +41,8 @@ ls_iopt = "ok"   # inactive open_point
 ls_em = "-m"     # explored_map
 
 # print out
-print_boundary_pts = False
-print_true_sight = False
-
-start_point = [51, 50]
-#start_point = [0, 0]
-(gx, gy) = np.random.randint(100, size=(2,1))
-goal = np.array([gx, gy])
-goal = np.array(
-        [np.random.randint(100),np.random.randint(100)]
-        )
-#goal = np.array(
-#        [20, 30]
-#        )
-
+print_boundary_pts = True
+print_true_sight = True
 
 # Robots configuration
 class RobotType(Enum):
@@ -64,9 +50,9 @@ class RobotType(Enum):
     rectangle = 1
 
 class Config:
-    """
+    '''
     simulation parameter class
-    """
+    '''
 
     def __init__(self):
         # robot parameter
