@@ -105,11 +105,13 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     # initial state [x(m), y(m), yaw(rad), v(m/s), omega(rad/s)]
     x = np.array([start_point[0], start_point[1], math.pi / 8.0, 0.0, 0.0])
 
-    [ox_b,oy_b] = read_map_csv(mapname)    
+    ob = read_map_csv(mapname) # obstacles
+    ob = np.array(ob)    
+    
     traversal_path = []
     config.robot_type = robot_type
     trajectory = np.array(x)
-    ob = config.ob
+
     next_pt = np.array([0, 1])
     ao_gobal = [] # active open points [global]
     
@@ -132,7 +134,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         
         print ("\n_____Run times:{0}, at {1}".format(run_count, center))
         
-        t_sight, osight, csight = scan_around(center, robotvision, ox_b, oy_b, goal)
+        t_sight, osight, csight = scan_around(center, robotvision, ob, goal)
 
         r_goal, s_goal = check_goal(center, goal, config, robotvision, t_sight)
         print ("checking goal status ",r_goal, s_goal)
@@ -214,7 +216,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                 lambda event: [exit(0) if event.key == 'escape' else None])
             
             # draw map obstacles 
-            map_display(plt, mapname, ox_b, oy_b)
+            map_display(plt, mapname, ob)
             
             # show_traversal_path
             if show_traversal_path:

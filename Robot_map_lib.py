@@ -7,7 +7,7 @@ def map_generator(plt, N):
 
     return plt.ginput(N,show_clicks=True, timeout=-1) # no timeout
     
-def map_display(plt, mapname, ox, oy):
+def map_display(plt, mapname, ob):
     # displaying the title 
     plt.title("Display map: {0}".format(mapname))
-    plt.plot(ox, oy, ls_map)
+    plt.plot(ob[0], ob[1], ls_map)

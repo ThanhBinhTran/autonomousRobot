@@ -185,12 +185,16 @@ def remove_blind_sight( center, boundary_pts):
                 #i = i - 1
                 #break
             elif c_blind: # remove check sight cause it's blind sight
-                t_sight.pop(j)
+                #t_sight.pop(j)
+                t_sight= np.delete(t_sight, j, axis=0)
                 j = j - 1
             elif r_blind: # replace ref sight by check sight cause it's blind sight
-                get_check = t_sight.pop(j)
+                #get_check = t_sight.pop(j)
                 # update i so need to recheck
-                t_sight[i] = get_check
+                #t_sight[i] = get_check
+                t_sight[i] = t_sight[j]
+                t_sight= np.delete(t_sight, j, axis=0)
+                #t_sight= np.delete(t_sight, j, axis=0)
                 i = i-1
                 break
  
@@ -211,17 +215,19 @@ def true_sight(center, boundary_pts):
         t_sight = boundary_pts
     return t_sight
     
-def get_all_boundary_pairs(center, robot_vision, ox_b, oy_b):
+def get_all_boundary_pairs(center, robot_vision, ob):
     ''' find all boundary pairs among all obstacle line segments and circle '''
     x,y = center
     boundary_pts = []
-    for i in range(len(ox_b)-1):
-        ptA = [ox_b[i], oy_b[i]]
-        ptB = [ox_b[i+1], oy_b[i+1]]
+    print ("____+##$", len(ob[0]))
+    for i in range(len(ob[0])-1):
+        
+        ptA = ob[:,i]#[ox_b[i], oy_b[i]]
+        ptB = ob[:,i+1]#[ox_b[i+1], oy_b[i+1]]
         
         is_points = intersection(x, y, robot_vision, [ptA, ptB])
         
-        #print ("____+$: intersection point: ", is_points)
+        print ("____+$: intersection point: ", is_points,ptA, ptB)
         if len(is_points) > 0:
 
             ''' find boundary pair between a single line segment and circle '''
@@ -242,15 +248,18 @@ def get_all_boundary_pairs(center, robot_vision, ox_b, oy_b):
                         boundary_point.append(ptB)
                         
             if len (boundary_point) > 0:
-                if boundary_point[0] != boundary_point[1]: # make sure p1 != p2
+                
+                pd = point_dist(boundary_point[0], boundary_point[1])
+                print ("___834", pd)
+                if not math.isclose(pd, 0): # make sure p1 != p2
                     boundary_pts.append( [boundary_point[0],boundary_point[1]])
         
     return boundary_pts
     
-def get_true_sight( center, robot_vision, ox_b, oy_b):
+def get_true_sight( center, robot_vision, ob):
     # get boundary pairs, [start point x,  end point x], x start < x end
-    boundary_pts = get_all_boundary_pairs( center, robot_vision, ox_b, oy_b)
-    
+    boundary_pts = get_all_boundary_pairs( center, robot_vision, ob)
+    #boundary_pts = np.array(boundary_pts)
     if print_boundary_pts:
         print_pairs ("boundary_pts", boundary_pts)
         
@@ -588,12 +597,12 @@ def get_open_close_sight(x, y, radius, goal, t_sight):
 
     return open_cpairs, close_cpairs
     
-def scan_around(center, robot_vision, ox_b, oy_b, goal):
+def scan_around(center, robot_vision, ob, goal):
     '''
     this function is to scan obstacle 
     return true sight, closed sight, and open sight
     '''
-    t_sight = get_true_sight(center, robot_vision, ox_b, oy_b)
+    t_sight = get_true_sight(center, robot_vision, ob)
     osight, csight = get_open_close_sight(center[0], center[1], robot_vision, goal, t_sight)
     
     return t_sight, osight, csight

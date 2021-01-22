@@ -96,7 +96,7 @@ class Config:
         #                    [13.0, 13.0]
         #                    ])
         #
-        self.ob = np.random.randint(100, size=(1,2))
+        #self.ob = np.random.randint(100, size=(1,2))
     @property
     def robot_type(self):
         return self._robot_type
