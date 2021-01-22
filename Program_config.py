@@ -41,8 +41,8 @@ ls_iopt = "ok"   # inactive open_point
 ls_em = "-m"     # explored_map
 
 # print out
-print_boundary_pts = True
-print_true_sight = True
+print_boundary_pairs = True
+print_true_pairs = True
 
 # Robots configuration
 class RobotType(Enum):

@@ -6,6 +6,7 @@ author: Binh Tran Thanh
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+import tripy
 
 from Robot_lib import *
 from Robot_paths_lib import *
@@ -104,21 +105,27 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
 
     ob = read_map_csv(mapname) 
     ob = np.array(ob)
-    
-    
     print ("OB", ob)
-    print ("OB1", ob[:,2])
-    print ("OB2", ob[0])
+    print ("OB1", ob[:,0])
+    print ("OB2", ob[:,1])
+    
+    # Polygon can be clockwise or counter-clockwise
+    polygon = ob.reshape(-1,2)
+    print ("polygon", ob)
+    triangles = tripy.earclip(polygon)
+    print ("triangles", triangles)
+
           
           
     # draw map obstacles 
     map_display(plt, mapname, ob)
     #start point
-    plot_point(plt, ob[:,start], ls="*m")
+    plot_point(plt, ob[start], ls="*m")
     #goal
-    plot_point(plt, ob[:,goal], ls="*r")
+    plot_point(plt, ob[goal], ls="*r")
     
-    plt.plot((ob[0][0],ob[0][-1]), (ob[1][0],ob[1][-1]), "-b")
+    plt.plot((ob[0][0],ob[-1][0]), (ob[0][1],ob[-1][1]), "-b")
+    
     #plot_arrow(x[0], x[1], x[2])
     plt.axis("equal") # make sure ox oy axises are same resolution open local points
      

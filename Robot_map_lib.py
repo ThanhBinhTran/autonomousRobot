@@ -10,4 +10,4 @@ def map_generator(plt, N):
 def map_display(plt, mapname, ob):
     # displaying the title 
     plt.title("Display map: {0}".format(mapname))
-    plt.plot(ob[0], ob[1], ls_map)
+    plt.plot(ob[:,0], ob[:,1], ls_map)

@@ -10,8 +10,7 @@ def write_map_csv(file_name, f_data, data_header):
 
 def read_map_csv(mapname):
     first_line = True
-    ox = []
-    oy = []
+    ob=[]
     
     with open(mapname, newline='') as f:
         reader = csv.reader(f, delimiter=',', quoting=csv.QUOTE_NONE)
@@ -19,6 +18,5 @@ def read_map_csv(mapname):
             if first_line:
                 first_line = False
                 continue
-            ox.append(int(row[0]))
-            oy.append(int(row[1]))
-    return [ox, oy]
+            ob.append([int(row[0]),int(row[1])])
+    return ob

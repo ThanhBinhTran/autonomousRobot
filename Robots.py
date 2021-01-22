@@ -134,11 +134,11 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         
         print ("\n_____Run times:{0}, at {1}".format(run_count, center))
         
-        t_sight, osight, csight = scan_around(center, robotvision, ob, goal)
+        tpairs, osight, csight = scan_around(center, robotvision, ob, goal)
 
-        r_goal, s_goal = check_goal(center, goal, config, robotvision, t_sight)
+        r_goal, s_goal = check_goal(center, goal, config, robotvision, tpairs)
         print ("checking goal status ",r_goal, s_goal)
-        emap = explored_map(emap, t_sight)
+        emap = explored_map(emap, tpairs)
         
         print ("\n__open sights local:", osight)
         if not s_goal and not r_goal:
@@ -176,7 +176,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                 
             print ("ao_gobal ", ao_gobal)
                 
-            traversal_path.append([center, t_sight, osight, csight])
+            traversal_path.append([center, tpairs, osight, csight])
             
             picked_idx, next_pt = pick_next(ao_gobal)
             
@@ -237,7 +237,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             # display goal
             plot_goal(plt, goal, r_goal, s_goal)
             
-            plot_vision(plt, center[0], center[1], robotvision, t_sight, osight, csight)
+            plot_vision(plt, center[0], center[1], robotvision, tpairs, osight, csight)
             
 
             if show_active_openpt:
