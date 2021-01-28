@@ -12,7 +12,7 @@ def menu():
     #mapname = "_river.csv" 
     mapname = "_map.csv"
     #mapname = "_MuchMoreFun.csv"
-    start_point = [0, 0]
+    start = [0, 0]
 
     #goal = np.array(np.random.randint(100, size=(1,2)))
     goal = np.array( [70, 70] )
@@ -42,7 +42,7 @@ def menu():
         elif opt in ("-s", "--start"):
             try:
                 pt = arg.split('_')
-                start_point = np.array( [float(pt[0]), float(pt[1])] )
+                start = np.array( [float(pt[0]), float(pt[1])] )
             except ValueError:
                 print('invalid start point')
                 sys.exit(2)
@@ -56,5 +56,5 @@ def menu():
             except ValueError:
                 print('invalid goal point')
                 sys.exit(2)
-    
-    return runtimes, mapname, start_point, goal
+    print ("Start {0}, Goal {1}, map {2}, runtimes {3}".format(start, goal, mapname, runtimes))
+    return runtimes, mapname, start, goal
