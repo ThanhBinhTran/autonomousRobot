@@ -6,23 +6,24 @@ rel_tol = 0.0000001
 
 show_animation = True
 
-show_traversal_path = False
+show_traversal_path = True
 show_true_sight = True
 show_open_sight = True
-show_close_sight = True
+show_close_sight = False
 show_ref_sight = False
-
+show_trajectory = False
 show_active_openpt = True
 show_inactive_openpt = False
-
-show_explored_map = True
-
+show_next_point = True
+show_explored_map = False
+show_goal = True
 show_text_goal = True
+show_circle_range = False
 
 print_close_sight = False
 print_open_sight = False
 print_ref_sight = False
-print_traversal_path = False
+print_traversal_path = True
 # line styl
 
 ls_is = ":.c"    # intersection
@@ -56,7 +57,34 @@ class Config:
 
     def __init__(self):
         # robot parameter
-        self.max_speed = 10.0  # [m/s]
+        self.max_speed = 100.0  # [m/s]
+        self.min_speed = -100.0  # [m/s]
+        self.max_yaw_rate = 40.0 * math.pi / 180.0  # [rad/s]
+        self.max_accel = 0.2  # [m/ss]
+        self.max_delta_yaw_rate = 40.0 * math.pi / 180.0  # [rad/ss]
+        self.v_resolution = 0.01  # [m/s]
+        self.yaw_rate_resolution = 0.1 * math.pi / 180.0  # [rad/s]
+        self.dt = 0.1  # [s] Time tick for motion prediction
+        self.predict_time = 0.1  # [s]
+        self.to_goal_cost_gain = 0.15
+        self.speed_cost_gain = 1.0
+        self.obstacle_cost_gain = 1.0
+        self.robot_stuck_flag_cons = 0.001  # constant to prevent robot stucked
+        self.robot_type = RobotType.circle
+        self.robot_vision = 20 # the range of input vision
+        # if robot_type == RobotType.circle
+        # Also used to check if goal is reached in both types
+        self.robot_radius = 1.0  # [m] for collision check
+
+        # if robot_type == RobotType.rectangle
+        #self.robot_width = 0.5  # [m] for collision check
+        self.robot_width = 0.5  # [m] for collision check
+        #self.robot_length = 1.2  # [m] for collision check
+        self.robot_length = 1.2  # [m] for collision check
+        # obstacles [x(m) y(m), ....]
+        #self.ob = np.array([[-1, -1],
+        
+        self.max_speed = 1.0  # [m/s]
         self.min_speed = -0.5  # [m/s]
         self.max_yaw_rate = 40.0 * math.pi / 180.0  # [rad/s]
         self.max_accel = 0.2  # [m/ss]
@@ -70,7 +98,7 @@ class Config:
         self.obstacle_cost_gain = 1.0
         self.robot_stuck_flag_cons = 0.001  # constant to prevent robot stucked
         self.robot_type = RobotType.circle
-        self.robot_vision = 10 # the range of input vision
+
         # if robot_type == RobotType.circle
         # Also used to check if goal is reached in both types
         self.robot_radius = 1.0  # [m] for collision check
@@ -78,8 +106,6 @@ class Config:
         # if robot_type == RobotType.rectangle
         self.robot_width = 0.5  # [m] for collision check
         self.robot_length = 1.2  # [m] for collision check
-        # obstacles [x(m) y(m), ....]
-        #self.ob = np.array([[-1, -1],
         #                    [0, 2],
         #                    [4.0, 2.0],
         #                    [5.0, 4.0],

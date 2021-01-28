@@ -39,7 +39,7 @@ def detect_blind_sight(center, ref_sight, check_sight):
     # get inside status of c1, c0
     c0_in, c0_code = inside_angle_area(c[0], center, [r[0], r[1]])
     c1_in, c1_code = inside_angle_area(c[1], center, [r[0], r[1]])
-    print ("_^^_ inside status:", c0_in, c0_code, c1_in, c1_code)
+    #print ("_^^_ inside status:", c0_in, c0_code, c1_in, c1_code)
     ''' 
         reference sight fully coverages check sight
             -> if case
@@ -174,17 +174,17 @@ def remove_blind_pairs( center, b_pairs):
         j = i + 1
         while j < len(t_pairs) :
         
-            print ("_+_Checking {0}{1} ".format(t_pairs[i][0],t_pairs[i][1]), "--> {0}{1}".format(t_pairs[j][0], t_pairs[j][1]) )
+            #print ("_+_Checking {0}{1} ".format(t_pairs[i][0],t_pairs[i][1]), "--> {0}{1}".format(t_pairs[j][0], t_pairs[j][1]) )
             ds, r_blind, c_blind, d_sight = detect_blind_sight(center, t_pairs[i], t_pairs[j])
-            print_pairs(" [Local] divide sight", ds)
-            print ("status of sight: r {0}, c {1}, d {2}".format(r_blind, c_blind, d_sight))
+            #print_pairs(" [Local] divide sight", ds)
+            #print ("status of sight: r {0}, c {1}, d {2}".format(r_blind, c_blind, d_sight))
             if d_sight:  # separate into 2 new sight
-                print ("#%@ ", t_pairs[i], ds[0])
+                #print ("#%@ ", t_pairs[i], ds[0])
                 t_pairs[i] = np.array(ds[0])
                 t_pairs[j] = np.array(ds[1])
                 
-                if len(ds) == 3:
-                    print ("___(#^ len = 3", ds)
+                #if len(ds) == 3:
+                    #print ("___(#^ len = 3", ds)
                     #t_pairs.append(ds[2])
                 #i = i - 1
                 #break
@@ -607,6 +607,73 @@ def scan_around(center, robot_vision, ob, goal):
     
     return t_sight, osight, csight
     
+def get_explorered_sight(center, goal, robotvision, tpairs, osight):
+    '''     
+    extend map from local true sights
+    '''
+    map = []
+    temp_tpairs = np.array(tpairs)
+    temp_osight = np.array(osight)
+    print ("temp_tpairs", temp_tpairs)
+    print ("temp_osight", temp_osight)
+
+    angle_tpairs = [math.degrees(unsigned_angle_xAxis(point)) for point in temp_tpairs[:,0]]
+    angle_osight = [math.degrees(unsigned_angle_xAxis(point)) for point in temp_osight[:,0]]
+    
+    print ("angle_tpairs", angle_tpairs)
+    print ("angle_osight", angle_osight)
+    
+    angle_tpairs_idx_sort = np.argsort(angle_tpairs)
+    angle_osight_idx_sort = np.argsort(angle_osight)
+    print ("angle_tpairs_idx_sort", angle_tpairs_idx_sort)
+    print ("angle_osight_idx_sort", angle_osight_idx_sort)
+    i = 0
+    j = 0
+    lasti = False
+    lastj = False
+    idx_i = 0
+    idx_j = 0
+    while i < len(angle_tpairs):
+        while j < len(angle_osight):
+            pre_i = idx_i
+            pre_j = idx_j
+            idx_i = angle_tpairs_idx_sort[i]
+            idx_j = angle_osight_idx_sort[j]
+            print ("idx_i idx_j", idx_i, idx_j, temp_tpairs[idx_i], osight[idx_j][0:2])
+            if angle_tpairs[idx_i] < angle_osight[idx_j]:
+                if lastj:
+                    map.append([osight[pre_j][1],temp_tpairs[idx_i][0]])
+                map.append(temp_tpairs[idx_i])
+
+                lasti = True
+                lastj = False
+                break
+            else:
+                if lasti:
+                    map.append([temp_tpairs[idx_i][1], osight[pre_j][1]])                
+                map.append([osight[idx_j][0],osight[idx_j][2]])
+                map.append([osight[idx_j][2],osight[idx_j][1]])
+                lasti = True
+                lastj = False
+            j += 1
+        i += 1
+    if i != len(angle_tpairs):  # i remain
+        while i < len(angle_tpairs):
+            idx_i = angle_tpairs_idx_sort[i]
+            map.append(temp_tpairs[idx_i])
+        i += 1
+    else:
+        while j < len(angle_osight):
+            idx_j = angle_osight_idx_sort[j]
+            map.append([osight[idx_j][0],osight[idx_j][2]])
+            map.append([osight[idx_j][2],osight[idx_j][1]])
+            j += 1
+    map = np.array(map)
+    #print ("__________map", map)
+    
+    return map
+    
+    
 def explored_map(emap, ltsight):
     '''
     extend map from local true sights
@@ -621,5 +688,4 @@ def explored_map(emap, ltsight):
         #print ("is_belongline", is_belongline)
     else:
         emap = np.array(ltsight)
-    print ("___*@#", emap)
     return emap

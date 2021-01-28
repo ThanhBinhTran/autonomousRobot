@@ -22,6 +22,11 @@ def draw_vision_area(plt, x, y, radius):
     ''' draw a circle that limits the vision of robot ''' 
     vision = plt.Circle((x, y), radius, color="red", linestyle  = ":", fill=False)
     plt.gcf().gca().add_artist(vision)
+
+def draw_vision_area(plt, x, y, radius, ls = ":"):
+    ''' draw a circle that limits the vision of robot ''' 
+    vision = plt.Circle((x, y), radius, color="red", linestyle  = ls, fill=False)
+    plt.gcf().gca().add_artist(vision)
     
 def draw_arc_area(plt, x, y, radius):
 
@@ -33,7 +38,8 @@ def draw_arc_area(plt, x, y, radius):
     plt.axes().add_patch(aarc)
        
 def plot_vision(plt, x, y, radius, true_sight, osight, csight):
-    draw_vision_area(plt, x, y, radius)
+    if show_circle_range:
+        draw_vision_area(plt, x, y, radius)
     #draw_arc_area(plt, x, y, radius)
     
     if show_true_sight:
@@ -61,6 +67,10 @@ def plot_goal(plt, goal, r_goal, s_goal):
 def plot_point(plt, point, ls="xr"):
     plt.plot(point[0], point[1], ls)
 
+def plot_point_text(plt, point, ls, text):
+    plt.plot(point[0], point[1], ls)
+    plt.text(point[0], point[1] + 2, text)
+   
 def plot_line(plt, line, ls="-xr"):
     plt.plot((line[0][0],line[1][0]), (line[0][1],line[1][1]), ls)
     
@@ -75,3 +85,24 @@ def plot_pairs(plt, pairs, ls="-xr"):
     
 def plot_points(plt, pts, ls="xr"):
     plt.plot(pts[:, 0], pts[:, 1], ls)
+    
+def plot_edge(plt, center_pts, edges):
+    for pairs in edges :
+        plot_line(plt, [center_pts[pairs[0]],center_pts[pairs[1]]], ls="-k")
+ 
+def plot_triangles(plt,triangles, ls = ":c"):
+    ''' 
+    plot list of triangles
+    '''
+    for triangle in triangles:
+        plot_line(plt, [triangle[0],triangle[1]], ls)
+        plot_line(plt, [triangle[1],triangle[2]], ls)
+        plot_line(plt, [triangle[2],triangle[0]], ls)
+
+def plot_center(plt, center_pts): 
+    '''
+    plot a center of triangles
+    '''
+    for i in range(len(center_pts)):
+        plt.plot(center_pts[i][0], center_pts[i][1], ".b" )
+        plt.text(center_pts[i][0], center_pts[i][1], "{0}".format(i) )  

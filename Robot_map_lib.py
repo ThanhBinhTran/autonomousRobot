@@ -1,5 +1,8 @@
 win_size = 100
 from Program_config import ls_map
+from Robot_lib import *
+import numpy as np
+
 def map_generator(plt, N):
     # displaying the title 
     plt.title("click on plot to generate {0} points of map".format(N))
@@ -10,4 +13,22 @@ def map_generator(plt, N):
 def map_display(plt, mapname, ob):
     # displaying the title 
     plt.title("Display map: {0}".format(mapname))
-    plt.plot(ob[:,0], ob[:,1], ls_map)
+    x = [point[0] for point in ob]
+    y = [point[1] for point in ob]
+    plt.plot(x, y, ls_map)
+    #plt.plot(ob[:,0], ob[:,1], )
+
+def map_serialize(ob_wall, config):
+    # divide line into bunch of point 
+    map_pts = []
+    for i in range(len(ob_wall)-1):
+        ptS = ob_wall[i]
+        ptE = ob_wall[i+1]
+        lenSE = point_dist(ptS, ptE)
+        MINSIZE = max(config.robot_length, config.robot_width)
+        numparts = int (lenSE/(MINSIZE*2) )
+        vecSE = np.subtract(ptE, ptS)/numparts
+        for j in range(numparts):
+            ptj = np.add(ptS, np.multiply(vecSE,j) )
+            map_pts.append(ptj)
+    return map_pts

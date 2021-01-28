@@ -1,7 +1,7 @@
 from Robot_lib import *
 import matplotlib.pyplot as plt
 from scipy.spatial.transform import Rotation as R
-
+from point import *
 vectors_t = np.array([
                [ 1, 0],
                [ 1, 1],
