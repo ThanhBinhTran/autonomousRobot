@@ -99,14 +99,14 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     menu_result = menu()
     run_times = menu_result[0]
     mapname = menu_result[1]
-    start_point = menu_result[2] 
+    start = menu_result[2] 
     goal = menu_result[3]
     
     # initial state [x(m), y(m), yaw(rad), v(m/s), omega(rad/s)]
-    x = np.array([start_point[0], start_point[1], math.pi / 8.0, 0.0, 0.0])
+    x = np.array([start[0], start[1], math.pi / 8.0, 0.0, 0.0])
 
     ob = read_map_csv(mapname) # obstacles
-    ob = np.array(ob)    
+    #ob = np.array(ob)    
     
     traversal_path = []
     config.robot_type = robot_type
@@ -123,8 +123,8 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     
     emap = []
     no_way_togoal = False
-    
-    print ("\n____Robot is reaching to goal: {0} from start point {1}".format(goal, start_point))
+    binh_test = []
+    print ("\n____Robot is reaching to goal: {0} from start {1}".format(goal, start))
     while True:
         run_count += 1
         # scan around robot
@@ -140,6 +140,13 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         print ("checking goal status ",r_goal, s_goal)
         emap = explored_map(emap, tpairs)
         
+        
+        #trisight =  triangulate_sight(tpairs,osight,center)
+        #binh_tt = get_explorered_sight(center, goal, robotvision, tpairs, osight)
+        #if len(binh_test) == 0:
+        #    binh_test = binh_tt
+        #else:
+        #    binh_test= np.concatenate((binh_test,binh_tt), axis = 0)
         print ("\n__open sights local:", osight)
         if not s_goal and not r_goal:
             osight = np.array(osight)
@@ -217,7 +224,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             
             # draw map obstacles 
             map_display(plt, mapname, ob)
-            
+
             # show_traversal_path
             if show_traversal_path:
                 for step in traversal_path:
@@ -226,7 +233,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     sosight = step[2]
                     scsight = step[3]
                     #print (sts_circle)
-                    plot_vision(plt, scenter[0], scenter[1], radius, st_sight, sosight, sosight)
+                    plot_vision(plt, scenter[0], scenter[1], robotvision, st_sight, sosight, sosight)
                     
             #plt.plot(predicted_trajectory[:, 0], predicted_trajectory[:, 1], "-g")
             plt.plot(center[0], center[1], "xr")
@@ -235,7 +242,8 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             plot_robot(center[0], center[1], x[2], config)
             
             # display goal
-            plot_goal(plt, goal, r_goal, s_goal)
+            if show_goal:
+                plot_goal(plt, goal, r_goal, s_goal)
             
             plot_vision(plt, center[0], center[1], robotvision, tpairs, osight, csight)
             
@@ -244,11 +252,14 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                 plot_points(plt, ao_gobal, ls_aopt)
             
             # display next point if exist
-            if picked_idx != -1:
-                plot_point(plt, next_pt, ls_nextpt)
+            if show_next_point:
+                if picked_idx != -1:
+                    plot_point(plt, next_pt, ls_nextpt)
 
             if show_explored_map:
-                plot_explored_map(plt, emap, ls_em)
+                print ("BINH test", binh_test)
+                plot_explored_map(plt, binh_test, ls_em)
+                #plot_explored_map(plt, emap, ls_em)
             #plot_arrow(x[0], x[1], x[2])
             plt.axis("equal") # make sure ox oy axises are same resolution open local points
             plt.grid(True)
@@ -267,7 +278,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             break
             
     print("Done")
-    if show_animation:
+    if show_animation and show_trajectory:
         plt.plot(trajectory[:, 0], trajectory[:, 1], "-r")
         plt.pause(0.0001)
 
