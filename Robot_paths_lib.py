@@ -1,6 +1,7 @@
 import numpy as np
 from sys import float_info
 from Robot_lib import *    
+from collections import defaultdict 
 
 def ranking_score(angle, distance):
         
@@ -9,7 +10,7 @@ def ranking_score(angle, distance):
     b = 1
     angle = angle/math.pi
     distance = distance/100
-    print ("Ranking score: angle {0}, distance {1}".format(angle, distance) )
+    #print ("Ranking score: angle {0}, distance {1}".format(angle, distance) )
     if not math.isclose(angle, 0.0) and not math.isclose(distance, 0.0):
         r_score = a/abs(angle**2) + b/(distance**2)
     else:    
@@ -35,10 +36,10 @@ def pick_next(ao_gobal):
     next_pt = []
     if len(ao_gobal) > 0:
         ranks = ao_gobal[:,2]
-        print ("global open points: ", ao_gobal[:,0:2])
-        print ("global ranks: ",ranks)
-        print ("pick index ", np.argmax(ranks))
-        print ("picked rank ", np.amax(ranks))
+        #print ("global open points: ", ao_gobal[:,0:2])
+        #print ("global ranks: ",ranks)
+        #print ("pick index ", np.argmax(ranks))
+        #print ("picked rank ", np.amax(ranks))
         pick_idx = np.argmax(ranks)
         next_pt = ao_gobal[pick_idx,0:2]
         
@@ -96,3 +97,81 @@ def find_AH_paths(ox_b, oy_b, startpoint, goal):
         AH_path_temp = get_possible_AH_next_points_from_point(AH_points, obstacle_list, start_point, goal)
         AH_paths.append(AH_path_temp)
     return AH_paths
+    
+# Function to build the graph 
+def build_graph(edges): 
+    edges 
+    graph = defaultdict(list) 
+      
+    # Loop to iterate over every  
+    # edge of the graph 
+    for edge in edges: 
+        a, b = edge[0], edge[1] 
+          
+        # Creating the graph  
+        # as adjacency list 
+        graph[a].append(b) 
+        graph[b].append(a) 
+    return graph 
+    
+# Function to initialize a graph
+def graph_intiailze():
+    return defaultdict(list) 
+
+# Function to insert edges into graph
+def graph_insert(graph, pnode, leafs): 
+    #print ("__pnode:", pnode)
+    #print ("__leafs:", leafs)
+    if len(leafs) > 0:
+        for leaf in leafs: 
+            graph[tuple(pnode)].append(tuple(leaf)) 
+            graph[tuple(leaf)].append(tuple(pnode)) 
+
+# Function to find the shortest 
+# path between two nodes of a graph 
+def BFS_SP(graph, start, goal): 
+    print ("Start:", start)
+    print ("Goal:", goal)
+    #print ("graph", graph)
+    explored = []
+      
+    # Queue for traversing the  
+    # graph in the BFS 
+    queue = [[start]] 
+      
+    # If the desired node is  
+    # reached 
+    if start == goal: 
+        print("Same Node") 
+        return start
+      
+    # Loop to traverse the graph  
+    # with the help of the queue 
+    while queue: 
+        path = queue.pop(0) 
+        node = path[-1] 
+          
+        # Condition to check if the 
+        # current node is not visited 
+        if node not in explored: 
+            neighbours = graph[node] 
+            #print ("_NODE:", node)
+            # Loop to iterate over the  
+            # neighbours of the node 
+            for neighbour in neighbours: 
+                #print ("___neighbour:", neighbour)
+                new_path = list(path) 
+                new_path.append(neighbour) 
+                queue.append(new_path) 
+                  
+                # Condition to check if the  
+                # neighbour node is the goal 
+                if neighbour == goal: 
+                    print("Shortest path = ", new_path) 
+                    return new_path
+            explored.append(node) 
+  
+    # Condition when the nodes  
+    # are not connected 
+    print("So sorry, but a connecting path doesn't exist :(") 
+    return []

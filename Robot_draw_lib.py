@@ -51,11 +51,8 @@ def plot_vision(plt, x, y, radius, true_sight, osight, csight):
     if show_close_sight:
         plot_pairs(plt, csight, ls_cs)
         
-def plot_explored_map(plt, explored_map, ls_em):
-        plot_pairs(plt, explored_map, ls_em)
-
 def plot_goal(plt, goal, r_goal, s_goal):
-    plt.plot(goal[0], goal[1], ls_goal)
+    plot_point(plt, goal, ls_goal)
     if show_text_goal:
         if r_goal:
             plt.text(goal[0], goal[1] + 2, "reached goal!")
@@ -67,29 +64,38 @@ def plot_goal(plt, goal, r_goal, s_goal):
 def plot_point(plt, point, ls="xr"):
     plt.plot(point[0], point[1], ls)
 
+def plot_points(plt, pts, ls="xr"):
+    plt.plot(pts[:, 0], pts[:, 1], ls)
+
 def plot_point_text(plt, point, ls, text):
-    plt.plot(point[0], point[1], ls)
+    plot_point(plt, point, ls)
     plt.text(point[0], point[1] + 2, text)
    
 def plot_line(plt, line, ls="-xr"):
     plt.plot((line[0][0],line[1][0]), (line[0][1],line[1][1]), ls)
-    
+       
 def plot_lines(plt, lines, ls="-xr"):
     xs = [i[0] for i in lines]
     ys = [i[1] for i in lines]
     plt.plot(xs, ys, ls)
 
+def plot_paths(plt, paths, ls="-b"):
+    for path in paths:
+        plot_lines(plt, path, ls)
+        
 def plot_pairs(plt, pairs, ls="-xr"):
     for pair in pairs:
         plot_line(plt, pair, ls)
-    
-def plot_points(plt, pts, ls="xr"):
-    plt.plot(pts[:, 0], pts[:, 1], ls)
-    
+        
 def plot_edge(plt, center_pts, edges):
     for pairs in edges :
         plot_line(plt, [center_pts[pairs[0]],center_pts[pairs[1]]], ls="-k")
- 
+
+def plot_visible_graph(plt, visible_graph, ls_vg):
+    for pnode in visible_graph:
+        for verteces in visible_graph[pnode]:
+            plot_line(plt, [pnode, verteces], ls_vg)
+
 def plot_triangles(plt,triangles, ls = ":c"):
     ''' 
     plot list of triangles
@@ -104,5 +110,4 @@ def plot_center(plt, center_pts):
     plot a center of triangles
     '''
     for i in range(len(center_pts)):
-        plt.plot(center_pts[i][0], center_pts[i][1], ".b" )
-        plt.text(center_pts[i][0], center_pts[i][1], "{0}".format(i) )  
+        plot_point_text(plt, center_pts[i], ".b", "{0}".format(i))

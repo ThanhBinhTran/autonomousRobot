@@ -5,25 +5,26 @@ from enum import Enum
 rel_tol = 0.0000001
 
 show_animation = True
+show_trajectory = True
 
-show_traversal_path = True
+show_traversal_sight = True
 show_true_sight = True
 show_open_sight = True
 show_close_sight = False
 show_ref_sight = False
-show_trajectory = False
+
 show_active_openpt = True
 show_inactive_openpt = False
 show_next_point = True
 show_explored_map = False
-show_goal = True
+
 show_text_goal = True
 show_circle_range = False
 
-print_close_sight = False
-print_open_sight = False
-print_ref_sight = False
-print_traversal_path = True
+print_close_sight = True
+print_open_sight = True
+print_ref_sight = True
+print_traversal_sight = False
 # line styl
 
 ls_is = ":.c"    # intersection
@@ -37,13 +38,13 @@ ls_cs = ":m"     # close sight
 ls_os = "c"      # open sight
 ls_goal = "*r"   # goal
 ls_nextpt = "xr" # next points
-ls_aopt = "ob"   # active open points
+ls_aopt = ".b"   # active open points
 ls_iopt = "ok"   # inactive open_point
 ls_em = "-m"     # explored_map
-
+ls_vg = ":k"     # visible graph
 # print out
-print_boundary_pairs = True
-print_true_pairs = True
+print_boundary_pairs = False
+print_true_pairs = False
 
 # Robots configuration
 class RobotType(Enum):

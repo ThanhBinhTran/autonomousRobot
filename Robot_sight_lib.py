@@ -112,7 +112,7 @@ def detect_blind_sight(center, ref_sight, check_sight):
         r1_in, r1_code = inside_angle_area(r[1], center, [c[0], c[1]])
         r0_inccc, r_code = inside_angle_area(r[0], c[0], [center, c[1]])
         r1_inccc, r_code = inside_angle_area(r[1], c[0], [center, c[1]])
-        print ("_^^_ inside status[R]:", r0_in, r0_code, r1_in, r1_code, r0_inccc, r1_inccc)
+        #print ("_^^_ inside status[R]:", r0_in, r0_code, r1_in, r1_code, r0_inccc, r1_inccc)
         if r0_in and r1_in: # ref sight is inside check sight
             # check if r is closer than check sight
             if r0_inccc and r1_inccc: # reference sight is closer
@@ -271,7 +271,7 @@ def get_true_pairs( center, robot_vision, ob):
     return t_pairs
     
 def inside_global_true_sight(pt, radius, traversal_path):
-    result = [inside_local_true_sight(pt, x, radius, tsight) for x,tsight, nuse1, nuse2 in traversal_path]
+    result = [inside_local_true_sight(pt, x, radius, tsight) for x,tsight, _ in traversal_path]
     ret_result = np.sum(result) > 0
     #print ("inside global sight result: ", result, ", return :", ret_result)
     return ret_result
@@ -672,9 +672,6 @@ def get_explorered_sight(center, goal, robotvision, tpairs, osight):
     #print ("__________map", map)
     
     return map
-    
-    
-def explored_map(emap, ltsight):
     '''
     extend map from local true sights
     '''
@@ -683,7 +680,7 @@ def explored_map(emap, ltsight):
         if len(new_map) > 0:
             emap = np.concatenate((emap, ltsight), axis=0)
             emap = np.unique(emap, axis=0)
-        print ("new map", new_map)
+        #print ("new map", new_map)
         #is_belongline = [belong_line(new_map, eline) for eline in emap]
         #print ("is_belongline", is_belongline)
     else:
