@@ -193,7 +193,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                
         if print_traversal_sight:
             print ("traversal_sight:", traversal_sight)
-            
+         
         if show_animation:
 
             # clear plot
@@ -214,7 +214,9 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     st_sight = step[1]
                     sosight = step[2]
                     plot_vision(plt, scenter[0], scenter[1], robotvision, st_sight, sosight, sosight)
-                    
+            
+            shortestpath(plt, traversal_sight)
+            
             plot_point(plt, center, "Hb")
             plot_goal(plt, goal, r_goal, s_goal)            
             

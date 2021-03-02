@@ -3,6 +3,8 @@ from sys import float_info
 from Robot_lib import *    
 from collections import defaultdict 
 
+from Robot_draw_lib import *
+
 def ranking_score(angle, distance):
         
     # ranking = a/as + b/dist
@@ -175,3 +177,41 @@ def BFS_SP(graph, start, goal):
     # are not connected 
     print("So sorry, but a connecting path doesn't exist :(") 
     return []
+
+def shortestpath(plt, traversal_sight):
+    across_ls = []
+    if len(traversal_sight) > 2:
+        for i in range(1, len( traversal_sight) -1):
+            prenode = traversal_sight[i-1][0]
+            postnode = traversal_sight[i+1][0]
+            cennode = traversal_sight[i][0]
+            tsight = traversal_sight[i][1]
+            local_ls = []
+            base_edge = np.subtract(cennode, prenode)
+            for pair in tsight:
+                in_status, _ = inside_angle_area(pair[0], cennode, (prenode, postnode))
+                if in_status:
+                    buff_ls0 = np.subtract(cennode, pair[0])
+                    buff_ls1 = np.subtract(cennode, pair[1])
+                    angle0 = abs(signed_angle(base_edge, buff_ls0))
+                    angle1 = abs(signed_angle(base_edge, buff_ls1))
+                    local_ls.append([angle0, pair[0][0], pair[0][1]])
+                    local_ls.append([angle1, pair[1][0], pair[1][1]])
+
+            local_ls.sort()
+            # remove duplicate (mutual) line segment
+            i = 0
+            while i < len( local_ls) -1:
+                # if 2 angles are close then remove 1
+                if math.isclose(local_ls[i][0], local_ls[i+1][0]):
+                    local_ls.pop(i)
+                    continue
+                i = i + 1
+                
+            across_ls.extend(local_ls)
+            print ("___:", i, " ***, ", local_ls)
+        i = 0
+        for item in across_ls:
+            print (item[1:3])
+            plot_point_text(plt, item[1:3],"*r", i)
+            i = i + 1

@@ -327,4 +327,4 @@ def print_point(message_ID, point_x, point_y):
 def print_cpairs(message_ID, cpairs): # print circle pairs
     print ("{0}, len: {1}".format(message_ID, len(cpairs)))
     for pairs in cpairs:
-        print ("- items ", pairs)
+        print (pairs)
