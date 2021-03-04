@@ -79,9 +79,14 @@ def plot_lines(plt, lines, ls="-xr"):
     ys = [i[1] for i in lines]
     plt.plot(xs, ys, ls)
 
-def plot_paths(plt, paths, ls="-b"):
-    for path in paths:
-        plot_lines(plt, path, ls)
+def plot_paths(plt, paths, ls="-r", ls_next ="-b"):
+    for i in range (len(paths)):
+        path = paths[i]
+        if i == len(paths) -1:
+            plot_lines(plt, path, ls_next)
+        else:
+            plot_lines(plt, path, ls)
+
         
 def plot_pairs(plt, pairs, ls="-xr"):
     for pair in pairs:

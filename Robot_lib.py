@@ -4,7 +4,6 @@ import math
 def intersection(x, y, radius, ls_points): # line segment points
     ''' 
     find the two different points where a line intersections a circle 
-    
     '''
     is_pt = []
     p1x,p1y = ls_points[0]
@@ -279,7 +278,7 @@ def line_across(line1, line2):
     '''
     is_pt = line_intersection(line1, line2)
     ret_result = None
-    if is_pt is not None and inside_ls(is_pt, line1):
+    if is_pt is not None and inside_ls(is_pt, line1) and inside_ls(is_pt, line2):
         ret_result = is_pt
     return ret_result
     
@@ -300,7 +299,20 @@ def line_intersection(line1, line2):
     x = det(d, xdiff) / div
     y = det(d, ydiff) / div
     return (x, y)
- 
+
+def get_middle_direction(center, radius, pair):
+    '''
+    given 2 points and a center, this function finds a direction where is from center to middle 
+    of 2 points with length of radius
+    '''
+    midpt = midpoint(pair[0], pair[1])
+    pt_is = intersection(center[0], center[1], radius, [center, midpt])
+
+    if inside_ls(midpt, [pt_is[0], center]):
+        return pt_is[0]
+    else:
+        return pt_is[1]
+        
 def get_index_true(status):
     ''' 
     return index of true elements
@@ -328,3 +340,6 @@ def print_cpairs(message_ID, cpairs): # print circle pairs
     print ("{0}, len: {1}".format(message_ID, len(cpairs)))
     for pairs in cpairs:
         print (pairs)
+        
+def approximately_num(num):
+    return format(num, '.10f')

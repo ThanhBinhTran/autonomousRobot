@@ -421,8 +421,8 @@ def divide_open_cpair_complement (center, cpair):
     return return_pairs
 
 def init_open_cpair(center, radius, ptS, ptE):
-    # open_cpairs = [point Start, point end , and open point]
-    oPt = get_a_open_point_from_a_pair(center, radius, [ptS,ptE])
+    # get a middle direction of a open sight, this direction is open point 
+    oPt = get_middle_direction(center, radius, [ptS,ptE])
     return [ptS, ptE, oPt]
     
 def get_open_cpairs(center, radius, goal, close_cpairs):
@@ -459,7 +459,6 @@ def get_open_cpairs(center, radius, goal, close_cpairs):
             
         for pair in pairs_extend:
             o_cpairs.append(init_open_cpair(center, radius, pair[0], pair[1]))
-            #o_cpairs.append(init_open_cpair(center, radius, c_cpairs[0][0], c_cpairs[0][1]))
             
     else:
         #print ("more than 2 obstacles detected")
@@ -569,15 +568,6 @@ def mutual_point(pts, ref_pts):
     result_0 = [dist_p0r0, dist_p0r1]
     result_1 = [dist_p1r0, dist_p1r1]
     return [result_0, result_1]
-
-def get_a_open_point_from_a_pair(center, radius, pair):
-    midpt = midpoint(pair[0], pair[1])
-    pt_is = intersection(center[0], center[1], radius, [center, midpt])
-
-    if inside_ls(midpt, [pt_is[0], center]):
-        return pt_is[0]
-    else:
-        return pt_is[1]
            
 def get_open_close_sight(x, y, radius, goal, t_sight):
     center = [x,y]

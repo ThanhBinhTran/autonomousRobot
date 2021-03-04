@@ -32,15 +32,17 @@ def motion(x, u, dt):
     #x[4] = u[1]
     x[0] += u[0] 
     x[1] += u[1] 
+    x[0] = approximately_num(x[0])
+    x[1] = approximately_num(x[1])
     return x
 
 
-def plot_arrow(x, y, yaw, length=0.5, width=0.1):  # pragma: no cover
+def plot_arrow(plt, x, y, yaw, length=0.5, width=0.1):  # pragma: no cover
     plt.arrow(x, y, length * math.cos(yaw), length * math.sin(yaw),
               head_length=width, head_width=width)
     plt.plot(x, y)
   
-def plot_robot(x, y, yaw, config):  # pragma: no cover
+def plot_robot(plt, x, y, yaw, config):  # pragma: no cover
     if config.robot_type == RobotType.rectangle:
         outline = np.array([[-config.robot_length / 2, config.robot_length / 2,
                              (config.robot_length / 2), -config.robot_length / 2,
@@ -61,25 +63,8 @@ def plot_robot(x, y, yaw, config):  # pragma: no cover
         out_x, out_y = (np.array([x, y]) +
                         np.array([np.cos(yaw), np.sin(yaw)]) * config.robot_radius)
         plt.plot([x, out_x], [y, out_y], "-k")
-                  
-def plot_AH_paths(AH_paths, goal):
-    for path in AH_paths:
-        AH_sp = path[0]       # start point
-        AH_nextps = path[1]   # all next points
-        blind_ps = path[2]    # all blind points
-        goal_appear = path[3] # goad appear
-        #print (path)
-        # draw AH path segment
-        for AH_point in AH_nextps:
-            plt.plot((AH_sp[0],AH_point[0]), (AH_sp[1], AH_point[1]), "--or")
-        
-        # draw blind points segment
-        for bp in blind_ps:
-            plt.plot((AH_sp[0],bp[0]), (AH_sp[1], bp[1]), "--y")
-            
-        if goal_appear:
-            plt.plot((AH_sp[0],goal[0]), (AH_sp[1], goal[1]), "-r")
-            
+    
+    
 def saw_goal(center, radius, t_sight, goal):
     return inside_local_true_sight(goal, center, radius, t_sight)
 
@@ -126,7 +111,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     print ("\n____Robot is reaching to goal: {0} from start {1}".format(goal, start))
     while True:
         run_count += 1
-        center = [x[0], x[1]]
+        center = [x[0], x[1] ]
         
         print ("\n_____Run times:{0}, at {1}".format(run_count, center))
         # clean old data
@@ -141,6 +126,11 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         if not s_goal and not r_goal:
             osight = np.array(osight)
             open_local_pts = osight[:, 2]    # open_local_pts
+            print ("open_local_pts,", open_local_pts)
+            for i in range( len(open_local_pts)):
+                open_local_pts[i][0] = approximately_num(open_local_pts[i][0])
+                open_local_pts[i][1] = approximately_num(open_local_pts[i][1])
+            print ("open_local_pts_____1,", open_local_pts)
             if len(open_local_pts) : # new local found
                 if len(traversal_sight) == 0:
                     # ranks new local open points
@@ -151,6 +141,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                 else:
                     open_local_pts_status = [inside_global_true_sight(pt, robotvision, traversal_sight) for pt in open_local_pts]
                     ao_local_pts = open_local_pts[np.logical_not(open_local_pts_status)]
+                    print ("ao_local_pts,", ao_local_pts)
                     if len(ao_local_pts) > 0:
                         ranks_new = np.array([ranking(center, pt, goal) for pt in ao_local_pts])
                         ao_local = np.concatenate((ao_local_pts, ranks_new), axis=1)
@@ -168,9 +159,8 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             picked_idx, next_pt = pick_next(ao_gobal)
             
             # find the shortest path from center to next point
-            sp_fromC = BFS_SP(visible_graph, tuple(center), tuple(next_pt))
-            if len(sp_fromC) > 2:
-                print ("What i found:", sp_fromC)
+            skeleton_path = BFS_skeleton_path(visible_graph, tuple(center), tuple(next_pt))
+
             # remove picked point from active global open point
             if picked_idx != -1:
                 ao_gobal= np.delete(ao_gobal, picked_idx, axis=0)
@@ -181,14 +171,14 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         else:
             next_pt = goal
             # find the shortest path from center to next point
-            sp_fromC = [center, goal]
+            skeleton_path = [center, goal]
             
         # record the path
         traversal_sight.append([center, tpairs, osight])
-        visited_path.append(sp_fromC)
+
         
         #make a move 
-        u = u = np.subtract(next_pt,center)
+        u = np.subtract(next_pt,center)
         x = motion(x, u, config.dt)  # simulate robot
                
         if print_traversal_sight:
@@ -215,17 +205,16 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     sosight = step[2]
                     plot_vision(plt, scenter[0], scenter[1], robotvision, st_sight, sosight, sosight)
             
-            shortestpath(plt, traversal_sight)
+            asp = approximated_shortest_path(plt, skeleton_path, traversal_sight, robotvision)
+            visited_path.append(asp)
             
-            plot_point(plt, center, "Hb")
+            # plot robot 
+            plot_robot(plt, center[0], center[1], x[2], config)
+            
             plot_goal(plt, goal, r_goal, s_goal)            
-            
-            #plt.plot(ob[:, 0], ob[:, 1], "ok")
-            plot_robot(center[0], center[1], x[2], config)
             
             plot_vision(plt, center[0], center[1], robotvision, tpairs, osight, csight)
             
-
             if show_active_openpt:
                 plot_points(plt, ao_gobal, ls_aopt)
             
@@ -235,13 +224,15 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     plot_point(plt, next_pt, ls_nextpt)
             
             plot_visible_graph(plt, visible_graph, ls_vg)
-            plot_paths(plt, visited_path, "-r")
-
+            
+            plot_paths(plt, visited_path, "-r", "-m")
+            
+            
             #plot_arrow(x[0], x[1], x[2])
             plt.axis("equal") # make sure ox oy axises are same resolution open local points
             plt.grid(True)
-            #plt.pause(0.0001)
-            plt.pause(0.1)
+            plt.pause(0.0001)
+            #plt.pause(0.1)
         
         # Run once for debugging
         if run_times == run_count:
@@ -256,7 +247,6 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     print ("visited_path:", visited_path)            
     print("Done")
 
-    
     plt.show()
 
 if __name__ == '__main__':

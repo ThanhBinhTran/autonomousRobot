@@ -131,9 +131,8 @@ def graph_insert(graph, pnode, leafs):
 
 # Function to find the shortest 
 # path between two nodes of a graph 
-def BFS_SP(graph, start, goal): 
-    print ("Start:", start)
-    print ("Goal:", goal)
+def BFS_skeleton_path(graph, start, goal): 
+    print ("Current {0}, Next {1}".format(start, goal))
     #print ("graph", graph)
     explored = []
       
@@ -169,7 +168,7 @@ def BFS_SP(graph, start, goal):
                 # Condition to check if the  
                 # neighbour node is the goal 
                 if neighbour == goal: 
-                    print("Shortest path = ", new_path) 
+                    print("BFS_skeleton_path = ", new_path) 
                     return new_path
             explored.append(node) 
   
@@ -178,40 +177,158 @@ def BFS_SP(graph, start, goal):
     print("So sorry, but a connecting path doesn't exist :(") 
     return []
 
-def shortestpath(plt, traversal_sight):
-    across_ls = []
-    if len(traversal_sight) > 2:
-        for i in range(1, len( traversal_sight) -1):
-            prenode = traversal_sight[i-1][0]
-            postnode = traversal_sight[i+1][0]
-            cennode = traversal_sight[i][0]
-            tsight = traversal_sight[i][1]
-            local_ls = []
-            base_edge = np.subtract(cennode, prenode)
-            for pair in tsight:
-                in_status, _ = inside_angle_area(pair[0], cennode, (prenode, postnode))
-                if in_status:
-                    buff_ls0 = np.subtract(cennode, pair[0])
-                    buff_ls1 = np.subtract(cennode, pair[1])
-                    angle0 = abs(signed_angle(base_edge, buff_ls0))
-                    angle1 = abs(signed_angle(base_edge, buff_ls1))
-                    local_ls.append([angle0, pair[0][0], pair[0][1]])
-                    local_ls.append([angle1, pair[1][0], pair[1][1]])
+def approximated_shortest_path(plt, skeleton_path, traversal_sight, robotvision):
+    if len(skeleton_path) <= 2:
+        return skeleton_path
+    else:
+        print ("skeleton_path:", skeleton_path)
+        spt = skeleton_path[0]
+        gpt = skeleton_path[-1]
+        critical_ls = get_critical_ls(plt, skeleton_path, traversal_sight, robotvision)
+        return approximately_shortest_path(plt, critical_ls, spt, gpt)
 
-            local_ls.sort()
-            # remove duplicate (mutual) line segment
-            i = 0
-            while i < len( local_ls) -1:
-                # if 2 angles are close then remove 1
-                if math.isclose(local_ls[i][0], local_ls[i+1][0]):
-                    local_ls.pop(i)
-                    continue
-                i = i + 1
-                
-            across_ls.extend(local_ls)
-            print ("___:", i, " ***, ", local_ls)
+def get_critical_ls(plt, skeleton_path, traversal_sight, robotvision):
+    critical_ls = []
+    for i in range(1, len( skeleton_path) -1):
+        prenode = skeleton_path[i-1]
+        postnode = skeleton_path[i+1]
+        cennode = skeleton_path[i]
+        #print ("prept {0}, currentpt {1}, nextpt {2}".format(prenode, cennode, postnode))
+        # query true sight for centernode
+        tsight = []
+        for ts in traversal_sight:
+            print ("traversal_sight item ", ts[0])
+            if list(cennode) == ts[0]: # casting for compare
+                print ("found_______ ", cennode)
+                tsight = ts[1]
+        #print ("true closed sight for current point:", tsight)
+        local_ls = []
+        base_edge = np.subtract(cennode, prenode)
+        for pair in tsight:
+            pt0 = list(pair[0])
+            pt1 = list(pair[1])
+            in_status, _ = inside_angle_area(pt0, cennode, (prenode, postnode))
+            if in_status:
+                buff_ls0 = np.subtract(cennode, pt0)
+                buff_ls1 = np.subtract(cennode, pt1)
+                angle0 = abs(signed_angle(base_edge, buff_ls0))
+                angle1 = abs(signed_angle(base_edge, buff_ls1))
+                local_ls.append([angle0, pt0, cennode])
+                local_ls.append([angle1, pt1, cennode])
+        #print ("local_ls ", local_ls)
+        local_ls.sort()
+        
+        # remove duplicate (mutual) line segment
         i = 0
-        for item in across_ls:
-            print (item[1:3])
-            plot_point_text(plt, item[1:3],"*r", i)
+        while i < len( local_ls) -1:
+            # if 2 angles are close then remove 1
+            if math.isclose(local_ls[i][0], local_ls[i+1][0]):
+                local_ls.pop(i)
+                continue
             i = i + 1
+
+        # if there is no local across line, create a fake across ls
+        if len(local_ls) == 0:
+            midpt = get_middle_direction(cennode, robotvision, (prenode,postnode))
+            local_ls.append([0, midpt, cennode])
+
+        critical_ls.extend(local_ls)
+
+    i = 0
+    for item in critical_ls:
+        print (item)
+        plot_point_text(plt, item[1],".r", i)
+        plot_line(plt, (item[1], item[2]), ":r")
+        i = i + 1
+    return critical_ls
+
+def approximately_shortest_path_B(plt, critical_ls, spt, gpt):
+    i = 0;
+    path = [] # list of points
+    pre_total_dist = float('inf')
+    total_dist = 0.0
+    if len(critical_ls) > 0:
+        # initialize the path by choosing mid points of critical line segment
+        path.append(spt)    # start point
+        for ls in critical_ls:
+            pt = midpoint(ls[1], ls[2])
+            path.append(pt) # middle point of critical line segments 
+            i = i + 1
+        path.append(gpt)    # end point
+        
+        for j in range (100):
+            midpts = []
+            for i in range (len(path)-1):
+                midpts.append(midpoint(path[i], path[i+1]))
+                
+            # find all new points for the path
+            for i in range (len(midpts) -1):
+                line1 = (midpts[i], midpts[i+1])
+                line2 = critical_ls[i][1:3]
+                # find cross point of 2 line midpoints(i, i +1) and critical ls [i]
+                pn_new = line_across(line1, line2)
+                if pn_new is not None:
+                    path[i+1] = pn_new
+                else:
+                    dist1 = point_dist(path[i], critical_ls[i][1])
+                    dist2 = point_dist(path[i], critical_ls[i][2])
+                    if dist1 < dist2:
+                        path[i+1] = critical_ls[i][1]
+                    else:
+                        path[i+1] = critical_ls[i][2]
+            for i in range(len(path) -1):
+                total_dist += point_dist(path[i], path[i+1])
+            #print ("___________________", total_dist, pre_total_dist)
+            #if total_dist < pre_total_dist:
+            #    pre_total_dist = total_dist
+            #    print ("___________________ updated", pre_total_dist)
+            #else:
+            #    print ("___________________ break")
+            #    break
+        for i in range (len (path) -1):
+            plot_line(plt, (path[i], path[i+1]), '-r')
+    return  path
+
+#T. Hoai
+def approximately_shortest_path(plt, critical_ls, spt, gpt):
+    i = 0;
+    path = [] # list of points
+    pre_total_dist = float('inf')
+    total_dist = 0.0
+    if len(critical_ls) > 0:
+        # initialize the path by choosing mid points of critical line segment
+        path.append(spt)    # start point
+        for ls in critical_ls:
+            pt = midpoint(ls[1], ls[2])
+            path.append(pt) # middle point of critical line segments 
+            i = i + 1
+        path.append(gpt)    # end point
+        
+        for j in range (1000):
+            
+            for i in range (1, len(path)-1):
+                # find cross point of p(n-1), p(n) and p(n+1)
+                line1 = (path[i-1], path[i+1])
+                line2 = critical_ls[i-1][1:3]
+                pn_new = line_across(line1, line2)
+                if pn_new is not None:
+                    path[i] = pn_new
+                else:
+                    d1 = point_dist(path[i-1], critical_ls[i-1][1]) +  point_dist(path[i+1], critical_ls[i-1][1])
+                    d2 = point_dist(path[i-1], critical_ls[i-1][2]) +  point_dist(path[i+1], critical_ls[i-1][2])
+                    if d1 > d2:
+                        path[i] = critical_ls[i-1][2]
+                    else:
+                        path[i] = critical_ls[i-1][1]
+            for i in range(len(path) -1):
+                total_dist += point_dist(path[i], path[i+1])
+            #print ("___________________", total_dist, pre_total_dist)
+            #if total_dist < pre_total_dist:
+            #    pre_total_dist = total_dist
+            #    print ("___________________ updated", pre_total_dist)
+            #else:
+            #    print ("___________________ break")
+            #    break
+        for i in range (len (path) -1):
+            plot_line(plt, (path[i], path[i+1]), '-r')
+    return  path
