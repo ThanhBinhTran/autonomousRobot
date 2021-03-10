@@ -37,19 +37,17 @@ def draw_arc_area(plt, x, y, radius):
     #plt.gcf().gca().add_patch(arc)
     plt.axes().add_patch(aarc)
        
-def plot_vision(plt, x, y, radius, true_sight, osight, csight):
+def plot_vision(plt, x, y, radius, csight, osight):
     if show_circle_range:
         draw_vision_area(plt, x, y, radius)
     #draw_arc_area(plt, x, y, radius)
     
-    if show_true_sight:
-        draw_true_sight(plt, x, y, true_sight, cl_ts, ls_ts) 
+    if show_closed_sight:
+        draw_true_sight(plt, x, y, csight, cl_ts, ls_ts) 
             
     if show_open_sight:
         draw_open_sight(plt, x, y, osight)
         
-    if show_close_sight:
-        plot_pairs(plt, csight, ls_cs)
         
 def plot_goal(plt, goal, r_goal, s_goal):
     plot_point(plt, goal, ls_goal)
@@ -67,6 +65,9 @@ def plot_point(plt, point, ls="xr"):
 def plot_points(plt, pts, ls="xr"):
     plt.plot(pts[:, 0], pts[:, 1], ls)
 
+def plot_text(plt, point, text):
+    plt.text(point[0], point[1] + 2, text)
+    
 def plot_point_text(plt, point, ls, text):
     plot_point(plt, point, ls)
     plt.text(point[0], point[1] + 2, text)
@@ -110,6 +111,13 @@ def plot_triangles(plt,triangles, ls = ":c"):
         plot_line(plt, [triangle[1],triangle[2]], ls)
         plot_line(plt, [triangle[2],triangle[0]], ls)
 
+def plot_critical_line_segments(plt, critical_ls, ls_cls):
+    i = 0
+    for ls in critical_ls:
+        plot_line(plt, ls[1:3], ls_cls)
+        plot_text(plt, ls[1], i)
+        i += 1
+    
 def plot_center(plt, center_pts): 
     '''
     plot a center of triangles

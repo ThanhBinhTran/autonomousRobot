@@ -20,27 +20,13 @@ from Robot_control_panel import *
 
 config = Config()
 
-def motion(x, u, dt):
+def motion(current_position, next_pt):
     '''
     motion model
     '''
-
-    #x[2] += u[1] * dt
-    #x[0] += u[0] * math.cos(x[2]) * dt
-    #x[1] += u[0] * math.sin(x[2]) * dt
-    #x[3] = u[0]
-    #x[4] = u[1]
-    x[0] += u[0] 
-    x[1] += u[1] 
-    x[0] = approximately_num(x[0])
-    x[1] = approximately_num(x[1])
-    return x
-
-
-def plot_arrow(plt, x, y, yaw, length=0.5, width=0.1):  # pragma: no cover
-    plt.arrow(x, y, length * math.cos(yaw), length * math.sin(yaw),
-              head_length=width, head_width=width)
-    plt.plot(x, y)
+    current_position[0] = approximately_num(next_pt[0])
+    current_position[1] = approximately_num(next_pt[1])
+    return current_position
   
 def plot_robot(plt, x, y, yaw, config):  # pragma: no cover
     if config.robot_type == RobotType.rectangle:
@@ -90,16 +76,18 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     start = menu_result[2] 
     goal = menu_result[3]
     
-    # initial state [x(m), y(m), yaw(rad), v(m/s), omega(rad/s)]
-    x = np.array([start[0], start[1], math.pi / 8.0, 0.0, 0.0])
+    # current position of robot
+    cpos = np.array([start[0], start[1]])
 
+    # read map 
     ob = read_map_csv(mapname) # obstacles
     
+    # traversal sight to draw visible visited places
     traversal_sight = []
 
-    ao_gobal = [] # active open points [global]
+    # active open points [global]
+    ao_gobal = [] 
 
-    run_count = 0
     r_goal = True
     s_goal = True
 
@@ -107,36 +95,44 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     
     visible_graph = graph_intiailze()
     visited_path = []
+
+    # for display information
+    run_count = 0
     
     print ("\n____Robot is reaching to goal: {0} from start {1}".format(goal, start))
+    
     while True:
         run_count += 1
-        center = [x[0], x[1] ]
+        center = [cpos[0], cpos[1] ]
         
         print ("\n_____Run times:{0}, at {1}".format(run_count, center))
         # clean old data
         next_pt = []
         
         # scan to get sights at local
-        tpairs, osight, csight = scan_around(center, robotvision, ob, goal)
+        closed_sights, open_sights = scan_around(center, robotvision, ob, goal)
         
         # check if the robot saw or reach the goal
-        r_goal, s_goal = check_goal(center, goal, config, robotvision, tpairs)
+        r_goal, s_goal = check_goal(center, goal, config, robotvision, closed_sights)
         
         if not s_goal and not r_goal:
-            osight = np.array(osight)
-            open_local_pts = osight[:, 2]    # open_local_pts
+            # get local open points
+            open_sights = np.array(open_sights)
+            open_local_pts = open_sights[:, 2]    # open_local_pts
             print ("open_local_pts,", open_local_pts)
             for i in range( len(open_local_pts)):
                 open_local_pts[i][0] = approximately_num(open_local_pts[i][0])
                 open_local_pts[i][1] = approximately_num(open_local_pts[i][1])
-            print ("open_local_pts_____1,", open_local_pts)
+
+            # check whether open local points are active 
             if len(open_local_pts) : # new local found
                 if len(traversal_sight) == 0:
                     # ranks new local open points
                     ao_local_pts = open_local_pts
                     ranks_new = np.array([ranking(center, pt, goal) for pt in open_local_pts])
+                    # active open points at local
                     ao_local = np.concatenate((ao_local_pts, ranks_new), axis=1)
+                    # add local to global
                     ao_gobal = np.array(ao_local)
                 else:
                     open_local_pts_status = [inside_global_true_sight(pt, robotvision, traversal_sight) for pt in open_local_pts]
@@ -144,7 +140,9 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     print ("ao_local_pts,", ao_local_pts)
                     if len(ao_local_pts) > 0:
                         ranks_new = np.array([ranking(center, pt, goal) for pt in ao_local_pts])
+                        # active open points at local
                         ao_local = np.concatenate((ao_local_pts, ranks_new), axis=1)
+                        # add local to global
                         ao_gobal = np.concatenate((ao_gobal, ao_local), axis=0)
                     else:
                         ao_local_pts = []
@@ -152,13 +150,13 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                 
                 graph_insert(visible_graph, center, ao_local_pts)
             
-            else:   # local has no open direction any more
-                print ("local has no direction any more")
+            else:   # there is no direction at local
+                print ("there is no direction at local")
                 
             # pick next point to make a move
             picked_idx, next_pt = pick_next(ao_gobal)
             
-            # find the shortest path from center to next point
+            # find the shortest skeleton path from current position (center) to next point
             skeleton_path = BFS_skeleton_path(visible_graph, tuple(center), tuple(next_pt))
 
             # remove picked point from active global open point
@@ -174,16 +172,17 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             skeleton_path = [center, goal]
             
         # record the path
-        traversal_sight.append([center, tpairs, osight])
-
-        
-        #make a move 
-        u = np.subtract(next_pt,center)
-        x = motion(x, u, config.dt)  # simulate robot
-               
+        traversal_sight.append([center, closed_sights, open_sights])
         if print_traversal_sight:
             print ("traversal_sight:", traversal_sight)
-         
+        
+        asp, critical_ls = approximately_shortest_path(skeleton_path, traversal_sight, robotvision)
+        #asp = remove_validation(asp)
+        visited_path.append(asp)
+        
+        #make a move from current position
+        cpos = motion(cpos, next_pt)  # simulate robot
+        
         if show_animation:
 
             # clear plot
@@ -199,21 +198,19 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
 
             # show_traversal_sight
             if show_traversal_sight:
-                for step in traversal_sight:
-                    scenter = step[0]
-                    st_sight = step[1]
-                    sosight = step[2]
-                    plot_vision(plt, scenter[0], scenter[1], robotvision, st_sight, sosight, sosight)
-            
-            asp = approximated_shortest_path(plt, skeleton_path, traversal_sight, robotvision)
-            visited_path.append(asp)
+                for local in traversal_sight:
+                    lcenter = local[0]  # center of robot at local
+                    lc_sight = local[1] # closed sight at local
+                    lo_sight = local[2] # open sight at local
+                    plot_vision(plt, lcenter[0], lcenter[1], robotvision, lc_sight, lo_sight)
+           
             
             # plot robot 
-            plot_robot(plt, center[0], center[1], x[2], config)
+            plot_robot(plt, center[0], center[1], 0, config)
             
             plot_goal(plt, goal, r_goal, s_goal)            
             
-            plot_vision(plt, center[0], center[1], robotvision, tpairs, osight, csight)
+            plot_vision(plt, center[0], center[1], robotvision, closed_sights, open_sights)
             
             if show_active_openpt:
                 plot_points(plt, ao_gobal, ls_aopt)
@@ -222,19 +219,20 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             if show_next_point:
                 if len(next_pt) > 0:
                     plot_point(plt, next_pt, ls_nextpt)
+                    
+            if show_visible_graph:
+                plot_visible_graph(plt, visible_graph, ls_vg)
+            if show_visited_path:
+                plot_paths(plt, visited_path, ls_vp, ls_goingp)
             
-            plot_visible_graph(plt, visible_graph, ls_vg)
-            
-            plot_paths(plt, visited_path, "-r", "-m")
-            
-            
-            #plot_arrow(x[0], x[1], x[2])
-            plt.axis("equal") # make sure ox oy axises are same resolution open local points
+            if show_critical_line_segments:
+                plot_critical_line_segments(plt, critical_ls, ls_cls)
+            # to set equal make sure x y axises are same resolution 
+            plt.axis("equal")
             plt.grid(True)
             plt.pause(0.0001)
-            #plt.pause(0.1)
         
-        # Run once for debugging
+        # Run n times for debugging
         if run_times == run_count:
             break
         

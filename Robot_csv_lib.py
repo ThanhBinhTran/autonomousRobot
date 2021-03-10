@@ -18,5 +18,5 @@ def read_map_csv(mapname):
             if first_line:
                 first_line = False
                 continue
-            ob.append([int(row[0]),int(row[1])])
+            ob.append([float(row[0]),float(row[1])])
     return ob

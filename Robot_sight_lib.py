@@ -166,62 +166,64 @@ def detect_blind_sight(center, ref_sight, check_sight):
 
     return divided_sight, r_blind, c_blind, d_sight
     
-def remove_blind_pairs( center, b_pairs):
-    t_pairs = b_pairs
+def remove_blind_lss( center, b_lss):
+    '''
+    remove blind line segments in boundary line segments
+    to get true closed sights
+    '''
+    closed_sights = b_lss
     
     i = 0 # start with index = 0
-    while i < len(t_pairs) -1:
+    while i < len(closed_sights) -1:
         j = i + 1
-        while j < len(t_pairs) :
+        while j < len(closed_sights) :
         
-            #print ("_+_Checking {0}{1} ".format(t_pairs[i][0],t_pairs[i][1]), "--> {0}{1}".format(t_pairs[j][0], t_pairs[j][1]) )
-            ds, r_blind, c_blind, d_sight = detect_blind_sight(center, t_pairs[i], t_pairs[j])
-            #print_pairs(" [Local] divide sight", ds)
+            #print ("Checking {0} and {1}".format(closed_sights[i],closed_sights[j][0]) )
+            ds, r_blind, c_blind, d_sight = detect_blind_sight(center, closed_sights[i], closed_sights[j])
+            #princlosed_sights(" [Local] divide sight", ds)
             #print ("status of sight: r {0}, c {1}, d {2}".format(r_blind, c_blind, d_sight))
             if d_sight:  # separate into 2 new sight
-                #print ("#%@ ", t_pairs[i], ds[0])
-                t_pairs[i] = np.array(ds[0])
-                t_pairs[j] = np.array(ds[1])
+                closed_sights[i] = np.array(ds[0])
+                closed_sights[j] = np.array(ds[1])
                 
                 #if len(ds) == 3:
                     #print ("___(#^ len = 3", ds)
-                    #t_pairs.append(ds[2])
+                    #closed_sights.append(ds[2])
                 #i = i - 1
                 #break
             elif c_blind: # remove check sight cause it's blind sight
-                #t_pairs.pop(j)
-                t_pairs= np.delete(t_pairs, j, axis=0)
+                #closed_sights.pop(j)
+                closed_sights= np.delete(closed_sights, j, axis=0)
                 j = j - 1
             elif r_blind: # replace ref sight by check sight cause it's blind sight
                 # update i so need to recheck
-                t_pairs[i] = t_pairs[j]
-                t_pairs= np.delete(t_pairs, j, axis=0)
+                closed_sights[i] = closed_sights[j]
+                closed_sights= np.delete(closed_sights, j, axis=0)
                 i = i-1
                 break
  
             j += 1
         i += 1 
-        #print_pairs ("true_sight loop[{0}]".format(i), boundary_pts)
-    return t_pairs
+    return closed_sights
     
-def true_pairs(center, b_pairs):
+def get_closed_sights_from_blss(center, b_lss):
     '''
-    get true pairs from boundary pairs by remove blind pairs
+    get closed sight from boundary line segments by remove blind line segments in blss
     '''
-    t_pairs = []
+    closed_sights = []
     
-    if len( b_pairs ) >=2:
-        t_pairs = remove_blind_pairs(center, b_pairs)
-    else: # true sight is boundary_pt if there is only 1 pair
-        t_pairs = b_pairs
-    return t_pairs
+    if len( b_lss ) <=1:# if there is only 1 boundary line segment then it is closed_sights
+        closed_sights = b_lss
+    else: 
+        closed_sights = remove_blind_lss(center, b_lss)
+    return closed_sights
     
-def get_all_boundary_pairs(center, robot_vision, ob):
+def get_boundary_linesegments(center, robot_vision, ob):
     ''' 
     find all boundary pairs among all obstacle line segments and circle 
     '''
     x,y = center
-    b_pairs = []
+    b_lss = []
     for i in range(len(ob)-1):
         
         ptA = ob[i]  
@@ -253,22 +255,21 @@ def get_all_boundary_pairs(center, robot_vision, ob):
                 
                 pd = point_dist(b_pts[0], b_pts[1])
                 if not math.isclose(pd, 0): # make sure p1 != p2
-                    b_pairs.append( [b_pts[0],b_pts[1]])
-    return b_pairs
+                    b_lss.append( [b_pts[0],b_pts[1]])
+    return b_lss
     
-def get_true_pairs( center, robot_vision, ob):
-    # get boundary pairs, [start point x,  end point x], x start < x end
-    b_pairs = get_all_boundary_pairs( center, robot_vision, ob)
+def get_closed_sights( center, robot_vision, ob):
+    # get boundary line segments where is limited by obstacles
+    b_lss = get_boundary_linesegments( center, robot_vision, ob)
 
-    if print_boundary_pairs:
-        print_pairs ("boundary_pairs", b_pairs)
-    
-    
-    t_pairs = true_pairs(center, b_pairs)
-    if print_true_pairs:
-        print_pairs ("true_pairs", t_pairs)
+    if print_boundary_linesegments:
+        print_pairs ("print_boundary_linesegments", b_lss)
         
-    return t_pairs
+    closed_sights = get_closed_sights_from_blss(center, b_lss)
+    if print_closed_sights:
+        print_pairs ("print_closed_sights", closed_sights)
+        
+    return closed_sights
     
 def inside_global_true_sight(pt, radius, traversal_path):
     result = [inside_local_true_sight(pt, x, radius, tsight) for x,tsight, _ in traversal_path]
@@ -302,92 +303,90 @@ def inside_local_true_sight(pt, center, radius, t_sight):
         return False
     #return not outside and (inside_open_sight or visible)
 
-def get_true_is_circle_pairs( center, radius, true_pair):
-    ''' get true intersection between true sight and circle -> circle pairs '''
-    spt0, spt1 = true_pair
+def get_ref_csight_lss( center, radius, closed_sights):
+    '''
+    get close sight line segments where is intersection of close points and circle
+    '''
+    cspt0, cspt1 = closed_sights
     x, y = center
-    # process angle
     
-    angle0 = signed_angle_xAxis([spt0[0]-x,spt0[1]-y])  # cal angle base on ox axis
-    angle1 = signed_angle_xAxis([spt1[0]-x,spt1[1]-y])  # cal angle base on ox axis
+    # process angle
+    c_pt0 = np.subtract(center,cspt0)   # vector center -> closed sight point 0
+    c_pt1 = np.subtract(center,cspt1)   # vector center -> closed sight point 1
+    
+    angle0 = signed_angle_xAxis(c_pt0)  # cal angle base on ox axis
+    angle1 = signed_angle_xAxis(c_pt1)  # cal angle base on ox axis
 
     cpoints = []
     # circle point 0
-    cpt_is = intersection(x, y, radius, [spt0, center])
+    cpt_is = intersection(x, y, radius, [cspt0, center])
     
-    if inside_ls(cpt_is[0], [spt0, center]):
+    if inside_ls(cpt_is[0], [cspt0, center]):
         cpoints.append(cpt_is[0])
     else:
         cpoints.append(cpt_is[1])
     
     # circle point 1
-    cpt_is = intersection(x, y, radius, [spt1,center])
-    if inside_ls(cpt_is[0], [spt1,center]):
+    cpt_is = intersection(x, y, radius, [cspt1,center])
+    if inside_ls(cpt_is[0], [cspt1,center]):
         cpoints.append(cpt_is[0])
     else:
         cpoints.append(cpt_is[1])
 
-    # order by angle
-    #if angle0 < angle1:
-    #    result = [cpoints[0],cpoints[1]]
-    #else:
-    #    result = [cpoints[1],cpoints[0]]
-    result = [cpoints[0],cpoints[1]]
-    return result
+    return [cpoints[0],cpoints[1]]
 
-def get_close_cpairs(center, ref_cpairs):
-    ret_result = []
-    #clone new reference circle pairs
-    rPairs = [] 
-    rPairs.extend(ref_cpairs)
-    if len(rPairs) == 1:
-        ret_result = [[rPairs[0][0], rPairs[0][1], True]]
+
+def get_csight_lss(center, ref_csight_linesegments):
+    '''
+    from reference close sight line segments, extend nearby line segments into one
+    '''
+    result = []
+    #clone new reference closed sight line segments
+    rcsLSs = [] 
+    rcsLSs.extend(ref_csight_linesegments)
+    if len(rcsLSs) == 1:
+        result = [[rcsLSs[0][0], rcsLSs[0][1], True]]
     else:
         i = 0
-        while i < len(rPairs) -1:
-            r_cpairs = rPairs[i] # reference pair
+        while i < len(rcsLSs) -1:
+            r_cpairs = rcsLSs[i] # reference pair
             #print ("__________", r_cpairs)
             j = i + 1
-            while j < len(rPairs) :
-                c_cpairs = rPairs[j]
+            while j < len(rcsLSs) :
+                c_cpairs = rcsLSs[j]
                 #print ("__________", c_cpairs)
                 result = mutual_point(r_cpairs, c_cpairs) 
                 #print (result)
                 new_cpairs = []
                 if   result[0][0]:
-                    #print ("check me #213 0")
                     new_cpairs = [r_cpairs[1], c_cpairs[1]]
                 elif result[0][1]:
-                    #print ("check me #213 1")
                     new_cpairs = [c_cpairs[0], r_cpairs[1]]
                 elif result[1][0]:
-                    #print ("check me #213 2")
                     new_cpairs = [r_cpairs[0], c_cpairs[1]]
                 elif result[1][1]:
-                    #print ("check me #213 3")
                     new_cpairs = [r_cpairs[0], c_cpairs[0]]
                 
                 if len( new_cpairs) > 0:
-                    rPairs[i] = new_cpairs
-                    rPairs.pop(j)
-                    #rPairs[j] = []
+                    rcsLSs[i] = new_cpairs
+                    rcsLSs.pop(j)
                     i = i - 1
                     break
                 j = j + 1
             i = i + 1
 
         
-        # once there is only one closed cpair
+        # once there is only one closed sight line segment
         # check if its whether true or fake
-        if len(rPairs) == 1:
-            ios = is_open_sight(center, rPairs[0], ref_cpairs)
-            if ios: # closed cpair is true close
-                ret_result = [[rPairs[0][0], rPairs[0][1], False]]
-            else: # close cpair is complement area
-                ret_result = [[rPairs[0][0], rPairs[0][1], True]]
+        if len(rcsLSs) == 1:
+            ios = is_open_sight(center, rcsLSs[0], ref_csight_linesegments)
+            if ios: # csight line segment is true closed
+                result = [[rcsLSs[0][0], rcsLSs[0][1], False]]
+            else: # csight line segment is complement
+                result = [[rcsLSs[0][0], rcsLSs[0][1], True]]
         else:
-            ret_result = rPairs
-    return ret_result
+            result = rcsLSs
+    return result
     
 def divide_open_cpair(center, inangle, vs, ve):
     return_pairs = []
@@ -425,7 +424,7 @@ def init_open_cpair(center, radius, ptS, ptE):
     oPt = get_middle_direction(center, radius, [ptS,ptE])
     return [ptS, ptE, oPt]
     
-def get_open_cpairs(center, radius, goal, close_cpairs):
+def get_osight_linesegments(center, radius, goal, close_cpairs):
     # declare open circle pairs for open sight
     o_cpairs = []
         
@@ -569,45 +568,44 @@ def mutual_point(pts, ref_pts):
     result_1 = [dist_p1r0, dist_p1r1]
     return [result_0, result_1]
            
-def get_open_close_sight(x, y, radius, goal, t_sight):
-    center = [x,y]
-
-    ref_cpairs = [get_true_is_circle_pairs( (x, y), radius, true_pair) for true_pair in t_sight]
+def get_open_sights(center, radius, goal, closed_sights):
+    # get reference closed line segments
+    ref_csight_lss = [get_ref_csight_lss( center, radius, c_sight) for c_sight in closed_sights]
     
-    if print_ref_sight:
-        print ("\n_ref circle pairs", ref_cpairs)
+    if print_ref_csight_linesegments:
+        print ("print_ref_csight_linesegments", ref_csight_lss)
     
-    close_cpairs = get_close_cpairs((x,y), ref_cpairs)
-    if print_close_sight:
-        print_cpairs("\n_close circle pairs", close_cpairs)
+    csights_lss = get_csight_lss(center, ref_csight_lss)
+    if print_csight_linesegments:
+        print_cpairs("print_closed_linesegments", csights_lss)
         
-    open_cpairs = get_open_cpairs(center, radius, goal, close_cpairs)
-    if print_open_sight:
-        print_cpairs("\n_open circle pairs", open_cpairs)
+    open_sights = get_osight_linesegments(center, radius, goal, csights_lss)
+    if print_open_sights:
+        print_cpairs("print_open_sights", open_sights)
 
-    return open_cpairs, close_cpairs
+    return open_sights
     
 def scan_around(center, robot_vision, ob, goal):
     '''
     this function is to scan obstacle 
-    return true sight, closed sight, and open sight
+    return true sight = (closed sight, and open sight)
     '''
-    t_sight = get_true_pairs(center, robot_vision, ob)
-    osight, csight = get_open_close_sight(center[0], center[1], robot_vision, goal, t_sight)
+    closed_sights = get_closed_sights(center, robot_vision, ob)
+    open_sights = get_open_sights(center, robot_vision, goal, closed_sights)
     
-    return t_sight, osight, csight
+    return closed_sights, open_sights
     
-def get_explorered_sight(center, goal, robotvision, tpairs, osight):
+def get_explorered_sight(center, goal, robotvision, csight, osight):
     '''     
     extend map from local true sights
     '''
     map = []
-    temp_tpairs = np.array(tpairs)
+    temp_csight = np.array(csight)
     temp_osight = np.array(osight)
-    print ("temp_tpairs", temp_tpairs)
+    print ("temp_csight", temp_csight)
     print ("temp_osight", temp_osight)
 
-    angle_tpairs = [math.degrees(unsigned_angle_xAxis(point)) for point in temp_tpairs[:,0]]
+    angle_tpairs = [math.degrees(unsigned_angle_xAxis(point)) for point in temp_csight[:,0]]
     angle_osight = [math.degrees(unsigned_angle_xAxis(point)) for point in temp_osight[:,0]]
     
     print ("angle_tpairs", angle_tpairs)
@@ -629,18 +627,18 @@ def get_explorered_sight(center, goal, robotvision, tpairs, osight):
             pre_j = idx_j
             idx_i = angle_tpairs_idx_sort[i]
             idx_j = angle_osight_idx_sort[j]
-            print ("idx_i idx_j", idx_i, idx_j, temp_tpairs[idx_i], osight[idx_j][0:2])
+            print ("idx_i idx_j", idx_i, idx_j, temp_csight[idx_i], osight[idx_j][0:2])
             if angle_tpairs[idx_i] < angle_osight[idx_j]:
                 if lastj:
-                    map.append([osight[pre_j][1],temp_tpairs[idx_i][0]])
-                map.append(temp_tpairs[idx_i])
+                    map.append([osight[pre_j][1],temp_csight[idx_i][0]])
+                map.append(temp_csight[idx_i])
 
                 lasti = True
                 lastj = False
                 break
             else:
                 if lasti:
-                    map.append([temp_tpairs[idx_i][1], osight[pre_j][1]])                
+                    map.append([temp_csight[idx_i][1], osight[pre_j][1]])                
                 map.append([osight[idx_j][0],osight[idx_j][2]])
                 map.append([osight[idx_j][2],osight[idx_j][1]])
                 lasti = True
@@ -650,7 +648,7 @@ def get_explorered_sight(center, goal, robotvision, tpairs, osight):
     if i != len(angle_tpairs):  # i remain
         while i < len(angle_tpairs):
             idx_i = angle_tpairs_idx_sort[i]
-            map.append(temp_tpairs[idx_i])
+            map.append(temp_csight[idx_i])
         i += 1
     else:
         while j < len(angle_osight):

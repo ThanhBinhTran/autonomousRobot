@@ -2,31 +2,44 @@ import numpy as np
 import math
 from enum import Enum
 
-rel_tol = 0.0000001
-
+'''
+CONTROL SIGNAL FOR SHOWING OR HIDING PLOT EMELENTS
+'''
 show_animation = True
 show_trajectory = True
 
 show_traversal_sight = True
-show_true_sight = True
 show_open_sight = True
-show_close_sight = False
+show_closed_sight = True
 show_ref_sight = False
 
-show_active_openpt = True
+show_visited_path = True
+show_visible_graph = False
+
+show_active_openpt = False
 show_inactive_openpt = False
 show_next_point = True
-show_explored_map = False
 
 show_text_goal = True
 show_circle_range = False
+show_critical_line_segments = True
 
-print_close_sight = True
-print_open_sight = True
-print_ref_sight = True
+
+'''
+PRINT OUT FOR DEBUG
+'''
+print_boundary_linesegments = False
+print_closed_sights = False
+print_closed_linesegments = False
+print_open_sights = False
+print_ref_sight = False
+print_ref_csight_linesegments = False
+print_csight_linesegments = False
 print_traversal_sight = False
-# line styl
 
+'''
+LINE STYPE FOR DISPLAY PLOT
+'''
 ls_is = ":.c"    # intersection
 ls_bp = "-r"     # boundary points
 ls_ts = "-"      # true sight
@@ -37,15 +50,14 @@ ls_map = "-b"    # map
 ls_cs = ":m"     # close sight
 ls_os = "c"      # open sight
 ls_goal = "*r"   # goal
-ls_nextpt = "xr" # next points
+ls_nextpt = "1r" # next points
 ls_aopt = ".b"   # active open points
 ls_iopt = "ok"   # inactive open_point
 ls_em = "-m"     # explored_map
 ls_vg = ":k"     # visible graph
-# print out
-print_boundary_pairs = False
-print_true_pairs = False
-
+ls_vp = "-r"     # visited path
+ls_goingp = "-pg" # going path
+ls_cls = '-1b'
 # Robots configuration
 class RobotType(Enum):
     circle = 0
@@ -78,9 +90,7 @@ class Config:
         self.robot_radius = 1.0  # [m] for collision check
 
         # if robot_type == RobotType.rectangle
-        #self.robot_width = 0.5  # [m] for collision check
         self.robot_width = 0.5  # [m] for collision check
-        #self.robot_length = 1.2  # [m] for collision check
         self.robot_length = 1.2  # [m] for collision check
         # obstacles [x(m) y(m), ....]
         #self.ob = np.array([[-1, -1],

@@ -25,14 +25,15 @@ def intersection(x, y, radius, ls_points): # line segment points
 def inside_ls(point, ls_points): # line segment points
     '''
     check if a point is whether inside given line segment 
-    return True if inside, otherwise return False 
+    return True if inside, otherwise return False
+    using total distance to check, 
     '''
-    d1 = np.subtract(point, ls_points[0])
-    d2 = np.subtract(point, ls_points[1])
-    position = np.dot (d1, d2)
-    if position <= 0:
-        return True
-    return False
+    dp1 = point_dist(point, ls_points[0])
+    dp2 = point_dist(point, ls_points[1])
+    dls = point_dist(ls_points[1], ls_points[0])
+    dp = dp1 + dp2
+    return math.isclose(dp, dls)
+    
 
 def rotate_vector_center(center, v, radians):
     '''
@@ -261,7 +262,7 @@ def belong_line(point, line):
     check if the point is whether belong line or not
     '''
     a, b, c = line_from_points(line[0], line[1])
-    return a*point[0] + b*point[1] == c
+    return Math.isclose(a*point[0] + b*point[1], c)
     
 def point_dist(p, q):
     '''
@@ -342,4 +343,4 @@ def print_cpairs(message_ID, cpairs): # print circle pairs
         print (pairs)
         
 def approximately_num(num):
-    return format(num, '.10f')
+    return format(float(num), '.10f')

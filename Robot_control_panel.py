@@ -12,10 +12,10 @@ def menu():
     #mapname = "_river.csv" 
     mapname = "_map.csv"
     #mapname = "_MuchMoreFun.csv"
-    start = [0, 0]
+    start = [0.0, 0.0]
 
     #goal = np.array(np.random.randint(100, size=(1,2)))
-    goal = np.array( [70, 70] )
+    goal = np.array( [70.0, 70.0] )
     try:
         opts, args = getopt.getopt(sys.argv[1:],"hn:s:g:m:", ["runtimes=","start=","goal=","mapname="])
     except getopt.GetoptError:
