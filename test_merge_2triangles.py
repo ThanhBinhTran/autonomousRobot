@@ -18,8 +18,8 @@ from Robot_control_panel import *
 import tripy
 
 
-tri0 = ((0, 0),(0, 4), (4, 0))
-tri1 = ((6, 6), (1, 5), (5, 1))
+tri0 = ((0, 0),(0, 6), (6, 0))
+tri1 = ((1, 1), (1, 4), (-3, 6))
 
 def union_triangles(tri0, tri1):
     '''
@@ -35,7 +35,7 @@ def union_triangles(tri0, tri1):
     # get indexes of points that are inside ref triangle 
     ptin_idx = get_index_true(trIin)
     mutualpoints = len(ptin_idx)
-
+    polygon = []
     if mutualpoints == 0:
         # triangle 1 is outside triangle 0
         pts_in_status = [inside_triangle(point, tri1) for point in tri0]
@@ -80,12 +80,42 @@ def union_triangles(tri0, tri1):
 
     elif mutualpoints == 2:
         if incode < 4:
-            print ("11112 triangles has a mutual vertex")
+            print ("both 2 vertices of triangle 1 are on an edge of triangle 0")
+        elif incode < 8:
+            print ("2 vertex of triangle: 1 on edge, 1 is in closed triangle 0")
         else:
-            print ("1111a vertex of triangle 1 is in closed triangle 0")
+            print ("2 vertices of triangle 1 are inside closed triangle 0")
+                        # pick point that is inside triangle
+            outpts = get_index_false(trIin)
+            d = ptin_idx[0]
+            e = ptin_idx[1]
+            f = outpts[0]
+            for i in range(3):
+                a = i
+                if a == 2:
+                    b = 0
+                else:
+                    b = a + 1
+                c = 3 - a - b
+                # a b c loop for 0 1 2; 1 2 0, 2 0 1
+                newptA = line_across((tri1[d], tri1[f]), (tri0[a],tri0[b]))
+                newptB = line_across((tri1[e], tri1[f]), (tri0[a],tri0[b]))
+                print ("newpt", newptA, newptB, a, b, c)
+                if newptA is not None and newptB is not None:
+                    break
+            if point_dist(tri0[a],newptA) > point_dist(tri0[a],newptB):
+                temp = newptA 
+                newptA = newptB
+                newptB = temp
+            polygon = [tri0[c], tri0[a], newptA, tri1[f], newptB, tri0[b]]
+            
+            ret_result = tripy.earclip(polygon)
+            
     elif mutualpoints == 3:
         # 3 points of triangle 1 are all inside triangle 0 
         ret_result = tri0
+    print ("polygon", polygon)   
+    print ("ret_result", ret_result)
     return ret_result
 
 utriangles = union_triangles(tri0, tri1)

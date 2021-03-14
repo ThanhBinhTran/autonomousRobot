@@ -58,6 +58,10 @@ def plot_goal(plt, goal, r_goal, s_goal):
             plt.text(goal[0], goal[1] + 2, "saw goal!")
         else:
             plt.text(goal[0], goal[1] + 2, "goal")
+
+def plot_start(plt, start):
+    plot_point(plt, start, ls_start)
+    plt.text(start[0], start[1] + 2, "start!")
             
 def plot_point(plt, point, ls="xr"):
     plt.plot(point[0], point[1], ls)

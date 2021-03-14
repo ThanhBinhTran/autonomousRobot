@@ -208,25 +208,30 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             # plot robot 
             plot_robot(plt, center[0], center[1], 0, config)
             
+            # plot goal
             plot_goal(plt, goal, r_goal, s_goal)            
             
+            # plot start
+            plot_start(plt, start)
+            
+            # plot robot's vision at local (center)
             plot_vision(plt, center[0], center[1], robotvision, closed_sights, open_sights)
             
             if show_active_openpt:
                 plot_points(plt, ao_gobal, ls_aopt)
-            
-            # display next point if exist
-            if show_next_point:
-                if len(next_pt) > 0:
-                    plot_point(plt, next_pt, ls_nextpt)
-                    
+           
             if show_visible_graph:
                 plot_visible_graph(plt, visible_graph, ls_vg)
             if show_visited_path:
                 plot_paths(plt, visited_path, ls_vp, ls_goingp)
-            
             if show_critical_line_segments:
-                plot_critical_line_segments(plt, critical_ls, ls_cls)
+                plot_critical_line_segments(plt, critical_ls, ls_cls)            
+
+            # display next point if existing
+            if show_next_point:
+                if len(next_pt) > 0:
+                    plot_point(plt, next_pt, ls_nextpt)
+                    
             # to set equal make sure x y axises are same resolution 
             plt.axis("equal")
             plt.grid(True)

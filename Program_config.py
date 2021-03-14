@@ -6,11 +6,11 @@ from enum import Enum
 CONTROL SIGNAL FOR SHOWING OR HIDING PLOT EMELENTS
 '''
 show_animation = True
-show_trajectory = True
 
 show_traversal_sight = True
 show_open_sight = True
 show_closed_sight = True
+show_circle_range = False
 show_ref_sight = False
 
 show_visited_path = True
@@ -21,8 +21,8 @@ show_inactive_openpt = False
 show_next_point = True
 
 show_text_goal = True
-show_circle_range = False
-show_critical_line_segments = True
+show_text_start = True
+show_critical_line_segments = False
 
 
 '''
@@ -50,13 +50,14 @@ ls_map = "-b"    # map
 ls_cs = ":m"     # close sight
 ls_os = "c"      # open sight
 ls_goal = "*r"   # goal
+ls_start = "*b"   # goal
 ls_nextpt = "1r" # next points
 ls_aopt = ".b"   # active open points
 ls_iopt = "ok"   # inactive open_point
 ls_em = "-m"     # explored_map
 ls_vg = ":k"     # visible graph
 ls_vp = "-r"     # visited path
-ls_goingp = "-pg" # going path
+ls_goingp = "-1g" # going path
 ls_cls = '-1b'
 # Robots configuration
 class RobotType(Enum):
