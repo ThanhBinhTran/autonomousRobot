@@ -20,3 +20,16 @@ def read_map_csv(mapname):
                 continue
             ob.append([float(row[0]),float(row[1])])
     return ob
+    
+def read_map_csv_dwa(mapname):
+    first_line = True
+    ob=[]
+    
+    with open(mapname, newline='') as f:
+        reader = csv.reader(f, delimiter=',', quoting=csv.QUOTE_NONE)
+        for row in reader:
+            if first_line:
+                first_line = False
+                continue
+            ob.append([float(row[0])/6.6,float(row[1])/6.6])
+    return ob

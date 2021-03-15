@@ -27,10 +27,11 @@ for opt, arg in opts:
 points = []
 first_line = True
 
-[ox,oy] = read_map_csv(mapname)
-for i in range (len(ox)):
-    print (ox[i], oy[i])
+ob = read_map_csv(mapname)
 
-map_display(plt, mapname, ox, oy)
+# draw map obstacles 
+map_display(plt, mapname, ob)
+
+plt.axis("equal")
 plt.grid(True)
 plt.show()

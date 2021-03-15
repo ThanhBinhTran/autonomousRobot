@@ -26,7 +26,7 @@ def map_serialize(ob_wall, config):
         ptE = ob_wall[i+1]
         lenSE = point_dist(ptS, ptE)
         MINSIZE = max(config.robot_length, config.robot_width)
-        numparts = int (lenSE/(MINSIZE*2) )
+        numparts = int (lenSE/(MINSIZE) )
         vecSE = np.subtract(ptE, ptS)/numparts
         for j in range(numparts):
             ptj = np.add(ptS, np.multiply(vecSE,j) )

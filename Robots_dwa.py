@@ -12,7 +12,7 @@ from Robot_paths_lib import *
 from Robot_draw_lib import *
 from Robot_sight_lib import *
 from Robot_map_lib import *
-from Robot_csv_lib import read_map_csv
+from Robot_csv_lib import *
 from Program_config import *
 from Robot_control_panel import *
 
@@ -229,7 +229,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     # initial state [x(m), y(m), yaw(rad), v(m/s), omega(rad/s)]
     x = np.array([start[0], start[1], math.pi / 8.0, 0.0, 0.0])
 
-    ob_wall = read_map_csv(mapname) # obstacles
+    ob_wall = read_map_csv_dwa(mapname) # obstacles
        
     ob = map_serialize(ob_wall, config)
     ob = np.array(ob)
