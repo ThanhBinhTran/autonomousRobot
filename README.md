@@ -14,7 +14,7 @@ python Robots.py -n <number of run times> -m <map name> -s <start point> -g <goa
     - r: random point for goal
 - start point: default 0,0
 
-Example: ``` python Robots.py -n 5 -m _MuchMoreFun.csv -s 10_10 -g 30.0_70.0```
+Example: ``` python Robots.py -n 5 -m _MuchMoreFun.csv -s 5_5 -g 30.0_70.0```
 
 ###### To generate a map:
 ```

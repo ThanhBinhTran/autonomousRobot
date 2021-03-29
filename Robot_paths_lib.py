@@ -235,8 +235,8 @@ def get_critical_ls(skeleton_path, traversal_sight, robotvision):
                 buff_ls1 = np.subtract(c_pt, pt1)
                 angle0 = abs(signed_angle(base_edge, buff_ls0))
                 angle1 = abs(signed_angle(base_edge, buff_ls1))
-                #pt0 = get_disjoint_ls(c_pt, pt0, safe_radius)
-                #pt1 = get_disjoint_ls(c_pt, pt1, safe_radius)
+                pt0 = get_disjoint_ls(c_pt, pt0, safe_radius)
+                pt1 = get_disjoint_ls(c_pt, pt1, safe_radius)
                 local_ls.append([angle0, pt0, c_pt])
                 local_ls.append([angle1, pt1, c_pt])
         #print ("local_ls ", local_ls)
@@ -326,21 +326,4 @@ def approximately_sp_ls(critical_ls, spt, gpt):
                         path[i] = critical_ls[i-1][2]
                     else:
                         path[i] = critical_ls[i-1][1]
-    path = remove_validation(path, critical_ls)
     return  path
-
-def remove_validation(path, critical_ls):
-    '''
-    this function check then remove sub-path which goes back
-    due to order of line segments
-    '''
-    print ("path", path)
-    # loop from destination to source on path
-    # i on path is i-1 on line segment
-    for i in range (1, len(path) -1):
-        #loop from source to destination for line segments
-
-        for j in range ( len(critical_ls)-1, i, -1):
-            if inside_ls(path[i],critical_ls[j][1:3]):
-                print ("______________", i , j, path[i], critical_ls[j][1:3])
-    return path

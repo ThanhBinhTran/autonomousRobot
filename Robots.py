@@ -1,7 +1,7 @@
 '''
 autonomousRobot
 This project is to simulate an autonomousRobot that try to find a way to reach a goal (target) 
-author: Binh Tran Thanh
+author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
 '''
 import math
 import matplotlib.pyplot as plt
@@ -117,12 +117,14 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         
         if not s_goal and not r_goal:
             # get local open points
-            open_sights = np.array(open_sights)
-            open_local_pts = open_sights[:, 2]    # open_local_pts
-            print ("open_local_pts,", open_local_pts)
-            for i in range( len(open_local_pts)):
-                open_local_pts[i][0] = approximately_num(open_local_pts[i][0])
-                open_local_pts[i][1] = approximately_num(open_local_pts[i][1])
+            open_local_pts = []
+            if len(open_sights) > 0:
+                open_sights = np.array(open_sights)
+                open_local_pts = open_sights[:, 2]    # open_local_pts
+                print ("open_local_pts,", open_local_pts)
+                for i in range( len(open_local_pts)):
+                    open_local_pts[i][0] = approximately_num(open_local_pts[i][0])
+                    open_local_pts[i][1] = approximately_num(open_local_pts[i][1])
 
             # check whether open local points are active 
             if len(open_local_pts) : # new local found
@@ -150,8 +152,8 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                 
                 graph_insert(visible_graph, center, ao_local_pts)
             
-            else:   # there is no direction at local
-                print ("there is no direction at local")
+            else:   # there is no direction 
+                print ("there is no direction reaching the goal")
                 
             # pick next point to make a move
             picked_idx, next_pt = pick_next(ao_gobal)
@@ -181,12 +183,13 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         visited_path.append(asp)
         
         #make a move from current position
-        cpos = motion(cpos, next_pt)  # simulate robot
+        if not no_way_togoal:
+            cpos = motion(cpos, next_pt)  # simulate robot
         
         if show_animation:
 
             # clear plot
-            plt.cla()
+            #plt.cla()
 
             # for stopping simulation with the esc key.
             plt.gcf().canvas.mpl_connect(
@@ -205,25 +208,36 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     plot_vision(plt, lcenter[0], lcenter[1], robotvision, lc_sight, lo_sight)
            
             
-            # plot robot 
-            plot_robot(plt, center[0], center[1], 0, config)
+            if show_robot:
+                # plot robot 
+                plot_robot(plt, center[0], center[1], 0, config)
             
-            # plot goal
-            plot_goal(plt, goal, r_goal, s_goal)            
+            if show_goal:
+                # plot goal
+                plot_goal(plt, goal, r_goal, s_goal)            
             
-            # plot start
-            plot_start(plt, start)
+            if show_start:
+                # plot start
+                plot_start(plt, start)
             
             # plot robot's vision at local (center)
             plot_vision(plt, center[0], center[1], robotvision, closed_sights, open_sights)
             
-            if show_active_openpt:
+            if show_active_openpt and len(ao_gobal) > 0:
                 plot_points(plt, ao_gobal, ls_aopt)
            
             if show_visible_graph:
                 plot_visible_graph(plt, visible_graph, ls_vg)
+                
             if show_visited_path:
                 plot_paths(plt, visited_path, ls_vp, ls_goingp)
+                
+            if show_sketelon_path:
+                plot_lines(plt, skeleton_path, ls_sp)
+                
+            if show_approximately_shortest_path:
+                plot_lines(plt, asp, ls_asp)
+                
             if show_critical_line_segments:
                 plot_critical_line_segments(plt, critical_ls, ls_cls)            
 

@@ -262,7 +262,7 @@ def belong_line(point, line):
     check if the point is whether belong line or not
     '''
     a, b, c = line_from_points(line[0], line[1])
-    return Math.isclose(a*point[0] + b*point[1], c)
+    return math.isclose(a*point[0] + b*point[1], c)
     
 def point_dist(p, q):
     '''

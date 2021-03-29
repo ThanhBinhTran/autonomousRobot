@@ -8,30 +8,38 @@ CONTROL SIGNAL FOR SHOWING OR HIDING PLOT EMELENTS
 show_animation = True
 
 show_traversal_sight = True
+
 show_open_sight = True
 show_closed_sight = True
-show_circle_range = False
+show_circle_range = True
+
 show_ref_sight = False
 
-show_visited_path = True
+show_sketelon_path = True
+show_approximately_shortest_path = True
+show_critical_line_segments = True
+show_cls_orderednumber = False  # show ordered number of critical line segments
+show_visited_path = False
 show_visible_graph = True
 
 show_active_openpt = True
-show_inactive_openpt = True
 show_next_point = True
 
+show_robot = True
+show_goal = True
+show_start = False
 show_text_goal = True
-show_text_start = True
-show_critical_line_segments = True
+
+
 
 
 '''
 PRINT OUT FOR DEBUG
 '''
-print_boundary_linesegments = False
-print_closed_sights = False
+print_boundary_linesegments = True
+print_closed_sights = True
 print_closed_linesegments = False
-print_open_sights = False
+print_open_sights = True
 print_ref_sight = False
 print_ref_csight_linesegments = False
 print_csight_linesegments = False
@@ -58,7 +66,9 @@ ls_em = "-m"     # explored_map
 ls_vg = ":k"     # visible graph
 ls_vp = "-r"     # visited path
 ls_goingp = "-1g" # going path
-ls_cls = '-1b'
+ls_cls = '--g'      # critical line segment 
+ls_sp = "-r"        # shortest skeleton path
+ls_asp = "-m"       # approximately shortest path
 # Robots configuration
 class RobotType(Enum):
     circle = 0
@@ -85,7 +95,7 @@ class Config:
         self.obstacle_cost_gain = 1.0
         self.robot_stuck_flag_cons = 0.001  # constant to prevent robot stucked
         self.robot_type = RobotType.circle
-        self.robot_vision = 5 # the range of input vision
+        self.robot_vision = 150 # the range of input vision
         # if robot_type == RobotType.circle
         # Also used to check if goal is reached in both types
         self.robot_radius = 1.0  # [m] for collision check

@@ -2,7 +2,6 @@ from Robot_lib import *
 from Program_config import *
 from matplotlib import patches
 
-rel_tol = 0.0000001
 #import matplotlib.pyplot as plt
 
 def plot_sight(plt, x, y, pair, cl = "g", alpha = 0.3, linestyle = ":"):
@@ -119,8 +118,9 @@ def plot_critical_line_segments(plt, critical_ls, ls_cls):
     i = 0
     for ls in critical_ls:
         plot_line(plt, ls[1:3], ls_cls)
-        plot_text(plt, ls[1], i)
-        i += 1
+        if show_cls_orderednumber:
+            plot_text(plt, ls[1], i)
+            i += 1
     
 def plot_center(plt, center_pts): 
     '''
