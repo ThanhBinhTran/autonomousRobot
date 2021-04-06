@@ -189,7 +189,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         if show_animation:
 
             # clear plot
-            #plt.cla()
+            plt.cla()
 
             # for stopping simulation with the esc key.
             plt.gcf().canvas.mpl_connect(
