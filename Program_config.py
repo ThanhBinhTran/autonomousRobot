@@ -7,7 +7,7 @@ CONTROL SIGNALs FOR SHOWING OR HIDING PLOT EMELENTS
 '''
 show_animation = True
 show_map = True
-show_world = True
+show_world = False
 
 show_traversal_sight = True
 
@@ -15,7 +15,7 @@ show_open_sight = True
 show_closed_sight = True
 show_circle_range = True
 
-show_ref_sight = False
+show_ref_sight = True
 
 show_sketelon_path = True
 show_approximately_shortest_path = True
@@ -98,7 +98,7 @@ class Config:
         self.obstacle_cost_gain = 1.0
         self.robot_stuck_flag_cons = 0.001  # constant to prevent robot stucked
         self.robot_type = RobotType.circle
-        self.robot_vision = 50 # the range of input vision
+        self.robot_vision = 30 # the range of input vision
         # if robot_type == RobotType.circle
         # Also used to check if goal is reached in both types
         self.robot_radius = 1.0  # [m] for collision check

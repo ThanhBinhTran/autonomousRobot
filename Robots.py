@@ -36,12 +36,12 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     runtimes = menu_result.n
     mapname = menu_result.m
     worldname = menu_result.w
-    start = np.array(menu_result.s)
-    goal = np.array(menu_result.g)
+    start = np.array([menu_result.sx,menu_result.sy])
+    goal = np.array([menu_result.gx,menu_result.gy])
     
     # current position of robot
-    cpos = np.array([start[0], start[1]])
-
+    cpos = start
+    
     # read world map
     if worldname is not None:
         read_map_from_world(worldname)
@@ -70,9 +70,10 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     
     while True:
         run_count += 1
-        center = [cpos[0], cpos[1] ]
+        center = (cpos[0], cpos[1])
         
         print ("\n_____Run times:{0}, at {1}".format(run_count, center))
+        
         # clean old data
         next_pt = []
         
@@ -169,11 +170,12 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             ##############################################
             if show_world and worldname is not None:
                 world_display(plt, mpimg, worldname)
-                if show_map:
+            
+            # draw map obstacles 
+            if show_map:
+                if worldname is not None:
                     map_display(plt, worldname + ".csv", ob)
-            elif worldname is None:    
-                # draw map obstacles 
-                if show_map: 
+                else:    
                     map_display(plt, mapname, ob)
 
             # show_traversal_sight
@@ -190,10 +192,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             
             if show_goal:
                 plot_goal(plt, goal, r_goal, s_goal)            
-            
-            if show_start:
-                plot_start(plt, start)
-            
+                        
             # plot robot's vision at local (center)
             plot_vision(plt, center[0], center[1], robotvision, closed_sights, open_sights)
             

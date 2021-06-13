@@ -231,7 +231,7 @@ def get_critical_ls(skeleton_path, traversal_sight, robotvision):
         # query true sight for center node
         tsight = []
         for ts in traversal_sight:
-            if list(c_pt) == ts[0]: # casting for compare
+            if c_pt == ts[0]: 
                 tsight = ts[1]
         #print ("true closed sight for current point:", tsight)
         local_ls = []
