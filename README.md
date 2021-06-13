@@ -3,19 +3,19 @@ This project is to simulate an autonomousRobot :car: that try to find a way to r
 
 ###### To run demo type:
 ```
-python Robots.py -n <number of run times> -m <map name> -w <worldname> -s <start point> -g <goal point>
+python Robots.py -n <number of run times> -m <map name> -w <worldname> -sx <x> -sy <y> -gx <x> -gy <y>
 ```
-- number of run times:
-    - < 0: run until meet the given goal
-    - n: number of run times
+- n: number of run times:
+    - < 0 or 0: run until meet the given goal
+    - > 0: number of run times
     - default: 1
-- goal point
-    - x_y: input x y of goal
-    - r: random point for goal
-- start point: default 0,0
-
-Example: ``` python Robots.py -n 5 -m _MuchMoreFun.csv -s 5_5 -g 30.0_70.0```
-``` python Robots.py -n 10 -w _map.png -s 5_5 -g 30.0_70.0```
+- gx, gy: goal point of (x,y), type = float, default = 50.0, 50.0
+- sx, sy: start point of (x,y), type = float, default = 0.0, 0.0
+- m: input map name, default _map.csv
+- w: input world model, no default.
+Example: 
+- ``` python Robots.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 30.0 -gy 70.0```
+- ``` python Robots.py -n 5 -w _MuchMoreFun.csv -sx 5 -sy 5 -gx 30.0 -gy 70.0```
 
 ###### To generate a map:
 ```
