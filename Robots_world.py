@@ -12,43 +12,80 @@ from Robot_lib import *
 from Robot_paths_lib import *
 from Robot_draw_lib import *
 from Robot_sight_lib import *
-from Robot_map_lib import *
+from Robot_map_lib import map_display
 from Robot_world_lib import *
-from Robot_csv_lib import *
-from Robot_goal_lib import *
+from Robot_csv_lib import read_map_csv
 from Program_config import *
 from Robot_control_panel import *
 
+
+
 config = Config()
-   
+
+def motion(current_position, next_pt):
+    '''
+    motion model
+    '''
+    current_position[0] = approximately_num(next_pt[0])
+    current_position[1] = approximately_num(next_pt[1])
+    return current_position
+  
+def plot_robot(plt, x, y, yaw, config):  # pragma: no cover
+    if config.robot_type == RobotType.rectangle:
+        outline = np.array([[-config.robot_length / 2, config.robot_length / 2,
+                             (config.robot_length / 2), -config.robot_length / 2,
+                             -config.robot_length / 2],
+                            [config.robot_width / 2, config.robot_width / 2,
+                             - config.robot_width / 2, -config.robot_width / 2,
+                             config.robot_width / 2]])
+        Rot1 = np.array([[math.cos(yaw), math.sin(yaw)],
+                         [-math.sin(yaw), math.cos(yaw)]])
+        outline = (outline.T.dot(Rot1)).T
+        outline[0, :] += x
+        outline[1, :] += y
+        plt.plot(np.array(outline[0, :]).flatten(),
+                 np.array(outline[1, :]).flatten(), "-k")
+    elif config.robot_type == RobotType.circle:
+        circle = plt.Circle((x, y), config.robot_radius, color="b")
+        plt.gcf().gca().add_artist(circle)
+        out_x, out_y = (np.array([x, y]) +
+                        np.array([np.cos(yaw), np.sin(yaw)]) * config.robot_radius)
+        plt.plot([x, out_x], [y, out_y], "-k")
+    
+    
+def saw_goal(center, radius, t_sight, goal):
+    return inside_local_true_sight(goal, center, radius, t_sight)
+
+def reached_goal(center, goal, config):
+    return point_dist(center, goal) <= config.robot_radius
+    
+def check_goal(center, goal, config, radius, t_sight):
+    s_goal = False
+    r_goal = point_dist(center, goal) <= config.robot_radius
+    if not r_goal:
+        s_goal = saw_goal(center, radius, t_sight, goal)
+    return r_goal, s_goal
+    
 def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     print(__file__ + " start!!")
 
-    # set configuration of robot
     config.robot_type = robot_type
     robotvision = config.robot_vision
-    
-    # set same window size to capture pictures
+    # set same window size to easy capture pictures
     plt.figure(figsize=(7,7))
-    
-    # get user input
     menu_result = menu()
-    runtimes = menu_result.n
-    mapname = menu_result.m
-    worldname = menu_result.w
-    start = np.array(menu_result.s)
-    goal = np.array(menu_result.g)
+    run_times = menu_result[0]
+    mapname = menu_result[1]
+    start = menu_result[2] 
+    goal = menu_result[3]
     
     # current position of robot
     cpos = np.array([start[0], start[1]])
 
     # read world map
-    if worldname is not None:
-        read_map_from_world(worldname)
-        ob = read_map_csv(worldname + ".csv")
-    else:
-        ob = read_map_csv(mapname)
-        
+    read_map_from_world(mapname)
+    ob = read_map_csv(mapname + ".csv")
+    
     # traversal sight to draw visible visited places
     traversal_sight = []
 
@@ -134,6 +171,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             else:
                 print ("No way to reach the goal!")
                 no_way_togoal = True
+ 
         else:
             next_pt = goal
             # find the shortest path from center to next point
@@ -156,25 +194,19 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
 
             # clear plot
             plt.cla()
-            
-            ##############################################
+
             # for stopping simulation with the esc key.
-            ##############################################
             plt.gcf().canvas.mpl_connect(
                 'key_release_event',
                 lambda event: [exit(0) if event.key == 'escape' else None])
             
-            ##############################################
-            # draw world and map
-            ##############################################
-            if show_world and worldname is not None:
-                world_display(plt, mpimg, worldname)
-                if show_map:
-                    map_display(plt, worldname + ".csv", ob)
-            elif worldname is None:    
-                # draw map obstacles 
-                if show_map: 
-                    map_display(plt, mapname, ob)
+            # draw map obstacles 
+            if show_map_display: 
+                map_display(plt, mapname, ob)
+            
+            # draw world 
+            if show_world_display:
+                world_display(plt, mpimg, mapname)
 
             # show_traversal_sight
             if show_traversal_sight:
@@ -186,12 +218,15 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
            
             
             if show_robot:
+                # plot robot 
                 plot_robot(plt, center[0], center[1], 0, config)
             
             if show_goal:
+                # plot goal
                 plot_goal(plt, goal, r_goal, s_goal)            
             
             if show_start:
+                # plot start
                 plot_start(plt, start)
             
             # plot robot's vision at local (center)
@@ -226,7 +261,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             plt.pause(0.0001)
         
         # Run n times for debugging
-        if runtimes == run_count:
+        if run_times == run_count:
             break
         
         # check reaching goal

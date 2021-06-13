@@ -3,9 +3,11 @@ import math
 from enum import Enum
 
 '''
-CONTROL SIGNAL FOR SHOWING OR HIDING PLOT EMELENTS
+CONTROL SIGNALs FOR SHOWING OR HIDING PLOT EMELENTS
 '''
 show_animation = True
+show_map = True
+show_world = True
 
 show_traversal_sight = True
 
@@ -18,7 +20,8 @@ show_ref_sight = False
 show_sketelon_path = True
 show_approximately_shortest_path = True
 show_critical_line_segments = True
-show_cls_orderednumber = False  # show ordered number of critical line segments
+show_cls_orderednumber = True  # show ordered number of critical line segments
+
 show_visited_path = True
 show_visible_graph = True
 
@@ -27,7 +30,7 @@ show_next_point = True
 
 show_robot = True
 show_goal = True
-show_start = False
+show_start = True
 show_text_goal = True
 
 
@@ -95,7 +98,7 @@ class Config:
         self.obstacle_cost_gain = 1.0
         self.robot_stuck_flag_cons = 0.001  # constant to prevent robot stucked
         self.robot_type = RobotType.circle
-        self.robot_vision = 20 # the range of input vision
+        self.robot_vision = 50 # the range of input vision
         # if robot_type == RobotType.circle
         # Also used to check if goal is reached in both types
         self.robot_radius = 1.0  # [m] for collision check

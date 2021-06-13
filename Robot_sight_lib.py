@@ -43,12 +43,13 @@ def detect_blind_sight(center, ref_sight, check_sight):
     d_sight = False   # true if there need to divide (ref, check) area in to 2 parts
                       #                (ref_sub_part, common_ref/check_part, check_sub_path)
                       #             then remove ref, check sight , and create 2 new sight 
+    
     divided_sight = []
     
     # get inside status of c1, c0
     c0_in, c0_code = inside_angle_area(c[0], center, r)
     c1_in, c1_code = inside_angle_area(c[1], center, r)
-    #print ("detect_blind_sight___status:", c0_in, c0_code, c1_in, c1_code, r, c)
+    print ("detect_blind_sight___status:", c0_in, c0_code, c1_in, c1_code, r, c)
     ''' 
         function inside_angle_area returns true if inside, false if outside
         if true, the additional code is provided,
@@ -71,6 +72,7 @@ def detect_blind_sight(center, ref_sight, check_sight):
     '''
     if c0_in and c1_in: 
     # check sight completely inside reference sight
+        print ("C1 inside, C2 inside _123")
         if c0_code <=1 and c1_code == 2: # mutual c0 while c1 inside
             # check if c1 is inside (r0, center r1)
             c1_in, _  = inside_angle_area(c[1], r[0] , [center, r[1]])
@@ -118,13 +120,17 @@ def detect_blind_sight(center, ref_sight, check_sight):
         '''
         check if check sight fully coverages ref_sight
         '''
+        print ("C1 inside, C2 inside _124")
         r0_in, _ = inside_angle_area(r[0], center, c)
         r1_in, _ = inside_angle_area(r[1], center, c)
         r0_inccc, _ = inside_angle_area(r[0], c[0], [center, c[1]])
         r1_inccc, _ = inside_angle_area(r[1], c[0], [center, c[1]])
+        print (r0_in, r1_in, r0_inccc, r1_inccc)
         if r0_in and r1_in: # ref sight is inside check sight
+            print ("ref sight is inside check sight")
             # check if r is closer than check sight
             if r0_inccc and r1_inccc: # reference sight is closer
+                print ("reference sight is closer")
                 isR0C = line_intersection([center, r[0]], c )
                 isR1C = line_intersection([center, r[1]], c )
                 d_sight = True
@@ -141,6 +147,7 @@ def detect_blind_sight(center, ref_sight, check_sight):
                 # [Reference sight] - [C1: isR0C] in this order
                     divided_sight = [ r, [c[1], isR0C]]
             else:
+                print ("reference sight is not closer")
                 r_blind = True
 
     elif c0_in and not c1_in :
@@ -148,6 +155,7 @@ def detect_blind_sight(center, ref_sight, check_sight):
         check if R0 is inside area of [R1, C1]
         if R0 is outside then R1 is inside area of [R0, C1] for sure
         '''
+        print ("C1 inside, C2 outside _125")
         d_sight = True
     
         r0_in, _ = inside_angle_area(r[0], center, [r[1], c[1]])
@@ -161,7 +169,7 @@ def detect_blind_sight(center, ref_sight, check_sight):
             if R0 is outside then R1 is inside area of [R0, C0] for sure
         '''
         d_sight = True
-       
+        print ("C1 outside, C2 inside _222")
         r0_in, _ = inside_angle_area(r[0], center, [r[1], c[0]])
         if r0_in :  # R1 C1 R0 C0
             divided_sight = divide_sight_R_C_R_C(center, r[1], c[1], r[0], c[0])
@@ -170,6 +178,8 @@ def detect_blind_sight(center, ref_sight, check_sight):
             divided_sight = divide_sight_R_C_R_C(center, r[0], c[1], r[1], c[0])
      
     else:   # both Check C0 C1 are outside
+        print ("C1 outside, C2 outside _333")
+        print ("C1 outside, C2 outside _333")
         # Check if ref_sight is inside Check_sight,
         rin, _ = inside_angle_area(r[0], center, [c[1], c[0]])
         if rin: # R inside C0- center - C1
@@ -194,10 +204,10 @@ def remove_blind_lss( center, b_lss):
         j = i + 1
         while j < len(closed_sights) :
         
-            #print ("Checking {0} and {1}".format(closed_sights[i],closed_sights[j][0]) )
+            print ("__sight: ref{0} and check{1}".format(closed_sights[i],closed_sights[j]) )
             ds, r_blind, c_blind, d_sight = detect_blind_sight(center, closed_sights[i], closed_sights[j])
             #princlosed_sights(" [Local] divide sight", ds)
-            #print ("status of sight: r {0}, c {1}, d {2}".format(r_blind, c_blind, d_sight))
+            print ("status of sight: r {0}, c {1}, d {2}".format(r_blind, c_blind, d_sight))
             if d_sight:  # separate into 2/3 new sight
                 closed_sights[i] = ds[0]
                 closed_sights[j] = ds[1]
@@ -231,15 +241,21 @@ def get_closed_sights_from_blss(center, b_lss):
     else: 
         closed_sights = remove_blind_lss(center, b_lss)
     return closed_sights
-    
+
 def get_boundary_linesegments(center, robot_vision, ob):
+    b_lss = []
+    for obstacle_part in ob:
+        b_lss_part = get_boundary_linesegments_single_obstacle(center, robot_vision, obstacle_part)
+        b_lss.extend(b_lss_part)
+    return b_lss
+    
+def get_boundary_linesegments_single_obstacle(center, robot_vision, ob):
     ''' 
     find all boundary pairs among all obstacle line segments and circle 
     '''
     x,y = center
     b_lss = []
     for i in range(len(ob)-1):
-        
         ptA = ob[i]  
         ptB = ob[i+1]
         if belong_line(center, [ptA, ptB]):
@@ -285,7 +301,7 @@ def test_get_closed(b_lss):
 def get_closed_sights( center, robot_vision, ob):
     # get boundary line segments where is limited by obstacles
     b_lss = get_boundary_linesegments( center, robot_vision, ob)
-
+    print (b_lss)
     if print_boundary_linesegments:
         print_pairs ("print_boundary_linesegments", b_lss)
     #b_lss = test_get_closed(b_lss)

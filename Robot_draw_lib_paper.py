@@ -60,7 +60,7 @@ def plot_goal(plt, goal, r_goal, s_goal):
 
 def plot_start(plt, start):
     plot_point(plt, start, ls_start)
-    plt.text(start[0], start[1] + 2, "start!")
+    plt.text(start[0], start[1], "start!")
             
 def plot_point(plt, point, ls="xr"):
     plt.plot(point[0], point[1], ls)
@@ -69,11 +69,11 @@ def plot_points(plt, pts, ls="xr"):
     plt.plot(pts[:, 0], pts[:, 1], ls)
 
 def plot_text(plt, point, text):
-    plt.text(point[0], point[1] + 2, text)
+    plt.text(point[0], point[1], text)
     
 def plot_point_text(plt, point, ls, text):
     plot_point(plt, point, ls)
-    plt.text(point[0], point[1] + 2, text)
+    plt.text(point[0], point[1], text)
    
 def plot_line(plt, line, ls="-xr"):
     plt.plot((line[0][0],line[1][0]), (line[0][1],line[1][1]), ls)
@@ -128,25 +128,3 @@ def plot_center(plt, center_pts):
     '''
     for i in range(len(center_pts)):
         plot_point_text(plt, center_pts[i], ".b", "{0}".format(i))
-        
-def plot_robot(plt, x, y, yaw, config):  # pragma: no cover
-    if config.robot_type == RobotType.rectangle:
-        outline = np.array([[-config.robot_length / 2, config.robot_length / 2,
-                             (config.robot_length / 2), -config.robot_length / 2,
-                             -config.robot_length / 2],
-                            [config.robot_width / 2, config.robot_width / 2,
-                             - config.robot_width / 2, -config.robot_width / 2,
-                             config.robot_width / 2]])
-        Rot1 = np.array([[math.cos(yaw), math.sin(yaw)],
-                         [-math.sin(yaw), math.cos(yaw)]])
-        outline = (outline.T.dot(Rot1)).T
-        outline[0, :] += x
-        outline[1, :] += y
-        plt.plot(np.array(outline[0, :]).flatten(),
-                 np.array(outline[1, :]).flatten(), "-k")
-    elif config.robot_type == RobotType.circle:
-        circle = plt.Circle((x, y), config.robot_radius, color="b")
-        plt.gcf().gca().add_artist(circle)
-        out_x, out_y = (np.array([x, y]) +
-                        np.array([np.cos(yaw), np.sin(yaw)]) * config.robot_radius)
-        plt.plot([x, out_x], [y, out_y], "-k")

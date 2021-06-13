@@ -5,16 +5,24 @@ from collections import defaultdict
 
 from Robot_draw_lib import *
 
+def motion(current_position, next_pt):
+    '''
+    motion model
+    '''
+    current_position[0] = approximately_num(next_pt[0])
+    current_position[1] = approximately_num(next_pt[1])
+    return current_position
+    
 def ranking_score(angle, distance):
         
-    # ranking = a/as + b/dist
-    a = 1
-    b = 1
+    # ranking = alpha/(distance**2) + beta/abs(angle**2)
+    alpha = 0.99
+    beta = 0.01
     angle = angle/math.pi
     distance = distance/100
     #print ("Ranking score: angle {0}, distance {1}".format(angle, distance) )
     if not math.isclose(angle, 0.0) and not math.isclose(distance, 0.0):
-        r_score = a/abs(angle**2) + b/(distance**2)
+        r_score = alpha/(distance) + beta/abs(angle) 
     else:    
         r_score = float_info.max
     return r_score
@@ -46,6 +54,7 @@ def pick_next(ao_gobal):
         next_pt = ao_gobal[pick_idx,0:2]
         
     return pick_idx, next_pt 
+
 def all_remaining_point_same_side(a, b, c, obstacle_list):
     ab = np.array([[a,b]])
     # ax + by = c
@@ -213,7 +222,8 @@ def get_critical_ls(skeleton_path, traversal_sight, robotvision):
     critical_ls = []
     # get safe radius to avoid disjoint among line segments
     safe_radius = get_safe_radius(skeleton_path, robotvision)
-
+    #safe_radius = robotvision
+    
     for i in range(1, len( skeleton_path) -1):
         pre_pt = skeleton_path[i-1]     # pre point
         post_pt = skeleton_path[i+1]    # post point

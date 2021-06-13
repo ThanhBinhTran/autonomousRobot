@@ -7,17 +7,18 @@ from Robot_csv_lib import *
 N = 16 #number of points
 mapname = "_map.csv"
 
-# python program -n <number> -m <mapname>
+
+help_mgs = 'python map_generator -n <number_of_points> -m <mapname>'
 try:
     opts, args = getopt.getopt(sys.argv[1:],"hn:m:", ["number=","mapname="])
 except getopt.GetoptError:
-    print ('python find -n <number_of_points> -m <mapname>')
+    print (help_mgs)
     sys.exit(2)
 
 patternStr = ""
 for opt, arg in opts:
     if opt == '-h':
-        print ('python find -n <number> -m <mapname>')
+        print (help_mgs)
         sys.exit()
     elif opt in ("-n", "--number"):
             try:
@@ -33,7 +34,7 @@ for opt, arg in opts:
                 sys.exit(2)
                 
     else:
-        print ('python find -n <number> -m <mapname>')
+        print (help_mgs)
         sys.exit()
 
 # input number of points of map, and click to generate map, middle mouse click to stop
