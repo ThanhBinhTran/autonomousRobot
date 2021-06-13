@@ -3,7 +3,7 @@ This project is to simulate an autonomousRobot :car: that try to find a way to r
 
 ###### To run demo type:
 ```
-python Robots.py -n <number of run times> -m <map name> -s <start point> -g <goal point>
+python Robots.py -n <number of run times> -m <map name> -w <worldname> -s <start point> -g <goal point>
 ```
 - number of run times:
     - < 0: run until meet the given goal
@@ -15,6 +15,7 @@ python Robots.py -n <number of run times> -m <map name> -s <start point> -g <goa
 - start point: default 0,0
 
 Example: ``` python Robots.py -n 5 -m _MuchMoreFun.csv -s 5_5 -g 30.0_70.0```
+``` python Robots.py -n 10 -w _map.png -s 5_5 -g 30.0_70.0```
 
 ###### To generate a map:
 ```
