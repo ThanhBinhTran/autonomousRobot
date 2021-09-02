@@ -1,5 +1,5 @@
 # autonomousRobot
-This project is to simulate an autonomousRobot :car: that try to find a way to reach a goal (target) 
+This project is to simulate an autonomousRobot :car: that try to find a way to reach a goal
 
 ##### To run demo:
 ```
