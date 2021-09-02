@@ -344,3 +344,106 @@ def print_cpairs(message_ID, cpairs): # print circle pairs
         
 def approximately_num(num):
     return format(float(num), '.10f')
+import matplotlib.pyplot as plt
+def find_configure_space(obstacles, robot_radius):
+    ''' this function is to find a configure space which is robot free-collision ares '''
+    nvs = []
+    cspaces = []
+    
+    # get normal vectors of all obstacles
+    for obstacle in obstacles:
+        nv = []
+        for i in range(len(obstacle)):
+            if i == len(obstacle)-1: # last one
+                nvector = normal_vector((obstacle[i],obstacle[0]), robot_radius)
+            else:
+                nvector = normal_vector((obstacle[i],obstacle[i+1]),robot_radius)
+            nv.append(nvector)
+        nvs.append(nv)
+     
+    
+    # get bisectors and limited line segment at joint points
+    lim_lss = []
+    for obstacle in obstacles:
+        lim_ls = []
+        for i in range(len(obstacle)):
+            if i == len(obstacle) -1: # last item
+                ls = cal_bisector (obstacle[i-1], obstacle[i], obstacle[0], robot_radius)
+            else:
+                ls = cal_bisector (obstacle[i-1], obstacle[i], obstacle[i+1], robot_radius)
+            lim_ls.extend(ls)
+        lim_lss.append(lim_ls)
+    
+    for lim_ls in lim_lss:
+        print ("__________________", lim_ls)
+        i = 0
+        for ls in lim_ls:
+            plt.plot(ls[0], ls[1], ".r")
+            plt.text(ls[0], ls[1], ".{0}".format(i))
+            i = i + 1
+
+    # find extend of obstacles
+    j = 0
+    extend_cspaces = []
+    for obstacle in obstacles:
+        extend_cspace =[]
+        for i in range(len(obstacle)):
+            if i == len(obstacle)-1: # last one
+                extend_cspace.append(np.add(obstacle[i], nvs[j][i]))
+                extend_cspace.append(np.add(obstacle[0], nvs[j][i]))
+            else:
+                extend_cspace.append(np.add(obstacle[i  ], nvs[j][i]))
+                extend_cspace.append(np.add(obstacle[i+1], nvs[j][i]))
+        extend_cspaces.append(extend_cspace)
+        j = j + 1
+    
+    for extend_cspace in extend_cspaces:
+        i = 0
+        for pt in extend_cspace:
+            plt.plot(pt[0], pt[1], ".b")
+            plt.text(pt[0], pt[1], ",{0}".format(i))
+            i = i + 1
+            
+    # find boundary of configuration spaces
+    j = 0
+    for nv in nvs:
+        cspace =[]
+        for i in range(len(nv)):
+            ls_Eob = (extend_cspaces[j][2*i],extend_cspaces[j][2*i+1])
+            if i == len(nv) - 1:
+                lsA = (lim_lss[j][2*i],lim_lss[j][2*i+1])
+                lsB = (lim_lss[j][0],lim_lss[j][1])
+            else:
+                lsA = (lim_lss[j][2*i],lim_lss[j][2*i+1])
+                lsB = (lim_lss[j][2*i+2],lim_lss[j][2*i+3])
+            jointPtA = line_intersection(ls_Eob, lsA)
+            jointPtB = line_intersection(ls_Eob, lsB)
+            cspace.append(jointPtA)
+            cspace.append(jointPtB)
+        cspaces.append(cspace)
+        j = j + 1
+    return cspaces
+    
+def  normal_vector(linesegment, robot_radius):
+    ''' this function is to find a  normal vector of a line segment '''
+    # calculate normal vector
+    nv = ((linesegment[1][1]-linesegment[0][1]), -(linesegment[1][0]-linesegment[0][0]))
+    # return normal vector with length of robot's radius
+    rnv = unit_vector(nv)*robot_radius
+    return rnv
+
+def cal_bisector (ptA, ptMid, ptB, robot_radius):
+    ''' this function calculate a bisector of 2 vector (mid,A) and (mid,B) then return line segment with normal vector of bisector '''
+    print ("AMB ", ptA, ptMid, ptB)
+    vectorA = np.subtract(ptMid, ptA)
+    vectorB = np.subtract(ptMid, ptB)
+    u_vecA = unit_vector(vectorA)
+    u_vecB = unit_vector(vectorB)
+    vector_bs = np.add(u_vecA, u_vecB)
+    vector_bs = unit_vector(vector_bs)*robot_radius
+    vector_bs = np.add(ptMid, vector_bs)
+    vector_AB = np.subtract(u_vecA, u_vecB)
+    limit_ls = np.add(vector_bs, vector_AB)
+    print ("___________", vector_bs, limit_ls)
+    linesegment_bs = (vector_bs, limit_ls)
+    return linesegment_bs

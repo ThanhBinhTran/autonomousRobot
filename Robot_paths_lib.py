@@ -16,10 +16,10 @@ def motion(current_position, next_pt):
 def ranking_score(angle, distance):
         
     # ranking = alpha/(distance**2) + beta/abs(angle**2)
-    alpha = 0.99
-    beta = 0.01
+    alpha = 0.9
+    beta = 0.1
     angle = angle/math.pi
-    distance = distance/100
+    distance = distance/150
     #print ("Ranking score: angle {0}, distance {1}".format(angle, distance) )
     if not math.isclose(angle, 0.0) and not math.isclose(distance, 0.0):
         r_score = alpha/(distance) + beta/abs(angle) 

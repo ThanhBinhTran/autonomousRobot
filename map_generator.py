@@ -37,6 +37,9 @@ for opt, arg in opts:
         print (help_mgs)
         sys.exit()
 
+plt.figure(figsize=(6,6))
+plt.grid(True)
+
 # input number of points of map, and click to generate map, middle mouse click to stop
 mappoints = map_generator(plt, N)
 
@@ -46,8 +49,8 @@ for i in range (len(x)):
     print (x[i],y[i])
 
 plt.plot(x, y, "-y")
-plt.grid(True)
 plt.show()
+
 
 # save map to file
 print ("save map points to file: {0}".format(mapname))

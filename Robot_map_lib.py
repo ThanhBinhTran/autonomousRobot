@@ -18,16 +18,8 @@ def map_display(plt, mapname, ob):
         y = [point[1] for point in ob_part]
         x.append(ob_part[0][0])
         y.append(ob_part[0][1])
-        plt.plot(x, y, ls_map)
+        plt.fill(x, y, color = 'k', alpha = 0.4, hatch='//////')
 
-def map_display1(plt, mapname, ob):
-    # displaying the title 
-    plt.title("Display map: {0}".format(mapname))
-    x = [point[0] for point in ob]
-    y = [point[1] for point in ob]
-    plt.plot(x, y, ls_map)
-    #plt.plot(ob[:,0], ob[:,1], )
-    
 def map_serialize(ob_wall, config):
     # divide line into bunch of point 
     map_pts = []
@@ -42,3 +34,4 @@ def map_serialize(ob_wall, config):
             ptj = np.add(ptS, np.multiply(vecSE,j) )
             map_pts.append(ptj)
     return map_pts
+    

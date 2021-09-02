@@ -172,7 +172,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             # draw world and map
             ##############################################
             if show_world and worldname is not None:
-                dworld_display(plt, mpimg, worldname)
+                world_display(plt, mpimg, worldname)
             
             # draw map obstacles 
             if show_map:
@@ -183,11 +183,14 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
 
             # show_traversal_sight
             if show_traversal_sight:
+                i = 0
                 for local in traversal_sight:
                     lcenter = local[0]  # center of robot at local
                     lc_sight = local[1] # closed sight at local
                     lo_sight = local[2] # open sight at local
                     plot_vision(plt, lcenter[0], lcenter[1], robotvision, lc_sight, lo_sight)
+                    plt.text(lcenter[0] + 1, lcenter[1] + 1, "C({0})".format(i))
+                    i = i + 1
            
             
             if show_robot:

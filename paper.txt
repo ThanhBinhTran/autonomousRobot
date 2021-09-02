@@ -1,0 +1,6 @@
+local sight
+python .\Robots.py -n 1 -sx 50 -sy 50 -gx 90 -gy 90
+
+
+
+python .\Paper_6_visibility_graph_global_sight.py -n 6 -gx 90 -gy 90

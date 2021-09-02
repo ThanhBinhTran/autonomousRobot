@@ -1,3 +1,5 @@
+python .\Robots.py -n 1 -sx 50 -sy 50 -gx 90 -gy 90
+
 import numpy as np
 import math
 from enum import Enum
@@ -10,24 +12,23 @@ show_map = True
 show_world = True
 
 show_traversal_sight = True
-#show_traversal_sight = True
 
 show_open_sight = True
 show_closed_sight = True
 show_circle_range = True
 
-show_ref_sight = False
+show_ref_sight = True
 
-show_sketelon_path = True
-show_approximately_shortest_path = True
+show_sketelon_path = False
+show_approximately_shortest_path = False
 show_critical_line_segments = False
 show_cls_orderednumber = True  # show ordered number of critical line segments
 
 show_visited_path = False
 show_visible_graph = False
 
-show_active_openpt = True
-show_next_point = True
+show_active_openpt = False
+show_next_point = False
 
 show_robot = True
 show_goal = True

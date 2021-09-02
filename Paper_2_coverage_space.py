@@ -5,53 +5,85 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
 '''
 import math
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import numpy as np
 
 from Robot_lib import *
 from Robot_paths_lib import *
 from Robot_draw_lib import *
 from Robot_sight_lib import *
-from Robot_map_lib import *
-from Robot_world_lib import *
-from Robot_csv_lib import *
-from Robot_goal_lib import *
+from Robot_map_lib import map_display
+from Robot_csv_lib import read_map_csv
 from Program_config import *
 from Robot_control_panel import *
 
+
+
 config = Config()
-   
+
+def motion(current_position, next_pt):
+    '''
+    motion model
+    '''
+    current_position[0] = approximately_num(next_pt[0])
+    current_position[1] = approximately_num(next_pt[1])
+    return current_position
+  
+def plot_robot(plt, x, y, yaw, config):  # pragma: no cover
+    if config.robot_type == RobotType.rectangle:
+        outline = np.array([[-config.robot_length / 2, config.robot_length / 2,
+                             (config.robot_length / 2), -config.robot_length / 2,
+                             -config.robot_length / 2],
+                            [config.robot_width / 2, config.robot_width / 2,
+                             - config.robot_width / 2, -config.robot_width / 2,
+                             config.robot_width / 2]])
+        Rot1 = np.array([[math.cos(yaw), math.sin(yaw)],
+                         [-math.sin(yaw), math.cos(yaw)]])
+        outline = (outline.T.dot(Rot1)).T
+        outline[0, :] += x
+        outline[1, :] += y
+        plt.plot(np.array(outline[0, :]).flatten(),
+                 np.array(outline[1, :]).flatten(), "-k")
+    elif config.robot_type == RobotType.circle:
+        circle = plt.Circle((x, y), config.robot_radius, color="b")
+        plt.gcf().gca().add_artist(circle)
+        out_x, out_y = (np.array([x, y]) +
+                        np.array([np.cos(yaw), np.sin(yaw)]) * config.robot_radius)
+        plt.plot([x, out_x], [y, out_y], "-k")
+    
+    
+def saw_goal(center, radius, t_sight, goal):
+    return inside_local_true_sight(goal, center, radius, t_sight)
+
+def reached_goal(center, goal, config):
+    return point_dist(center, goal) <= config.robot_radius
+    
+def check_goal(center, goal, config, radius, t_sight):
+    s_goal = False
+    r_goal = point_dist(center, goal) <= config.robot_radius
+    if not r_goal:
+        s_goal = saw_goal(center, radius, t_sight, goal)
+    return r_goal, s_goal
+    
 def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     print(__file__ + " start!!")
 
-    # set configuration of robot
     config.robot_type = robot_type
     robotvision = config.robot_vision
-    
-    # set same window size to capture pictures
-    plt.figure(figsize=(6,6))
-    
-    # get user input
+    # set same window size to easy capture pictures
+    plt.figure(figsize=(7,7))
     menu_result = menu()
-    runtimes = menu_result.n
-    mapname = menu_result.m
-    worldname = menu_result.w
-    start = np.array([menu_result.sx,menu_result.sy])
-    goal = np.array([menu_result.gx,menu_result.gy])
+    run_times = menu_result[0]
+    mapname = menu_result[1]
+    start = menu_result[2] 
+    goal = menu_result[3]
     
+    goal = np.array([0, 40])
     # current position of robot
-    cpos = start
-    
-    # read world map
-    if worldname is not None:
-        read_map_from_world(worldname)
-        ob = read_map_csv(worldname + ".csv")
-    else:
-        ob = read_map_csv(mapname)
+    cpos = np.array([start[0], start[1]])
 
-    # find configure space
-    #ob1 = find_configure_space(ob)
-    
+    # read map 
+    ob = read_map_csv(mapname) # obstacles
+    ob = [[60, 0],[60,1]]
     # traversal sight to draw visible visited places
     traversal_sight = []
 
@@ -73,10 +105,9 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     
     while True:
         run_count += 1
-        center = (cpos[0], cpos[1])
+        center = [cpos[0], cpos[1] ]
         
         print ("\n_____Run times:{0}, at {1}".format(run_count, center))
-        
         # clean old data
         next_pt = []
         
@@ -138,6 +169,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             else:
                 print ("No way to reach the goal!")
                 no_way_togoal = True
+ 
         else:
             next_pt = goal
             # find the shortest path from center to next point
@@ -160,26 +192,14 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
 
             # clear plot
             plt.cla()
-            
-            ##############################################
+
             # for stopping simulation with the esc key.
-            ##############################################
             plt.gcf().canvas.mpl_connect(
                 'key_release_event',
                 lambda event: [exit(0) if event.key == 'escape' else None])
             
-            ##############################################
-            # draw world and map
-            ##############################################
-            if show_world and worldname is not None:
-                dworld_display(plt, mpimg, worldname)
-            
             # draw map obstacles 
-            if show_map:
-                if worldname is not None:
-                    map_display(plt, worldname + ".csv", ob)
-                else:    
-                    map_display(plt, mapname, ob)
+            #map_display(plt, mapname, ob)
 
             # show_traversal_sight
             if show_traversal_sight:
@@ -191,16 +211,29 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
            
             
             if show_robot:
+                # plot robot 
                 plot_robot(plt, center[0], center[1], 0, config)
-            
+                plt.text(center[0] + 1, center[1] + 1, "Robot's center")
+                vision = plt.Circle(center, robotvision, color="red", linestyle  = "-", fill=False)
+                plt.gcf().gca().add_artist(vision)
             if show_goal:
+                # plot goal
                 plot_goal(plt, goal, r_goal, s_goal)            
-                        
+            
+            if show_start:
+                # plot start
+                plot_start(plt, start)
+            
             # plot robot's vision at local (center)
             plot_vision(plt, center[0], center[1], robotvision, closed_sights, open_sights)
             
             if show_active_openpt and len(ao_gobal) > 0:
-                plot_points(plt, ao_gobal, ls_aopt)
+                plot_points(plt, ao_gobal, ".b")
+                i = 1
+                for pt in ao_gobal:
+                    draw_vision_area(plt, pt[0], pt[1], robotvision)
+                    plt.text(pt[0] + 1, pt[1] - 2, "Po{0}".format(i))
+                    i = i + 1
            
             if show_visible_graph:
                 plot_visible_graph(plt, visible_graph, ls_vg)
@@ -220,15 +253,23 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             # display next point if existing
             if show_next_point:
                 if len(next_pt) > 0:
-                    plot_point(plt, next_pt, ls_nextpt)
+                    plot_point(plt, next_pt, ".b")
+                    draw_vision_area(plt, next_pt[0], next_pt[1], robotvision)
+                    plt.text(next_pt[0] + 1, next_pt[1] + 1, "Po0")
+
                     
             # to set equal make sure x y axises are same resolution 
             plt.axis("equal")
             plt.grid(True)
-            plt.pause(1)
-        
+            plt.pause(0.0001)
+            a = 40
+            b = -40
+            plot_point(plt, (a,a)  , '.w')
+            plot_point(plt, (a,b)  , '.w')
+            plot_point(plt, (b,a), '.w')
+            plot_point(plt, (b,b)    , '.w')
         # Run n times for debugging
-        if runtimes == run_count:
+        if run_times == run_count:
             break
         
         # check reaching goal
@@ -243,5 +284,5 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     plt.show()
 
 if __name__ == '__main__':
-    #main(robot_type=RobotType.rectangle)
-    main(robot_type=RobotType.circle)
+    main(robot_type=RobotType.rectangle)
+    #main(robot_type=RobotType.circle)

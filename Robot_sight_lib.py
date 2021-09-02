@@ -554,8 +554,6 @@ def get_allpts_except(all_pairs, e_pairs):
     allPts.remove(e_pairs[0])
     allPts.remove(e_pairs[1])
     return allPts
-
-
             
 def is_open_sight(center, cpair, all_pairs):
     #print ("___Pair {0}, all points {1}".format(cpair, all_pairs))
@@ -582,8 +580,7 @@ def is_open_sight_pairs(center, pt_i, pt_j, i, j, all_pairs):
     #print ("_Check pair (r, c): {0} {1}, index i: {2} j: {3}, result: {4}".format(r_cpairs[pt_i],c_cpairs[pt_j], pt_i, pt_j,  ret_result) )
 
     return ret_result
-    
-        
+           
 def open_sight(center, i, j, close_cpairs):
     # i is always greater than j
     
@@ -597,7 +594,6 @@ def open_sight(center, i, j, close_cpairs):
     else:
         found = False
     return found, ridx, cidx
-
 
 def point_isclose(q, p):
     return point_dist(p, q) < rel_tol
