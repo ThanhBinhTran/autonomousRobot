@@ -17,7 +17,8 @@ python Robots.py -n <number of run times> -m <map name> -w <worldname> -sx <x> -
 
 Example: 
 ```
-python Robots.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 30.0 -gy 70.0
+python Robots.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
+python Robots.py -n 0 -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
 python Robots.py -n 0 -w _map.png -sx 5 -sy 10 -gx 180.0 -gy 180
 ```
 
