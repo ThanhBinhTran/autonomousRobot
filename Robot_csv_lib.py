@@ -1,14 +1,14 @@
-'''
+"""
 autonomousRobot
 This project is to simulate an autonomousRobot that try to find a way to reach a goal (target) 
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
-'''
+"""
 
 import csv
 
-''' write map points into csv file in form of (x,y)
+""" write map points into csv file in form of (x,y)
     x,y is casted to integer for easy debug/observe 
-'''
+"""
 def write_map_csv(file_name, f_data, data_header):
     f = open(file_name, 'w', newline='', encoding="utf-8")
     writer = csv.writer(f, delimiter=",")
@@ -17,7 +17,7 @@ def write_map_csv(file_name, f_data, data_header):
         writer.writerow([int(pt[0]),int(pt[1])])
     f.close()
 
-''' read map points into csv file in form of (x,y) '''
+""" read map points into csv file in form of (x,y) """
 def read_map_csv1(mapname):
     first_line = True
     obstacles=[]
@@ -31,7 +31,7 @@ def read_map_csv1(mapname):
             obstacles.append([float(row[0]),float(row[1])])
     return obstacles
 
-'''read map points  which is consist of many parts '''
+"""read map points  which is consist of many parts """
 def read_map_csv(mapname):
     first_line = True
     obstacles =[]

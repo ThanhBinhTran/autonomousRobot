@@ -1,8 +1,8 @@
-'''
+"""
 autonomousRobot
 This project is to simulate an autonomousRobot that try to find a way to reach a goal (target) 
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
-'''
+"""
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,9 +21,9 @@ from Robot_control_panel import *
 config = Config()
 
 def motion(current_position, next_pt):
-    '''
+    """
     motion model
-    '''
+    """
     current_position[0] = approximately_num(next_pt[0])
     current_position[1] = approximately_num(next_pt[1])
     return current_position

@@ -1,12 +1,14 @@
+"""
 python .\Robots.py -n 1 -sx 50 -sy 50 -gx 90 -gy 90
+"""
 
 import numpy as np
 import math
 from enum import Enum
 
-'''
+"""
 CONTROL SIGNALs FOR SHOWING OR HIDING PLOT EMELENTS
-'''
+"""
 show_animation = True
 show_map = True
 show_world = True
@@ -38,9 +40,9 @@ show_text_goal = True
 
 
 
-'''
+"""
 PRINT OUT FOR DEBUG
-'''
+"""
 print_boundary_linesegments = True
 print_closed_sights = True
 print_closed_linesegments = False
@@ -50,9 +52,9 @@ print_ref_csight_linesegments = False
 print_csight_linesegments = False
 print_traversal_sight = False
 
-'''
+"""
 LINE STYPE FOR DISPLAY PLOT
-'''
+"""
 ls_is = ":.c"    # intersection
 ls_bp = "-r"     # boundary points
 ls_ts = "-"      # true sight
@@ -80,9 +82,9 @@ class RobotType(Enum):
     rectangle = 1
 
 class Config:
-    '''
+    """
     simulation parameter class
-    '''
+    """
 
     def __init__(self):
         # robot parameter

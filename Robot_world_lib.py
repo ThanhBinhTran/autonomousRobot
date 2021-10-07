@@ -1,8 +1,8 @@
-'''
+"""
 autonomousRobot
 This project is to simulate an autonomousRobot that try to find a way to reach a goal (target) 
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
-'''
+"""
 
 from __future__ import print_function
 import cv2 as cv

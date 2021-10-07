@@ -1,14 +1,15 @@
 import numpy as np
 from sys import float_info
-from Robot_lib import *    
+from Robot_lib import *
+from Robot_sight_lib import inside_global_true_sight
 from collections import defaultdict 
 
 from Robot_draw_lib import *
 
 def motion(current_position, next_pt):
-    '''
+    """
     motion model
-    '''
+    """
     current_position[0] = approximately_num(next_pt[0])
     current_position[1] = approximately_num(next_pt[1])
     return current_position
@@ -28,9 +29,9 @@ def ranking_score(angle, distance):
     return r_score
     
 def ranking(center, pt, goal):
-    '''
+    """
     score the open point by its angle (from center to point and goal) and its distance (to goal)
-    '''
+    """
 
     sa =  signed_angle(goal-center, pt - center)
     dist = point_dist (goal, pt)
@@ -38,10 +39,10 @@ def ranking(center, pt, goal):
     return [rank_score]
     
 def pick_next(ao_gobal):
-    '''
+    """
     return index and value of next point if there exist any active open point
     otherwise -1
-    '''
+    """
     pick_idx = -1
     next_pt = []
     if len(ao_gobal) > 0:
@@ -129,6 +130,11 @@ def build_graph(edges):
 def graph_intiailze():
     return defaultdict(list) 
 
+# Function to add local active point to graph
+def graph_add_lOpenPts(graph, center, lActive_OpenPts):
+    if len(lActive_OpenPts) > 0:
+        graph_insert(graph, center, lActive_OpenPts)
+        
 # Function to insert edges into graph
 def graph_insert(graph, pnode, leafs): 
     #print ("__pnode:", pnode)
@@ -337,3 +343,42 @@ def approximately_sp_ls(critical_ls, spt, gpt):
                     else:
                         path[i] = critical_ls[i-1][1]
     return  path
+
+"""
+    get local open points
+"""
+def get_local_open_points(open_sights):
+    local_openPts = []
+    if len(open_sights) > 0:
+        open_sights = np.array(open_sights)
+        local_openPts = open_sights[:, 2]    # local_openPts
+        print ("local_openPts,", local_openPts)
+        for i in range( len(local_openPts)):
+            local_openPts[i][0] = approximately_num(local_openPts[i][0])
+            local_openPts[i][1] = approximately_num(local_openPts[i][1])
+    return local_openPts
+    
+"""
+    check whether local open_points are active 
+"""
+def get_active_open_points(local_openPts, traversalSights,robotvision):
+    local_active_openPts = []
+    if len(local_openPts) : # new local found
+        if len(traversalSights) == 0:
+            local_active_openPts = local_openPts
+        else:
+            local_openPts_status = [inside_global_true_sight(pt, robotvision, traversalSights) for pt in local_openPts]
+            local_active_openPts = local_openPts[np.logical_not(local_openPts_status)]
+    return local_active_openPts
+ 
+"""
+    add local active and its ranking to global active points set
+"""
+def store_global_active_points(gActive_OpenPts, lActive_OpenPts, ranks_new):
+    if len(lActive_OpenPts) > 0:
+        local_active_openPts_info = np.concatenate((lActive_OpenPts, ranks_new), axis=1)
+        if len(gActive_OpenPts) == 0:
+            gActive_OpenPts = np.array(local_active_openPts_info)
+        else:
+            gActive_OpenPts = np.concatenate((gActive_OpenPts, local_active_openPts_info), axis=0)
+    return gActive_OpenPts

@@ -1,8 +1,8 @@
-'''
+"""
 autonomousRobot
 This project is to simulate an autonomousRobot that try to find a way to reach a goal (target) 
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
-'''
+"""
 import math
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg

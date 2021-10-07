@@ -2,29 +2,28 @@ import numpy as np
 import math
 from enum import Enum
 
-'''
+"""
 CONTROL SIGNALs FOR SHOWING OR HIDING PLOT EMELENTS
-'''
+"""
 show_animation = True
 show_map = True
 show_world = True
 
-show_traversal_sight = True
-#show_traversal_sight = True
+show_traversalSights = True
 
-show_open_sight = True
-show_closed_sight = True
-show_circle_range = True
+show_openSight = True
+show_closedSight = True
+show_circleRange = True
 
-show_ref_sight = False
+show_refSight = False
 
-show_sketelon_path = True
+show_sketelonPath = True
 show_approximately_shortest_path = True
 show_critical_line_segments = False
 show_cls_orderednumber = True  # show ordered number of critical line segments
 
-show_visited_path = False
-show_visible_graph = False
+show_visitedPath = False
+show_visibilityGraph = False
 
 show_active_openpt = True
 show_next_point = True
@@ -37,21 +36,21 @@ show_text_goal = True
 
 
 
-'''
+"""
 PRINT OUT FOR DEBUG
-'''
-print_boundary_linesegments = True
-print_closed_sights = True
-print_closed_linesegments = False
-print_open_sights = True
+"""
+print_boundary_line_segments = False
+print_closed_sights = False
+print_closed_line_segments = False
+print_open_sights = False
 print_ref_sight = False
-print_ref_csight_linesegments = False
-print_csight_linesegments = False
-print_traversal_sight = False
+print_ref_csight_line_segments = False
+print_csight_line_segments = False
+print_traversalSights = False
 
-'''
+"""
 LINE STYPE FOR DISPLAY PLOT
-'''
+"""
 ls_is = ":.c"    # intersection
 ls_bp = "-r"     # boundary points
 ls_ts = "-"      # true sight
@@ -79,9 +78,9 @@ class RobotType(Enum):
     rectangle = 1
 
 class Config:
-    '''
+    """
     simulation parameter class
-    '''
+    """
 
     def __init__(self):
         # robot parameter

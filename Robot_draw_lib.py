@@ -18,12 +18,12 @@ def draw_open_sight(plt, x, y, open_sight, cl="g", ls_ts="-"):
         plot_sight(plt, x, y, pair, cl, 0.3, ls_ts)
             
 def draw_vision_area(plt, x, y, radius):
-    ''' draw a circle that limits the vision of robot ''' 
+    """ draw a circle that limits the vision of robot """ 
     vision = plt.Circle((x, y), radius, color="red", linestyle  = ":", fill=False)
     plt.gcf().gca().add_artist(vision)
 
 def draw_vision_area(plt, x, y, radius, ls = ":"):
-    ''' draw a circle that limits the vision of robot ''' 
+    """ draw a circle that limits the vision of robot """ 
     vision = plt.Circle((x, y), radius, color="red", linestyle  = ls, fill=False)
     plt.gcf().gca().add_artist(vision)
     
@@ -37,14 +37,14 @@ def draw_arc_area(plt, x, y, radius):
     plt.axes().add_patch(aarc)
        
 def plot_vision(plt, x, y, radius, csight, osight):
-    if show_circle_range:
+    if show_circleRange:
         draw_vision_area(plt, x, y, radius)
     #draw_arc_area(plt, x, y, radius)
     
-    if show_closed_sight:
+    if show_closedSight:
         draw_true_sight(plt, x, y, csight, cl_ts, ls_ts) 
             
-    if show_open_sight:
+    if show_openSight:
         draw_open_sight(plt, x, y, osight)
         
         
@@ -106,9 +106,9 @@ def plot_visible_graph(plt, visible_graph, ls_vg):
             plot_line(plt, [pnode, verteces], ls_vg)
 
 def plot_triangles(plt,triangles, ls = ":c"):
-    ''' 
+    """ 
     plot list of triangles
-    '''
+    """
     for triangle in triangles:
         plot_line(plt, [triangle[0],triangle[1]], ls)
         plot_line(plt, [triangle[1],triangle[2]], ls)
@@ -123,9 +123,9 @@ def plot_critical_line_segments(plt, critical_ls, ls_cls):
             i += 1
     
 def plot_center(plt, center_pts): 
-    '''
+    """
     plot a center of triangles
-    '''
+    """
     for i in range(len(center_pts)):
         plot_point_text(plt, center_pts[i], ".b", "{0}".format(i))
         

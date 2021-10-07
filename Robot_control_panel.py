@@ -1,8 +1,8 @@
 import argparse
 
-'''
+"""
 get user inputs
-'''
+"""
 
 def menu():
     
