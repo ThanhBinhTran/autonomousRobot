@@ -241,7 +241,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     next_pt = np.array([0, 1])
     ao_gobal = [] # active open points [global]
     
-    robotvision = config.robot_vision
+    robot_vision = config.robot_vision
 
     run_count = 0
     r_goal = True

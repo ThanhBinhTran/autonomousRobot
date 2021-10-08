@@ -665,7 +665,7 @@ def scan_around(center, robot_vision, ob, goal):
     return closed_sights, open_sights
 
 
-def get_explorered_sight(center, goal, robotvision, csight, osight):
+def get_explorered_sight(center, goal, robot_vision, csight, osight):
     """     
     extend map from local true sights
     """

@@ -87,15 +87,19 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         # scan to get sights at local
         closed_sights, open_sights = scan_around(center, robot_vision, ob, goal)
 
-        # check if the robot saw or reach the goal
+        # check if the robot saw or reach the given goal
         r_goal, s_goal = check_goal(center, goal, config, robot_vision, closed_sights)
+
+        # initial local open point as empty
+        local_open_pts = []
 
         if not s_goal and not r_goal:
             # get local open points
             local_open_pts = get_local_open_points(open_sights)
 
             # check whether local open points are active
-            l_active_open_pts = get_active_open_points(local_open_pts, traversal_sights, robot_vision)
+            l_active_open_pts = get_active_open_points(local_open_pts, traversal_sights,
+                                                       robot_vision, center, goal)
 
             # Ranking new active openPts then stack to global set.
             if len(l_active_open_pts) > 0:
@@ -181,6 +185,9 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
 
             # plot robot's vision at local (center)
             plot_vision(plt, center[0], center[1], robot_vision, closed_sights, open_sights)
+
+            if show_local_openpt and len(local_open_pts) > 0:
+                plot_points(plt, local_open_pts, ls_lopt)
 
             if show_active_openpt and len(g_active_open_pts) > 0:
                 plot_points(plt, g_active_open_pts, ls_aopt)
