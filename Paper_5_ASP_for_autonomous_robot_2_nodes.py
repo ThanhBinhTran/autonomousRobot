@@ -19,7 +19,7 @@ from Robot_control_panel import *
 
 def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     goal = [10,10]
-    robotvision = 2
+    robot_vision = 2
     center = []
     center.append([1,0.5])
     center.append([2,2.2])
@@ -37,8 +37,8 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     [4.7, 0],
                     [4.7, 2]
                     ])
-    spts = intersection(center[0][0], center[0][1], robotvision, start_line)
-    epts = intersection(center[-1][0], center[-1][1], robotvision, end_line) 
+    spts = intersection(center[0][0], center[0][1], robot_vision, start_line)
+    epts = intersection(center[-1][0], center[-1][1], robot_vision, end_line) 
     
     if inside_ls(spts[0], start_line):
         start = spts[0]
@@ -62,15 +62,15 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     csights = []
     osights = []
     for centerpt in center:
-        cs, os = scan_around(centerpt, robotvision, ob, goal)
+        cs, os = scan_around(centerpt, robot_vision, ob, goal)
         csights.append(cs)
         osights.append(os)
     
     # draw circle range
     if 1:
         for centerpt in center:
-            draw_vision_area(plt, centerpt[0], centerpt[1], robotvision)
-            #draw_vision_area(plt, centerpt[0], centerpt[1], robotvision/2)
+            draw_vision_area(plt, centerpt[0], centerpt[1], robot_vision)
+            #draw_vision_area(plt, centerpt[0], centerpt[1], robot_vision/2)
   
     for ob_part in ob:
         plt.fill(ob_part[:,0], ob_part[:,1], color = 'k', alpha = 0.4, hatch='//')
@@ -95,7 +95,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         traversal_sight.append([center[i], csights[i], osights[i]])
         i = i + 1
 
-    asp, critical_ls = approximately_shortest_path(skeleton_path, traversal_sight, robotvision)
+    asp, critical_ls = approximately_shortest_path(skeleton_path, traversal_sight, robot_vision)
 
     if 0: # draw critical edge
         # draw plot_critical_line_segments

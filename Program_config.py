@@ -3,7 +3,12 @@ import math
 from enum import Enum
 
 """
-CONTROL SIGNALs FOR SHOWING OR HIDING PLOT EMELENTS
+    ALGORITHMS CONTROL
+"""
+ENABLE_AR_RANKING = False
+
+"""
+CONTROL SIGNALs FOR SHOWING OR HIDING PLOT ELEMENTS
 """
 show_animation = True
 show_map = True
@@ -25,6 +30,7 @@ show_cls_orderednumber = True  # show ordered number of critical line segments
 show_visitedPath = False
 show_visibilityGraph = False
 
+show_local_openpt = True
 show_active_openpt = True
 show_next_point = True
 
@@ -62,9 +68,9 @@ ls_cs = ":m"     # close sight
 ls_os = "c"      # open sight
 ls_goal = "*r"   # goal
 ls_start = "*b"   # goal
-ls_nextpt = "1r" # next points
+ls_nextpt = ".r" # next points
+ls_lopt = ".k"   # local open_point
 ls_aopt = ".b"   # active open points
-ls_iopt = "ok"   # inactive open_point
 ls_em = "-m"     # explored_map
 ls_vg = ":k"     # visible graph
 ls_vp = "-r"     # visited path

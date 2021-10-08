@@ -19,7 +19,7 @@ from Robot_control_panel import *
 
 def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     
-    robotvision = 3
+    robot_vision = 3
         
     ob = np.array([
                 [4, 0],
@@ -45,8 +45,8 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     [0.05, 0],
                     [0.05, 4]
                     ])
-    spts = intersection(center[0], center[1], robotvision, start_line)
-    epts = intersection(center[0], center[1], robotvision, end_line) 
+    spts = intersection(center[0], center[1], robot_vision, start_line)
+    epts = intersection(center[0], center[1], robot_vision, end_line) 
     
     if inside_ls(spts[0], start_line):
         start = spts[0]
@@ -64,10 +64,10 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     skeleton_path.append(start)
     skeleton_path.append(center)
     skeleton_path.append(end)
-    csights_0, osights_0 = scan_around(center, robotvision, obs, end)
-    csights_1, osights_1 = scan_around(center1, robotvision, obs, end)
+    csights_0, osights_0 = scan_around(center, robot_vision, obs, end)
+    csights_1, osights_1 = scan_around(center1, robot_vision, obs, end)
     
-    draw_vision_area(plt, center[0], center[1], robotvision)
+    draw_vision_area(plt, center[0], center[1], robot_vision)
     
     # map drawing
     plt.fill(ob[:,0], ob[:,1], color = 'k', alpha = 0.4, hatch='//')
@@ -75,7 +75,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     traversal_sight = []
     traversal_sight.append([center, csights_0, osights_0])
     traversal_sight.append([center1, csights_1, osights_1])
-    asp, critical_ls = approximately_shortest_path(skeleton_path, traversal_sight, robotvision)
+    asp, critical_ls = approximately_shortest_path(skeleton_path, traversal_sight, robot_vision)
 
     if 1: # approximate path and critical edge
         # draw plot_critical_line_segments

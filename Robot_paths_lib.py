@@ -387,7 +387,10 @@ def get_local_open_points(open_sights):
 def get_active_open_points(local_open_pts, traversal_sights, robot_vision, center, goal):
     local_active_open_pts = []
     if len(local_open_pts):  # new local found
-        local_active_open_pts = is_inside_active_arc(local_open_pts, robot_vision, center, goal)
+        if ENABLE_AR_RANKING:
+            local_active_open_pts = is_inside_active_arc(local_open_pts, robot_vision, center, goal)
+        else:
+            local_active_open_pts = local_open_pts
 
         # remove local_point which is inside explored area
         if len(traversal_sights) > 0:

@@ -68,7 +68,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     print(__file__ + " start!!")
 
     config.robot_type = robot_type
-    robotvision = config.robot_vision
+    robot_vision = config.robot_vision
     # set same window size to easy capture pictures
     plt.figure(figsize=(7,7))
     menu_result = menu()
@@ -112,10 +112,10 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         next_pt = []
         
         # scan to get sights at local
-        closed_sights, open_sights = scan_around(center, robotvision, ob, goal)
+        closed_sights, open_sights = scan_around(center, robot_vision, ob, goal)
         
         # check if the robot saw or reach the goal
-        r_goal, s_goal = check_goal(center, goal, config, robotvision, closed_sights)
+        r_goal, s_goal = check_goal(center, goal, config, robot_vision, closed_sights)
         
         if not s_goal and not r_goal:
             # get local open points
@@ -139,7 +139,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     # add local to global
                     ao_gobal = np.array(ao_local)
                 else:
-                    open_local_pts_status = [inside_global_true_sight(pt, robotvision, traversal_sight) for pt in open_local_pts]
+                    open_local_pts_status = [inside_global_true_sight(pt, robot_vision, traversal_sight) for pt in open_local_pts]
                     ao_local_pts = open_local_pts[np.logical_not(open_local_pts_status)]
                     print ("ao_local_pts,", ao_local_pts)
                     if len(ao_local_pts) > 0:
@@ -180,7 +180,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         if print_traversal_sight:
             print ("traversal_sight:", traversal_sight)
         
-        asp, critical_ls = approximately_shortest_path(skeleton_path, traversal_sight, robotvision)
+        asp, critical_ls = approximately_shortest_path(skeleton_path, traversal_sight, robot_vision)
         #asp = remove_validation(asp)
         visited_path.append(asp)
         
@@ -207,14 +207,14 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     lcenter = local[0]  # center of robot at local
                     lc_sight = local[1] # closed sight at local
                     lo_sight = local[2] # open sight at local
-                    plot_vision(plt, lcenter[0], lcenter[1], robotvision, lc_sight, lo_sight)
+                    plot_vision(plt, lcenter[0], lcenter[1], robot_vision, lc_sight, lo_sight)
            
             
             if show_robot:
                 # plot robot 
                 plot_robot(plt, center[0], center[1], 0, config)
                 plt.text(center[0] + 1, center[1] + 1, "Robot's center")
-                vision = plt.Circle(center, robotvision, color="red", linestyle  = "-", fill=False)
+                vision = plt.Circle(center, robot_vision, color="red", linestyle  = "-", fill=False)
                 plt.gcf().gca().add_artist(vision)
             if show_goal:
                 # plot goal
@@ -225,13 +225,13 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                 plot_start(plt, start)
             
             # plot robot's vision at local (center)
-            plot_vision(plt, center[0], center[1], robotvision, closed_sights, open_sights)
+            plot_vision(plt, center[0], center[1], robot_vision, closed_sights, open_sights)
             
             if show_active_openpt and len(ao_gobal) > 0:
                 plot_points(plt, ao_gobal, ".b")
                 i = 1
                 for pt in ao_gobal:
-                    draw_vision_area(plt, pt[0], pt[1], robotvision)
+                    draw_vision_area(plt, pt[0], pt[1], robot_vision)
                     plt.text(pt[0] + 1, pt[1] - 2, "Po{0}".format(i))
                     i = i + 1
            
@@ -254,7 +254,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             if show_next_point:
                 if len(next_pt) > 0:
                     plot_point(plt, next_pt, ".b")
-                    draw_vision_area(plt, next_pt[0], next_pt[1], robotvision)
+                    draw_vision_area(plt, next_pt[0], next_pt[1], robot_vision)
                     plt.text(next_pt[0] + 1, next_pt[1] + 1, "Po0")
 
                     
