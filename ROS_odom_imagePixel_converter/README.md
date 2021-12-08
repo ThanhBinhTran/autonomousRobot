@@ -1,4 +1,4 @@
-### convert between odometry information and image pixel
+# Odometry information and image pixel converter
 
 ```
 python ROS_odom_pixel_converter.py
