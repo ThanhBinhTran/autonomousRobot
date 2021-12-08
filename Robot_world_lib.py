@@ -19,7 +19,7 @@ def thresh_callback(threshold, src_gray, world_name):
 
     file_name = world_name + ".csv"
     data_header = ["x", "y"]
-    f = open(file_name, 'w', newline='', encoding="utf-8")
+    f = open(file_name, 'w', newline='')
     writer = csv.writer(f, delimiter=",")
     for part in contours:
         writer.writerow(data_header)
@@ -40,7 +40,6 @@ def read_map_from_world(world_name):
     src_gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
     src_gray = cv.blur(src_gray, (3, 3))
 
-    max_thresh = 255
     thresh = 100  # initial threshold
     obstacle = thresh_callback(thresh, src_gray, world_name)
     print(obstacle)
