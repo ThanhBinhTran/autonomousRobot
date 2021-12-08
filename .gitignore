@@ -3,5 +3,6 @@ __pycache__/*
 venv/*
 debug.py
 test.py
+paper.txt
 marker_fillstyle_reference.py
 simple_polygon_kernel/*
