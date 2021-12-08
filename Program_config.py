@@ -1,15 +1,14 @@
-import numpy as np
 import math
 from enum import Enum
 
-"""
+'''
     ALGORITHMS CONTROL
-"""
-ENABLE_AR_RANKING = False
+'''
+ENABLE_AR_RANKING = True
 
-"""
+'''
 CONTROL SIGNALs FOR SHOWING OR HIDING PLOT ELEMENTS
-"""
+'''
 show_animation = True
 show_map = True
 show_world = True
@@ -39,12 +38,9 @@ show_goal = True
 show_start = True
 show_text_goal = True
 
-
-
-
-"""
+'''
 PRINT OUT FOR DEBUG
-"""
+'''
 print_boundary_line_segments = False
 print_closed_sights = False
 print_closed_line_segments = False
@@ -54,39 +50,41 @@ print_ref_csight_line_segments = False
 print_csight_line_segments = False
 print_traversalSights = False
 
-"""
+'''
 LINE STYPE FOR DISPLAY PLOT
-"""
-ls_is = ":.c"    # intersection
-ls_bp = "-r"     # boundary points
-ls_ts = "-"      # true sight
-cl_ts = "m"      # color true sight
+'''
+ls_is = ":.c"  # intersection
+ls_bp = "-r"  # boundary points
+ls_ts = "-"  # true sight
+cl_ts = "m"  # color true sight
 cl_os = "c"
-ls_bp = ":g"     # blind sight
-ls_map = "-b"    # map 
-ls_cs = ":m"     # close sight
-ls_os = "c"      # open sight
-ls_goal = "*r"   # goal
-ls_start = "*b"   # goal
-ls_nextpt = ".r" # next points
-ls_lopt = ".k"   # local open_point
-ls_aopt = ".b"   # active open points
-ls_em = "-m"     # explored_map
-ls_vg = ":k"     # visible graph
-ls_vp = "-r"     # visited path
-ls_goingp = "-1g" # going path
-ls_cls = '--g'      # critical line segment 
-ls_sp = "-r"        # shortest skeleton path
-ls_asp = "-m"       # approximately shortest path
+ls_bp = ":g"  # blind sight
+ls_map = "-b"  # map
+ls_cs = ":m"  # close sight
+ls_os = "c"  # open sight
+ls_goal = "*r"  # goal
+ls_start = "*b"  # goal
+ls_nextpt = ".r"  # next points
+ls_lopt = ".k"  # local open_point
+ls_aopt = ".b"  # active open points
+ls_em = "-m"  # explored_map
+ls_vg = ":k"  # visible graph
+ls_vp = "-r"  # visited path
+ls_goingp = "-1g"  # going path
+ls_cls = '--g'  # critical line segment
+ls_sp = "-r"  # shortest skeleton path
+ls_asp = "-m"  # approximately shortest path
+
+
 # Robots configuration
 class RobotType(Enum):
     circle = 0
     rectangle = 1
 
 class Config:
-    """
+    '''
     simulation parameter class
-    """
+    '''
 
     def __init__(self):
         # robot parameter
@@ -104,7 +102,8 @@ class Config:
         self.obstacle_cost_gain = 1.0
         self.robot_stuck_flag_cons = 0.001  # constant to prevent robot stucked
         self.robot_type = RobotType.circle
-        self.robot_vision = 20 # the range of input vision
+        self.robot_vision = 20  # the range of input vision
+        
         # if robot_type == RobotType.circle
         # Also used to check if goal is reached in both types
         self.robot_radius = 1.0  # [m] for collision check
@@ -112,9 +111,7 @@ class Config:
         # if robot_type == RobotType.rectangle
         self.robot_width = 0.5  # [m] for collision check
         self.robot_length = 1.2  # [m] for collision check
-        # obstacles [x(m) y(m), ....]
-        #self.ob = np.array([[-1, -1],
-        
+
         self.max_speed = 1.0  # [m/s]
         self.min_speed = -0.5  # [m/s]
         self.max_yaw_rate = 40.0 * math.pi / 180.0  # [rad/s]
@@ -137,23 +134,7 @@ class Config:
         # if robot_type == RobotType.rectangle
         self.robot_width = 0.5  # [m] for collision check
         self.robot_length = 1.2  # [m] for collision check
-        #                    [0, 2],
-        #                    [4.0, 2.0],
-        #                    [5.0, 4.0],
-        #                    [5.0, 5.0],
-        #                    [5.0, 6.0],
-        #                    [5.0, 9.0],
-        #                    [8.0, 9.0],
-        #                    [7.0, 9.0],
-        #                    [8.0, 10.0],
-        #                    [9.0, 11.0],
-        #                    [12.0, 13.0],
-        #                    [12.0, 12.0],
-        #                    [15.0, 15.0],
-        #                    [13.0, 13.0]
-        #                    ])
-        #
-        #self.ob = np.random.randint(100, size=(1,2))
+
     @property
     def robot_type(self):
         return self._robot_type
