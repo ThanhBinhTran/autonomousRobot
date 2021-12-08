@@ -30,8 +30,9 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     robot_vision = config.robot_vision
 
     # set same window size to capture pictures
-    plt.figure(figsize=(6, 6))
-
+    fig = plt.figure(figsize=(6, 6))
+    fig.canvas.set_window_title('Path Planning Problem for an Autonomous Robot')
+    
     # get user input
     menu_result = menu()
     run_times = menu_result.n
@@ -160,7 +161,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             # draw world and map
             ##############################################
             if show_world and world_name is not None:
-                dworld_display(plt, mpimg, world_name)
+                world_display(plt, mpimg, world_name)
 
             # draw map obstacles 
             if show_map:
