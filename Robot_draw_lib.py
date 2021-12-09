@@ -1,7 +1,8 @@
 from Robot_lib import *
 from Program_config import *
 from matplotlib import patches
-
+import matplotlib.patches as mpatches
+from matplotlib.collections import PatchCollection
 
 # import matplotlib.pyplot as plt
 
@@ -15,17 +16,26 @@ def draw_true_sight(plt, x, y, true_sight, cl="g", ls_ts="-"):
         plot_sight(plt, x, y, pair, cl, 0.3, ls_ts)
 
 
-def draw_open_sight(plt, x, y, open_sight, cl="g", ls_ts="-"):
+def draw_open_sight_triangle(plt, x, y, open_sight, cl="g", ls_ts="-"):
     for data in open_sight:
         pair = data[0], data[1]
         plot_sight(plt, x, y, pair, cl, 0.3, ls_ts)
 
+def draw_open_sight_arc(ax, x, y, open_sight, radius, cl="g", ls_ts="-"):
+    center = x, y
+    arc_patches = []
 
-def draw_vision_area(plt, x, y, radius):
-    """ draw a circle that limits the vision of robot """
-    vision = plt.Circle((x, y), radius, color="red", linestyle=":", fill=False)
-    plt.gcf().gca().add_artist(vision)
-
+    # center_ox: a point starts from center and follows X-axis direction 
+    center_ox = np.add(center, [1,0] )
+    for arc in open_sight:
+        theta1radian = unsigned_angle(center, center_ox, arc[0])
+        theta2radian = unsigned_angle(center, center_ox, arc[1])
+        theta1 = math.degrees(theta1radian)
+        theta2 = math.degrees(theta2radian)
+        wedge = patches.Wedge(center, radius, theta1=theta1, theta2=theta2)
+        arc_patches.append(wedge)
+    collection = PatchCollection(arc_patches, facecolor='g', linestyle='solid', edgecolor='r', alpha=0.2)
+    ax.add_collection(collection)
 
 def draw_vision_area(plt, x, y, radius, ls=":"):
     """ draw a circle that limits the vision of robot """
@@ -42,16 +52,17 @@ def draw_arc_area(plt, x, y, radius):
     plt.axes().add_patch(aarc)
 
 
-def plot_vision(plt, x, y, radius, csight, osight):
+def plot_vision(plt, ax, x, y, radius, csight, osight):
     if show_circleRange:
         draw_vision_area(plt, x, y, radius)
-    # draw_arc_area(plt, x, y, radius)
+
 
     if show_closedSight:
         draw_true_sight(plt, x, y, csight, cl_ts, ls_ts)
 
     if show_openSight:
-        draw_open_sight(plt, x, y, osight)
+        #draw_open_sight_triangle(plt, x, y, osight)
+        draw_open_sight_arc(ax, x, y, osight, radius)
 
 
 def plot_goal(plt, goal, r_goal, s_goal):
