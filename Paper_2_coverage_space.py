@@ -71,18 +71,21 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     robot_vision = config.robot_vision
     # set same window size to easy capture pictures
     plt.figure(figsize=(7,7))
+    
+    # get user input
     menu_result = menu()
-    run_times = menu_result[0]
-    mapname = menu_result[1]
-    start = menu_result[2] 
-    goal = menu_result[3]
+    run_times = menu_result.n
+    map_name = menu_result.m
+    world_name = menu_result.w
+    start = np.array([menu_result.sx, menu_result.sy])
+    goal = np.array([menu_result.gx, menu_result.gy])
     
     goal = np.array([0, 40])
     # current position of robot
     cpos = np.array([start[0], start[1]])
 
     # read map 
-    ob = read_map_csv(mapname) # obstacles
+    ob = read_map_csv(map_name) # obstacles
     ob = [[60, 0],[60,1]]
     # traversal sight to draw visible visited places
     traversal_sight = []
@@ -177,7 +180,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             
         # record the path
         traversal_sight.append([center, closed_sights, open_sights])
-        if print_traversal_sight:
+        if print_traversalSights:
             print ("traversal_sight:", traversal_sight)
         
         asp, critical_ls = approximately_shortest_path(skeleton_path, traversal_sight, robot_vision)
@@ -202,7 +205,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             #map_display(plt, mapname, ob)
 
             # show_traversal_sight
-            if show_traversal_sight:
+            if show_traversalSights:
                 for local in traversal_sight:
                     lcenter = local[0]  # center of robot at local
                     lc_sight = local[1] # closed sight at local
@@ -235,13 +238,13 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     plt.text(pt[0] + 1, pt[1] - 2, "Po{0}".format(i))
                     i = i + 1
            
-            if show_visible_graph:
-                plot_visible_graph(plt, visible_graph, ls_vg)
+            if show_visibilityGraph:
+                plot_visibilityGraph(plt, visible_graph, ls_vg)
                 
-            if show_visited_path:
+            if show_visitedPath:
                 plot_paths(plt, visited_path, ls_vp, ls_goingp)
                 
-            if show_sketelon_path:
+            if show_sketelonPath:
                 plot_lines(plt, skeleton_path, ls_sp)
                 
             if show_approximately_shortest_path:

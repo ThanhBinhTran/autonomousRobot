@@ -17,7 +17,7 @@ show_traversalSights = True
 
 show_openSight = True
 show_closedSight = True
-show_circleRange = False
+show_circleRange = True
 
 show_refSight = False
 
@@ -26,10 +26,10 @@ show_approximately_shortest_path = True
 show_critical_line_segments = False
 show_cls_orderednumber = True  # show ordered number of critical line segments
 
-show_visitedPath = False
-show_visibilityGraph = False
+show_visitedPath = True
+show_visibilityGraph = True
 
-show_local_openpt = True
+show_local_openpt = False
 show_active_openpt = True
 show_next_point = True
 

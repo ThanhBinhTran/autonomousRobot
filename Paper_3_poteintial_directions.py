@@ -3,6 +3,9 @@ autonomousRobot
 This project is to simulate an autonomousRobot that try to find a way to reach a goal (target) 
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
 """
+'''
+
+'''
 import math
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -29,7 +32,8 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     robot_vision = config.robot_vision
     
     # set same window size to capture pictures
-    plt.figure(figsize=(6,6))
+    fig, ax = plt.subplots(figsize=(7, 7))
+    fig.canvas.set_window_title('Path Planning Problem for an Autonomous Robot')
     
     # get user input
     menu_result = menu()
@@ -77,7 +81,6 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                        [90, 10.0]
                        ])
     vision_list = []
-    plt.figure(figsize=(7,7))
     for center in centerpts:
         csight, osight  = scan_around(center, robot_vision, ob, goal)
         osight = np.array(osight)
@@ -100,8 +103,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         print ("________________")
         print (next_pt)
         # display vision
-        plot_vision(plt, center[0], center[1], robot_vision, csight, osight)
-        
+        plot_vision(plt, ax, center[0], center[1], robot_vision, csight, osight)
         
         plot_points(plt, open_local_pts, ls_aopt)
         plot_point_text(plt, center, "1r", "center_{0}".format(i) )
@@ -110,7 +112,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         if len(next_pt) > 0:
             plot_point(plt, next_pt, "or")
         plot_robot(plt, center[0], center[1], 0, config)
-        
+        plt.axis("equal")
     plt.show()
 
 if __name__ == '__main__':

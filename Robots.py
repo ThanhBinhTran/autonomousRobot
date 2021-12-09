@@ -31,7 +31,6 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
 
     # set same window size to capture pictures
     fig, ax = plt.subplots(figsize=(6, 6))
-    #BBBB fig = plt.figure(figsize=(6, 6))
     fig.canvas.set_window_title('Path Planning Problem for an Autonomous Robot')
     
     # get user input
