@@ -30,7 +30,8 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     robot_vision = config.robot_vision
 
     # set same window size to capture pictures
-    fig = plt.figure(figsize=(6, 6))
+    fig, ax = plt.subplots(figsize=(6, 6))
+    #BBBB fig = plt.figure(figsize=(6, 6))
     fig.canvas.set_window_title('Path Planning Problem for an Autonomous Robot')
     
     # get user input
@@ -146,8 +147,9 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             cpos = motion(cpos, next_pt)  # simulate robot
 
         if show_animation:
-
+            ##############################################
             # clear plot
+            ##############################################
             plt.cla()
 
             ##############################################
@@ -176,7 +178,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     lcenter = local[0]  # center of robot at local
                     lc_sight = local[1]  # closed sight at local
                     lo_sight = local[2]  # open sight at local
-                    plot_vision(plt, lcenter[0], lcenter[1], robot_vision, lc_sight, lo_sight)
+                    plot_vision(plt, ax, lcenter[0], lcenter[1], robot_vision, lc_sight, lo_sight)
 
             if show_robot:
                 plot_robot(plt, center[0], center[1], 0, config)
@@ -185,7 +187,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                 plot_goal(plt, goal, r_goal, s_goal)
 
             # plot robot's vision at local (center)
-            plot_vision(plt, center[0], center[1], robot_vision, closed_sights, open_sights)
+            plot_vision(plt, ax, center[0], center[1], robot_vision, closed_sights, open_sights)
 
             if show_local_openpt and len(local_open_pts) > 0:
                 plot_points(plt, local_open_pts, ls_lopt)

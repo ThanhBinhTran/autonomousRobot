@@ -4,7 +4,7 @@ from enum import Enum
 '''
     ALGORITHMS CONTROL
 '''
-ENABLE_AR_RANKING = True
+ENABLE_AR_RANKING = False
 
 '''
 CONTROL SIGNALs FOR SHOWING OR HIDING PLOT ELEMENTS
@@ -17,7 +17,7 @@ show_traversalSights = True
 
 show_openSight = True
 show_closedSight = True
-show_circleRange = True
+show_circleRange = False
 
 show_refSight = False
 
