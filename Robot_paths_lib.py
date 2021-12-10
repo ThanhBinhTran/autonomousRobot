@@ -8,9 +8,9 @@ from Robot_draw_lib import *
 
 
 def motion(current_position, next_pt):
-    """
+    '''
     motion model
-    """
+    '''
     current_position[0] = approximately_num(next_pt[0])
     current_position[1] = approximately_num(next_pt[1])
     return current_position
@@ -31,9 +31,9 @@ def ranking_score(angle, distance):
 
 
 def ranking(center, pt, goal):
-    """
+    '''
     score the open point by its angle (from center to point and goal) and its distance (to goal)
-    """
+    '''
 
     sa = signed_angle(goal - center, pt - center)
     dist = point_dist(goal, pt)
@@ -42,10 +42,10 @@ def ranking(center, pt, goal):
 
 
 def pick_next(ao_gobal):
-    """
+    '''
     return index and value of next point if there exist any active open point
     otherwise -1
-    """
+    '''
     pick_idx = -1
     next_pt = []
     if len(ao_gobal) > 0:
@@ -363,9 +363,9 @@ def approximately_sp_ls(critical_ls, spt, gpt):
     return path
 
 
-"""
+'''
     get local open points
-"""
+'''
 
 
 def get_local_open_points(open_sights):
@@ -373,24 +373,21 @@ def get_local_open_points(open_sights):
     if len(open_sights) > 0:
         open_sights = np.array(open_sights)
         local_open_pts = open_sights[:, 2]  # local_openPts
-        print("local_openPts,", local_open_pts)
+        #print("local_openPts,", local_open_pts)
         for i in range(len(local_open_pts)):
             local_open_pts[i][0] = approximately_num(local_open_pts[i][0])
             local_open_pts[i][1] = approximately_num(local_open_pts[i][1])
     return local_open_pts
 
 
-"""
+'''
     check whether local open_points are active 
-"""
+'''
 
 def get_active_open_points(local_open_pts, traversal_sights, robot_vision, center, goal):
     local_active_open_pts = []
     if len(local_open_pts):  # new local found
-        if ENABLE_AR_RANKING:
-            local_active_open_pts = is_inside_active_arc(local_open_pts, robot_vision, center, goal)
-        else:
-            local_active_open_pts = local_open_pts
+        local_active_open_pts = local_open_pts
 
         # remove local_point which is inside explored area
         if len(traversal_sights) > 0:
@@ -399,20 +396,26 @@ def get_active_open_points(local_open_pts, traversal_sights, robot_vision, cente
 
     return local_active_open_pts
 
-"""
-    check if local open points are inside active arc
-"""
+'''
+    check if local open points are inside active arc (arc_limA, arc_limB)
+'''
 def is_inside_active_arc(local_open_pts, robot_vision, center, goal):
+    # find 2 intersection points (arc_limA, arc_limB) between 2 circles (center, robot_vision)
+    #  and (goal, robot_to_goal)
+    
     robot_to_goal = point_dist(center, goal)
-    pt_a, pt_b = get_intersections_2circles(center, robot_vision, goal, robot_to_goal)
-    print(local_open_pts)
-    inside_active_arc = [inside_angle_area(pt, center, (pt_a,pt_b ))[0] for pt in local_open_pts]
-    local_active_open_pts = local_open_pts[inside_active_arc]
-    return local_active_open_pts
+    if robot_to_goal > robot_vision:
+        arc_limA, arc_limB = get_intersections_2circles(center, robot_vision, goal, robot_to_goal)
 
-"""
+        inside_active_arc = [inside_angle_area(pt, center, (arc_limA, arc_limB))[0] for pt in local_open_pts]
+        local_active_open_pts = local_open_pts[inside_active_arc]
+        return local_active_open_pts, np.array((arc_limA, arc_limB))
+    else:
+        return None, None
+
+'''
     add local active and its ranking to global active points set
-"""
+'''
 
 
 def store_global_active_points(g_active_open_pts, l_active_open_pts, ranking_score):

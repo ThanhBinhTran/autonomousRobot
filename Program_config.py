@@ -2,18 +2,13 @@ import math
 from enum import Enum
 
 '''
-    ALGORITHMS CONTROL
-'''
-ENABLE_AR_RANKING = False
-
-'''
 CONTROL SIGNALs FOR SHOWING OR HIDING PLOT ELEMENTS
 '''
 show_animation = True
 show_map = True
 show_world = True
 
-show_traversalSights = True
+show_traversalSights = False
 
 show_openSight = True
 show_closedSight = True
@@ -29,7 +24,7 @@ show_cls_orderednumber = True  # show ordered number of critical line segments
 show_visitedPath = True
 show_visibilityGraph = True
 
-show_local_openpt = False
+show_local_openpt = True
 show_active_openpt = True
 show_next_point = True
 
@@ -37,6 +32,23 @@ show_robot = True
 show_goal = True
 show_start = True
 show_text_goal = True
+
+'''
+Assumption of Hoai An Theory.
+'''
+# ALGORITHMS CONTROL
+THEORY_AR_ALGORITHMS = True
+# show animation
+show_active_openpt_HA_Assumption = True         # active open points (HA Assumption)
+show_activeArc_HA_Assumption = True             # arc points (HA Assumption)
+show_parentArc_HA_Assumption = True             # parent arc points (HA Assumption)
+show_boundaryPts_HA_Assumption = False          # boundary points intersection between circle and obstacles
+show_circleGoal_HA_Assumption = True            # big circle (at goal within radius = dist(goal, robot center))
+show_activeArcPts_order_HA_Assumption = False   # show order of arc points according to its angles
+# line styles
+ls_bp_HA = "k."     # boundary points (HA Assumption)
+ls_aap_HA = "c."    # active arc points (HA Assumption)
+ls_pap_HA = "go"    # parent arc points (HA Assumption)
 
 '''
 PRINT OUT FOR DEBUG
