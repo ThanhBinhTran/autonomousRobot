@@ -40,4 +40,4 @@ Example: ``` python map_generator.py -n 100 -m _map.csv ```
 ```bash
 python map_display.py -m <map name>
 ```
-Example: ```bash python map_display.py -m _map.csv ```
+Example: ``` python map_display.py -m _map.csv ```
