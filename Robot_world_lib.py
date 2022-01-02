@@ -42,7 +42,7 @@ def read_map_from_world(world_name):
 
     thresh = 100  # initial threshold
     obstacle = thresh_callback(thresh, src_gray, world_name)
-    print(obstacle)
+    #print(obstacle)
 
 
 def world_display(plt, mpimg, world_name):
