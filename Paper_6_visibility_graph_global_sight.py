@@ -190,7 +190,21 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     lc_sight = local[1] # closed sight at local
                     lo_sight = local[2] # open sight at local
                     plot_vision(plt, ax, lcenter[0], lcenter[1], robot_vision, lc_sight, lo_sight)
-                    plt.text(lcenter[0] + 1, lcenter[1] + 1, "C({0})".format(i))
+                    if i == 0:
+                        textpt = lcenter[0] + 1, lcenter[1] - 3
+                    elif i == 1:
+                        textpt = lcenter[0] + 1, lcenter[1] - 3
+                    elif i == 2:
+                        textpt = lcenter[0] + 1, lcenter[1] + 1
+                    elif i == 3:
+                        textpt = lcenter[0] + 3, lcenter[1] -1
+                    elif i == 4:
+                        textpt = lcenter[0] + 3, lcenter[1]
+                    elif i == 5:
+                        textpt = lcenter[0] + 2, lcenter[1] -0.5
+                    else:
+                        textpt = lcenter[0], lcenter[1]
+                    plt.text(textpt[0], textpt[1], "c({0})".format(i))
                     i = i + 1
            
             

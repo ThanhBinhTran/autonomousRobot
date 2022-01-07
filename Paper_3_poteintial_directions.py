@@ -106,7 +106,16 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         plot_vision(plt, ax, center[0], center[1], robot_vision, csight, osight)
         
         plot_points(plt, open_local_pts, ls_aopt)
-        plot_point_text(plt, center, "1r", "center_{0}".format(i) )
+        if i == 0:
+            textpoint = (center[0] + 1 , center[1] )
+        elif i == 1:
+            textpoint = (center[0] -15, center[1] - 5)
+        elif i == 2:
+            textpoint = (center[0] +2 , center[1] + 2)
+        elif i == 3:
+            textpoint = (center[0] -17, center[1])
+
+        plt.text(textpoint[0], textpoint[1], "center_{0}".format(i))
                     
         # display next point if existing
         if len(next_pt) > 0:

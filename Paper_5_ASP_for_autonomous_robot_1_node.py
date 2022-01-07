@@ -16,7 +16,7 @@ from Robot_csv_lib import read_map_csv
 from Program_config import *
 from Robot_control_panel import *
 
-
+pt_offset = np.zeros((100,2))  # 100 offsets of point
 def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     
     robot_vision = 3
@@ -80,10 +80,17 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     if 1: # approximate path and critical edge
         # draw plot_critical_line_segments
         i = 0
+        pt_offset[0] = [0.05, -0.1]
+        pt_offset[1] = [-0.3, -0.4]
+        pt_offset[2] = [-0.1, -0.1]
+        pt_offset[3] = [-0.3, -0.2]
+        pt_offset[4] = [ 0.1, -0.1]
+        pt_offset[5] = [-0.1, -0.2]
         for ls in critical_ls:
             pt = ls[1]
             plot_line(plt, ls[1:3], "-b")
-            plt.text(pt[0] -0.1, pt[1] - 0.2, "CE_c{0}".format(i))
+            textpt = pt + pt_offset[i]
+            plt.text(textpt[0], textpt[1], "CE_c{0}".format(i))
             i += 1
         # show_approximately_shortest_path
         if 0:
@@ -123,9 +130,9 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         
     plot_line(plt, (start,end), ls="-..r")
     
-    plt.text(start[0] + 0.1, start[1] + 0.1, "S")
-    plt.text(end[0] + 0.1, end[1] + 0.1, "E")
-    plt.text(center[0] + 0.1, center[1] + 0.1, "C")
+    plt.text(start[0] + 0.1, start[1] + 0.1, "s")
+    plt.text(end[0] + 0.1, end[1] + 0.1, "e")
+    plt.text(center[0] + 0.1, center[1] + 0.1, "c")
     
     # draw midpoint 
     if 0:
@@ -169,8 +176,17 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     if 1:
         plot_lines(plt, asp, "-r")
         i = 0
+        pt_offset[0] = [0, -0.1]
+        pt_offset[1] = [+0.1, + 0.1]
+        pt_offset[2] = [+0.1, + 0.1]
+        pt_offset[3] = [-0.1, + 0.1]
+        pt_offset[4] = [ +0.1, 0]
+        pt_offset[5] = [-0.1, + 0.1]
+        pt_offset[6] = [-0.2, -0.2]
         for pt in asp:
-            plt.text(pt[0], pt[1], "p{0}".format(i))
+
+            textpt = pt + pt_offset[i]
+            plt.text(textpt[0], textpt[1], "p{0}".format(i))
             i = i + 1
             plot_point(plt, pt, ".k")
         

@@ -16,6 +16,7 @@ from Robot_csv_lib import read_map_csv
 from Program_config import *
 from Robot_control_panel import *
 
+pt_offset = np.zeros((100,2))  # 100 offsets of point
 
 def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     goal = [10,10]
@@ -25,7 +26,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     center.append([2,2.2])
     center.append([4,2.2])
     # read map 
-    ob = read_map_csv("_paper_draw_map.csv") # obstacles
+    ob = read_map_csv("_paper_map.csv") # obstacles
     ob = np.array(ob)
     
     start_line = np.array([
@@ -67,7 +68,34 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         osights.append(os)
     
     # draw circle range
-    if 1:
+    # image__1
+    draw_critical_edge_temp = 0
+    draw_circle_range_temp = 1
+    skeleton_path_temp = 1
+    strange_line_temp = 0
+    collision_free_area_temp = 0
+    final_approximate_shortest_path_temp = 0
+    crosspoint_temp = 0
+
+    # image__2
+    draw_critical_edge_temp = 1
+    draw_circle_range_temp = 1
+    skeleton_path_temp = 1
+    strange_line_temp = 0
+    collision_free_area_temp = 1
+    final_approximate_shortest_path_temp = 1
+    crosspoint_temp = 0
+
+    # image__3
+    # draw_critical_edge_temp = 1
+    # draw_circle_range_temp = 1
+    # skeleton_path_temp = 1
+    # strange_line_temp = 0
+    # collision_free_area_temp = 1
+    # final_approximate_shortest_path_temp = 1
+    # crosspoint_temp = 1
+
+    if draw_circle_range_temp:
         for centerpt in center:
             draw_vision_area(plt, centerpt[0], centerpt[1], robot_vision)
             #draw_vision_area(plt, centerpt[0], centerpt[1], robot_vision/2)
@@ -80,12 +108,12 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     plot_point(plt, end, ".b")
     for pt in center:
         plot_point(plt, pt, ".b")
-    plt.text(center[0][0] +0.1, center[0][1] +0.1, "A")
-    plt.text(center[1][0] +0.1, center[1][1] +0.1, "B")
-    plt.text(center[2][0] +0.1, center[2][1] +0.1, "C")
+    plt.text(center[0][0] , center[0][1] - 0.2, "a")
+    plt.text(center[1][0] +0.1, center[1][1] +0.2, "b")
+    plt.text(center[2][0] +0.1, center[2][1] +0.2, "c")
         
-    plt.text(start[0]+0.1, start[1]+0.1, "S")
-    plt.text(end[0]+0.1, end[1]+0.1, "E")
+    plt.text(start[0], start[1]+0.2, "s")
+    plt.text(end[0], end[1]-0.2, "e")
 
     
     
@@ -97,7 +125,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
 
     asp, critical_ls = approximately_shortest_path(skeleton_path, traversal_sight, robot_vision)
 
-    if 0: # draw critical edge
+    if draw_critical_edge_temp: # draw critical edge
         # draw plot_critical_line_segments
         i = 0
         j = 0
@@ -118,13 +146,13 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     j += 1
                 
             
-    if 1:    # skeleton path
+    if skeleton_path_temp:    # skeleton path
         plot_lines(plt, skeleton_path, ls="--.b")
     
-    if 0: # strange line
+    if strange_line_temp: # strange line
         plot_line(plt, (start,end), ls="-..r")
     
-    if 0: # collision-free area
+    if collision_free_area_temp: # collision-free area
         pt = []
         pt.append(start)
         for ls in critical_ls:
@@ -147,12 +175,26 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         plt.fill(pt[:,0], pt[:,1], color = "g", alpha = 0.3, ls="-")
         
     # final approximate shortest path
-    if 0:
+    if final_approximate_shortest_path_temp:
         plot_lines(plt, asp, "-r")
         i = 0
+        pt_offset[0] = [ -0.2 ,  -0.2]
+        pt_offset[1] = [ 0    ,  0.15]
+        pt_offset[2] = [ 0    ,  0.05]
+        pt_offset[3] = [ 0    ,  -0.1]
+        pt_offset[4] = [ 0.05 ,  -0.1]
+        pt_offset[5] = [ -0.1 ,   0.1]
+        pt_offset[6] = [ 0    ,  0.15]
+        pt_offset[7] = [ 0.05 ,  0.05]
+        pt_offset[8] = [ 0    ,   0.1]
+        pt_offset[9] = [ 0.1  , -0.05]
+        pt_offset[10] = [0.1  ,     0]
+        pt_offset[11] = [0.1  ,     0]
+        pt_offset[12] = [0.05 ,   0.1]
         for pt in asp:
-            plt.text(pt[0], pt[1], "p{0}".format(i))
-            i = i + 1
+            textpt = pt + pt_offset[i]
+            plt.text(textpt[0], textpt[1], "p{0}".format(i))
+            i += 1
             plot_point(plt, pt, ".k")
     pt3 = asp[3]
     pt4 = asp[4]
@@ -160,9 +202,10 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     ptB = center[1]
     print (ptA, ptB, pt3, pt4)
     crosspoint = line_intersection((ptA,ptB), (pt3,pt4))
-    if 0: # crosspoint
+    
+    if crosspoint_temp: # crosspoint
         plot_point(plt, crosspoint, ".r")
-        plt.text(crosspoint[0],crosspoint[1],"M")
+        plt.text(crosspoint[0],crosspoint[1]-0.2,"m")
         plot_line(plt, (start,crosspoint), ls=":k")
         plot_line(plt, (crosspoint,end), ls=":k")
     plt.axis("equal")

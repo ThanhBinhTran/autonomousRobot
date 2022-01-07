@@ -52,7 +52,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     #plt.grid(True)
 
     plt.text(start[0] - 0.1, start[1] - 0.2, "A({0},{1})".format(start[0], start[1]))
-    plt.text(end[0] - 0.2, end[1]- 0.4, "B({0},{1})".format(end[0], end[1]))
+    plt.text(end[0] - 0.2, end[1] + 0.1, "B({0},{1})".format(end[0], end[1]))
     #plt.text(start[0] + 0.1, start[1] + 0.2, "P0")
     #plt.text(end[0] - 0.2, end[1]- 0.4, "P4")    
     p1 = midpoint(ls[0][0], ls[0][1])
@@ -77,14 +77,19 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             plot_line(plt, line, ls="-b")
             spt = line [0]
             ept = line [1]
-            plt.text(ept[0] , ept[1] - 0.1, "ce{0}".format(i))
+            if i == 0:
+                plt.text(ept[0] - 0.2, ept[1] + 0.1, "ce{0}".format(i))
+            elif i == 1:
+                plt.text(ept[0] - 0.15 , ept[1] + 0.2, "ce{0}".format(i))
+            elif i == 2:
+                plt.text(ept[0] + 0.1 , ept[1] + 0.1, "ce{0}".format(i))
             i = i + 1
         
     #shortest path step 1
     if 1:
 
         plt.text(p1[0] , p1[1]+0.1, "P1") 
-        plt.text(p2[0] , p2[1]+0.1, "P2") 
+        plt.text(p2[0] + 0.1 , p2[1]-0.1, "P2") 
         plt.text(p3[0] , p3[1]+0.1, "P3") 
         
         plot_line(plt, (start,p1), ls="--k")
@@ -99,7 +104,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         plot_point(plt, p2, ".b")
         plot_point(plt, p3, ".b")
         plot_point(plt, ls[0][0], ls = "or")
-        plt.text(ls[0][0][0], ls[0][0][1] + 0.1, "P1_new")
+        plt.text(ls[0][0][0]- 0.2, ls[0][0][1]+ 0.085, "P1_new")
  
     #shortest path final step 
     if 0:
@@ -111,7 +116,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         plot_point(plt, ls[1][1], ls = ".r")
         plot_point(plt, p3_final, ls = ".r")
         plt.text(ls[0][0][0], ls[0][0][1] + 0.1, "P1")
-        plt.text(ls[1][1][0], ls[1][1][1] - 0.2, "P2")
+        plt.text(ls[1][1][0] + 0.1, ls[1][1][1] - 0.1, "P2")
         plt.text(p3_final[0], p3_final[1] + 0.1, "P3")
         
     #shortest path
