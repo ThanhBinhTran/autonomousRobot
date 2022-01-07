@@ -6,20 +6,20 @@ from matplotlib.collections import PatchCollection
 
 # import matplotlib.pyplot as plt
 
-def plot_sight(plt, x, y, pair, cl="g", alpha=0.3, linestyle=":"):
+def plot_sight(plt, x, y, pair, cl="g", alpha=transparent_alpha, linestyle=":"):
     ptA, ptB = pair
     plt.fill([x, ptA[0], ptB[0]], [y, ptA[1], ptB[1]], color=cl, alpha=alpha, linestyle=linestyle)
 
 
 def draw_true_sight(plt, x, y, true_sight, cl="g", ls_ts="-"):
     for pair in true_sight:
-        plot_sight(plt, x, y, pair, cl, 0.3, ls_ts)
+        plot_sight(plt, x, y, pair, cl, transparent_alpha, ls_ts)
 
 
 def draw_open_sight_triangle(plt, x, y, open_sight, cl="g", ls_ts="-"):
     for data in open_sight:
         pair = data[0], data[1]
-        plot_sight(plt, x, y, pair, cl, 0.3, ls_ts)
+        plot_sight(plt, x, y, pair, cl, transparent_alpha, ls_ts)
 
 def draw_open_sight_arc(ax, x, y, open_sight, radius, cl="g", ls_ts="-"):
     center = x, y
@@ -34,7 +34,7 @@ def draw_open_sight_arc(ax, x, y, open_sight, radius, cl="g", ls_ts="-"):
         theta2 = math.degrees(theta2radian)
         wedge = patches.Wedge(center, radius, theta1=theta1, theta2=theta2)
         arc_patches.append(wedge)
-    collection = PatchCollection(arc_patches, facecolor='g', linestyle='solid', edgecolor='r', alpha=0.2)
+    collection = PatchCollection(arc_patches, facecolor='g', linestyle='solid', edgecolor='r', alpha=transparent_alpha)
     ax.add_collection(collection)
 
 def draw_vision_area(plt, x, y, radius, ls=":"):
