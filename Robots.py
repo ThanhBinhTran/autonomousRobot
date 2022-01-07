@@ -27,8 +27,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
 
     # set configuration of robot
     config.robot_type = robot_type
-    robot_vision = config.robot_vision
-
+ 
     # set same window size to capture pictures
     fig, ax = plt.subplots(figsize=(6, 6))
     fig.canvas.set_window_title('Path Planning Problem for an Autonomous Robot')
@@ -38,8 +37,14 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     run_times = menu_result.n
     map_name = menu_result.m
     world_name = menu_result.w
+    # get start point
     start = np.array([menu_result.sx, menu_result.sy])
+    # get goal point
     goal = np.array([menu_result.gx, menu_result.gy])
+    robot_vision = menu_result.r 
+    # get vision range 
+    if robot_vision == -1:  # default == -1
+        robot_vision = config.robot_vision
 
     # current position of robot
     cpos = start
@@ -169,7 +174,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                 if world_name is not None:
                     map_display(plt, world_name + ".csv", ob)
                 else:
-                    map_display(plt, map_name, ob)
+                    map_display(plt, map_name + " run times: {0}".format(run_count), ob)
 
             # show_traversalSights
             if show_traversalSights:

@@ -8,11 +8,11 @@ show_animation = True
 show_map = True
 show_world = True
 
-show_traversalSights = False
+show_traversalSights = True
 
 show_openSight = True
 show_closedSight = True
-show_circleRange = True
+show_circleRange = False
 
 show_refSight = False
 
@@ -21,7 +21,7 @@ show_approximately_shortest_path = True
 show_critical_line_segments = False
 show_cls_orderednumber = True  # show ordered number of critical line segments
 
-show_visitedPath = True
+show_visitedPath = False
 show_visibilityGraph = True
 
 show_local_openpt = True
@@ -32,7 +32,10 @@ show_robot = True
 show_goal = True
 show_start = True
 show_text_goal = True
-
+'''
+    transparent 
+'''
+transparent_alpha = 0.1
 '''
 Assumption of Hoai An Theory.
 '''
