@@ -31,7 +31,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     # set same window size to capture pictures
     fig, ax = plt.subplots(figsize=(6, 6))
     fig.canvas.set_window_title('Path Planning Problem for an Autonomous Robot')
-    
+
     # get user input
     menu_result = menu()
     run_times = menu_result.n
@@ -143,7 +143,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
 
         asp, critical_ls = approximately_shortest_path(skeleton_path, traversal_sights, robot_vision)
 
-        # recode visited path
+        # mark visited path
         visited_path.append(asp)
 
         # make a move from current position
@@ -171,10 +171,14 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
 
             # draw map obstacles 
             if show_map:
+                title = ""
                 if world_name is not None:
-                    map_display(plt, world_name + ".csv", ob)
+                    title = world_name + ".csv"  
                 else:
-                    map_display(plt, map_name + " run times: {0}".format(run_count), ob)
+                    title = map_name 
+                title += ", run times: {0}".format(run_count)
+                title += ", path len: {:.2f}".format (traveled_path_len(visited_path))
+                map_display(plt, title, ob)
 
             # show_traversalSights
             if show_traversalSights:
@@ -222,7 +226,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             # to set equal make sure x y axises are same resolution 
             plt.axis("equal")
             plt.grid(True)
-            plt.pause(1)
+            plt.pause(0.0001)
 
         # Run n times for debugging
         if run_times == run_count:
