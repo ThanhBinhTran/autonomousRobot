@@ -32,7 +32,7 @@ def ranking_score(angle, distance):
 
 def ranking(center, pt, goal):
     '''
-    score the open point by its angle (from center to point and goal) and its distance (to goal)
+    score the open point by its angle (from center to point and to goal) and its distance (to goal)
     '''
 
     sa = signed_angle(goal - center, pt - center)
@@ -426,3 +426,13 @@ def store_global_active_points(g_active_open_pts, l_active_open_pts, ranking_sco
         else:
             g_active_open_pts = np.concatenate((g_active_open_pts, local_active_open_pts_info), axis=0)
     return g_active_open_pts
+
+'''
+calcualte traveled path length
+'''
+def traveled_path_len(visitedpaths):
+    vp_len = 0
+    for path in visitedpaths:
+        for i in range(len(path)-1):
+            vp_len += point_dist(path[i], path[i+1])
+    return vp_len
