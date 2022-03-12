@@ -6,7 +6,8 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
 
 import csv
 
-''' write map points into csv file in form of (x,y)
+''' 
+    write map points into csv file in form of (x,y)
     x,y is casted to integer for easy debug/observe 
 '''
 
@@ -19,43 +20,28 @@ def write_map_csv(file_name, f_data, data_header):
     f.close()
 
 
-''' read map points into csv file in form of (x,y) '''
-
-def read_map_csv1(mapname):
-    first_line = True
-    obstacles = []
-
-    with open(mapname, newline='') as f:
-        reader = csv.reader(f, delimiter=',', quoting=csv.QUOTE_NONE)
-        for row in reader:
-            if first_line:
-                first_line = False
-                continue
-            obstacles.append([float(row[0]), float(row[1])])
-    return obstacles
-
-
-'''read map points  which consists of many parts '''
+'''
+    read map points which consists of many obstacle
+'''
 
 def read_map_csv(mapname):
-    first_line = True
-    obstacles = []
-    ob_part = []
+    obstacle = []   # list of points
+    obstacles = []  # list of obstacle
+    
     with open(mapname, newline='') as f:
         reader = csv.reader(f, delimiter=',', quoting=csv.QUOTE_NONE)
         for row in reader:
-            # print (row[0])
-            if row[0].find('x') != -1:
-                # print ("find x")
-                if len(ob_part) > 1:
-                    ob_part.append(ob_part[0])
-                    obstacles.append(ob_part)
-                ob_part = []
+            if row[0].find('x') != -1:  # header line
+                if len(obstacle) > 1:   
+                    obstacle.append(obstacle[0])    # append the first point to make a polygon
+                    obstacles.append(obstacle)      # append obstacle to obstacles
+                obstacle = []                       # clear and prepare for next obstacle
                 continue
-            ob_part.append([float(row[0]), float(row[1])])
-        if len(ob_part) > 1:
-            ob_part.append(ob_part[0])
-            obstacles.append(ob_part)
+            else:
+                obstacle.append([float(row[0]), float(row[1])]) # get point data
+        if len(obstacle) > 1:   # append the last one
+            obstacle.append(obstacle[0])
+            obstacles.append(obstacle)
     #print(obstacles)
     return obstacles
 
