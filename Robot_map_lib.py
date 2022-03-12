@@ -12,14 +12,14 @@ def map_generator(plt, N):
     return plt.ginput(N, show_clicks=True, timeout=-1)  # no timeout
 
 
-def map_display(plt, mapname, ob):
+def map_display(plt, mapname, obstacles):
     # displaying the title 
     plt.title("Display map: {0}".format(mapname))
-    for ob_part in ob:
-        x = [point[0] for point in ob_part]
-        y = [point[1] for point in ob_part]
-        x.append(ob_part[0][0])
-        y.append(ob_part[0][1])
+    for obstacle in obstacles:
+        x = [point[0] for point in obstacle]
+        y = [point[1] for point in obstacle]
+        x.append(obstacle[0][0])
+        y.append(obstacle[0][1])
         plt.fill(x, y, color='k', alpha=0.4, hatch='//////')
 
 
