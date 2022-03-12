@@ -127,9 +127,9 @@ def plot_edge(plt, center_pts, edges):
         plot_line(plt, [center_pts[pairs[0]], center_pts[pairs[1]]], ls="-k")
 
 
-def plot_visibilityGraph(plt, visible_graph, ls_vg):
-    for pnode in visible_graph:
-        for verteces in visible_graph[pnode]:
+def plot_visibilityGraph(plt, visibility_graph, ls_vg):
+    for pnode in visibility_graph:
+        for verteces in visibility_graph[pnode]:
             plot_line(plt, [pnode, verteces], ls_vg)
 
 
