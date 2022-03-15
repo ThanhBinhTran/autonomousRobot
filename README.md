@@ -2,9 +2,8 @@
 This project is to simulate an autonomousRobot :car: that try to find a way to reach a goal
 
 ##### Usage:
-```
-python Robot_main.py -n <number of run times> -m <map name> -w <worldname> -sx <x> -sy <y> -gx <x> -gy <y>
-```
+``` python Robot_main.py -n <number of run times> -m <map name> -w <worldname> -sx <x> -sy <y> -gx <x> -gy <y> ```
+
 * n: number of run times
     - < 0 or 0: run until meet the given goal
     - n: number of run times
@@ -25,11 +24,13 @@ python Robot_main.py -n 0 -w _world.png -sx 5 -sy 10 -gx 180.0 -gy 180
 ``` python Robots_theory.py -n 0 -m _forest.csv -gx 500 -gy 500 ```
 * set robot_vision parameter in Program_config.py to see the different outcome of experiments
 
-##### To generate a map: ``` python map_generator.py -n <number of points> -m <map name> ```
+##### To generate a map: 
+``` python map_generator.py -n <number of points> -m <map name> ```
 Example: ``` python map_generator.py -n 5 -m _map_temp.csv ```
 
 - Click on the given plot to input points
 - Middle mouse click to turn next obstacle, each obstracle contain maximum of 100000 vertices
 
-##### To display a map: ``` python map_display.py -m <map name> ```
+##### To display a map: 
+``` python map_display.py -m <map name> ```
 Example: ``` python map_display.py -m _map_temp.csv ```
