@@ -2,7 +2,7 @@ from Robot_paths_lib import *
 from Robot_lib import *
 from Robot_sight_lib import inside_local_true_sight, inside_global_true_sight
 
-class Robot_knowledge:
+class Robot:
     def __init__(self, start, vision_range, robot_radius= 0.2): 
         self.coordinate = tuple(start)      # hold current coordinate of robot
         self.next_coordinate = tuple(start) # hold next coordinate where robot moves to

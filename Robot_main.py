@@ -14,9 +14,8 @@ from Robot_sight_lib import *
 from Robot_map_lib import Map
 from Robot_world_lib import World
 from Robot_csv_lib import *
-from Robot_goal_lib import *
 from Program_config import *
-from Robot_knowledge import Robot_knowledge
+from Robot import Robot
 
 import argparse
 
@@ -24,7 +23,7 @@ config = Config()
 
 def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius):
     
-    Robot = Robot_knowledge(start, robot_vision, robot_radius)
+    robot = Robot(start, robot_vision, robot_radius)
 
     # set same window size to capture pictures
     fig, ax = plt.subplots(figsize=(6, 6))
@@ -45,72 +44,72 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
 
     while True:
         iter_count += 1
-        print("\n_____number of iteration:{0}, current robot coordinate{1}".format(iter_count, Robot.coordinate))
+        print("\n_____number of iteration:{0}, current robot coordinate{1}".format(iter_count, robot.coordinate))
         
-        Robot.update_coordinate(Robot.next_coordinate)
+        robot.update_coordinate(robot.next_coordinate)
 
         # clean old data
         next_point = []
 
         # scan to get sights at local
-        closed_sights, open_sights = scan_around(Robot, obstacles.data(), goal)
+        closed_sights, open_sights = scan_around(robot, obstacles.data(), goal)
 
         # check whether the robot saw or reach the given goal
-        Robot.check_goal(goal, closed_sights)
+        robot.check_goal(goal, closed_sights)
         #Robot.show_status()
 
-        if not Robot.saw_goal and not Robot.reach_goal:
+        if not robot.saw_goal and not robot.reach_goal:
             # get local open points
-            Robot.get_local_open_points(open_sights)
+            robot.get_local_open_points(open_sights)
 
             # check whether local open points are active
-            Robot.get_local_active_open_points()
+            robot.get_local_active_open_points()
 
             ranks_new = []
             # Ranking new active openPts then stack to global set.
-            if len(Robot.local_active_open_pts) > 0:
-                ranks_new = np.array([ranking(Robot.coordinate, pt, goal) for pt in Robot.local_active_open_pts])
+            if len(robot.local_active_open_pts) > 0:
+                ranks_new = np.array([ranking(robot.coordinate, pt, goal) for pt in robot.local_active_open_pts])
 
             # stack local active open point to global set
-            Robot.global_active_open_pts = store_global_active_points(Robot.global_active_open_pts, Robot.local_active_open_pts, ranks_new)
+            robot.global_active_open_pts = store_global_active_points(robot.global_active_open_pts, robot.local_active_open_pts, ranks_new)
 
             # add new active open points to graph_insert
-            graph_add_lOpenPts(Robot.visibility_graph, Robot.coordinate, Robot.local_active_open_pts)
+            graph_add_lOpenPts(robot.visibility_graph, robot.coordinate, robot.local_active_open_pts)
 
             # pick next point to make a move
-            next_point, next_pt_idx = Robot.pick_next_point()
+            next_point, next_pt_idx = robot.pick_next_point()
 
             if next_point is not None:
                 # find the shortest skeleton path from current position (center) to next point
-                skeleton_path = BFS_skeleton_path(Robot.visibility_graph, Robot.coordinate, tuple(next_point))
+                skeleton_path = BFS_skeleton_path(robot.visibility_graph, robot.coordinate, tuple(next_point))
 
                 # then remove picked point from active global open point
-                Robot.global_list_remove(next_pt_idx)
+                robot.global_list_remove(next_pt_idx)
             else:
                 print("No way to reach the goal!")
-                Robot.is_no_way_to_goal(True)
+                robot.is_no_way_to_goal(True)
 
         else:
             next_point = goal
             # find the shortest path from center to next point
-            skeleton_path = [Robot.coordinate, goal]
+            skeleton_path = [robot.coordinate, goal]
 
         # record the path and sight
-        Robot.expand_traversal_sights(closed_sights, open_sights)
+        robot.expand_traversal_sights(closed_sights, open_sights)
 
         if print_traversalSights:
-            Robot.print_traversal_sights()
+            robot.print_traversal_sights()
 
-        asp, critical_ls = approximately_shortest_path(skeleton_path, Robot.traversal_sights, Robot.vision_range)
+        asp, critical_ls = approximately_shortest_path(skeleton_path, robot.traversal_sights, robot.vision_range)
 
         # mark visited path
-        Robot.expand_visited_path(asp)
+        robot.expand_visited_path(asp)
 
         # make a move from current position
-        if not Robot.no_way_to_goal:
-            Robot.next_coordinate = motion(Robot.coordinate, next_point)  # simulate robot
+        if not robot.no_way_to_goal:
+            robot.next_coordinate = motion(robot.coordinate, next_point)  # simulate robot
 
-        plt_show_animation(plt, Robot, world_name, map_name, iter_count, obstacles ,mpimg , ax, goal, 
+        plt_show_animation(plt, robot, world_name, map_name, iter_count, obstacles ,mpimg , ax, goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
 
         # Run n times for debugging
@@ -118,14 +117,14 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
             break
 
         # check reaching goal
-        if Robot.reach_goal:
+        if robot.reach_goal:
             print("Goal!!")
             break
-        if Robot.no_way_to_goal:
+        if robot.no_way_to_goal:
             print("No way to goal!!")
             break
 
-    Robot.print_visited_path()
+    robot.print_visited_path()
     print("Done")
 
     plt.show()
