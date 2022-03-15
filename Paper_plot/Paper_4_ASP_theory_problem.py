@@ -42,12 +42,15 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     
     end = [4,3]
     plt.figure(figsize=(7,7))
-    
+    plt.axis("off")   # turns off axes
+    plt.axis("tight")  # gets rid of white border
+    #plt.axis("image")  # square up the image instead of filling the "figure" space    
+
     plot_point(plt, start, "or")
     plot_point(plt, end, "or")
     
-    plt.fill(ob_d[:,0], ob_d[:,1], color = 'k', alpha = 0.4, hatch='//')
-    plt.fill(ob_u[:,0], ob_u[:,1], color = 'k', alpha = 0.4, hatch='//')
+    plt.fill(ob_d[:,0], ob_d[:,1], color = 'k', alpha = 0.2, hatch='//')
+    plt.fill(ob_u[:,0], ob_u[:,1], color = 'k', alpha = 0.3, hatch='/')
     plt.axis("equal")
     #plt.grid(True)
 
@@ -65,12 +68,41 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     end,
                     ob_u[3], ob_u[2], ob_u[1],
                     ])
+    imageID = 2
+    capture_file_extension = "svg"
+    capture_file_extension = "eps"
+    capture_file_extension = "pdf"
+    
+    if imageID == 0:
+        draw_config_space = 0
+        draw_line_segment = 0
+        shortest_path_step_1 = 0
+        shortest_path_final_step  = 0
+        shortest_path = 0
+        capture_file_name = "0_robotsworld.{0}".format(capture_file_extension) 
+    elif imageID == 1:
+        draw_config_space = 1
+        draw_line_segment = 1
+        shortest_path_step_1 = 1
+        shortest_path_final_step  = 0
+        shortest_path = 0
+        capture_file_name = "0_APS_step1.{0}".format(capture_file_extension) 
+    else:
+        draw_config_space = 1
+        draw_line_segment = 1
+        shortest_path_step_1 = 0
+        shortest_path_final_step  = 0
+        shortest_path = 1
+        capture_file_name = "0_APS_result.{0}".format(capture_file_extension) 
+    
+    
+
     # draw config space
-    if 1:
+    if draw_config_space:
         plt.fill(config_space[:,0], config_space[:,1], color = "g", alpha = 0.4)
         
     #draw line segment
-    if 1:
+    if draw_line_segment:
         #
         i = 0
         for line in ls:
@@ -86,7 +118,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             i = i + 1
         
     #shortest path step 1
-    if 1:
+    if shortest_path_step_1:
 
         plt.text(p1[0] , p1[1]+0.1, "P1") 
         plt.text(p2[0] + 0.1 , p2[1]-0.1, "P2") 
@@ -107,7 +139,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         plt.text(ls[0][0][0]- 0.2, ls[0][0][1]+ 0.085, "P1_new")
  
     #shortest path final step 
-    if 0:
+    if shortest_path_final_step:
         p3_final = line_intersection((ls[1][1],end), ls[2])
         plot_line(plt, (start,ls[0][0]), ls="-r")
         plot_line(plt, (ls[0][0], ls[1][1]), ls="-r")
@@ -120,13 +152,18 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         plt.text(p3_final[0], p3_final[1] + 0.1, "P3")
         
     #shortest path
-    if 0:
+    if shortest_path:
         plot_line(plt, (start,end), ls="-..r")
         plot_line(plt, (start,ls[0][0]), ls="-r")
         plot_line(plt, (ls[0][0], ls[1][1]), ls="-r")
         plot_line(plt, (ls[1][1], end), ls="-r")
-    plt.show()
+    #plt.show()
+    #plt.savefig("test_rasterization.pdf", dpi=150)
+    #plt.savefig("test_rasterization.eps", dpi=150)
+    plt.savefig(capture_file_name, dpi=150)
 
 if __name__ == '__main__':
+    
     main(robot_type=RobotType.rectangle)
+    
     #main(robot_type=RobotType.circle)

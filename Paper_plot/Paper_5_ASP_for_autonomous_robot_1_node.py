@@ -128,7 +128,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     
 
         
-    plot_line(plt, (start,end), ls="-..r")
+    #plot_line(plt, (start,end), ls="-..r")
     
     plt.text(start[0] + 0.1, start[1] + 0.1, "s")
     plt.text(end[0] + 0.1, end[1] + 0.1, "e")
