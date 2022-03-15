@@ -4,15 +4,14 @@ from Robot_lib import *
 from Robot_sight_lib import inside_global_true_sight
 from collections import defaultdict
 
-from Robot_draw_lib import *
+#from Robot_draw_lib import *
 
 
 def motion(current_position, next_pt):
     '''
     motion model
     '''
-    current_position[0] = approximately_num(next_pt[0])
-    current_position[1] = approximately_num(next_pt[1])
+    current_position = (approximately_num(next_pt[0]), approximately_num(next_pt[1]))
     return current_position
 
 
@@ -362,39 +361,6 @@ def approximately_sp_ls(critical_ls, spt, gpt):
                         path[i] = critical_ls[i - 1][1]
     return path
 
-
-'''
-    get local open points
-'''
-
-
-def get_local_open_points(open_sights):
-    local_open_pts = []
-    if len(open_sights) > 0:
-        open_sights = np.array(open_sights)
-        local_open_pts = open_sights[:, 2]  # local_openPts
-        #print("local_openPts,", local_open_pts)
-        for i in range(len(local_open_pts)):
-            local_open_pts[i][0] = approximately_num(local_open_pts[i][0])
-            local_open_pts[i][1] = approximately_num(local_open_pts[i][1])
-    return local_open_pts
-
-
-'''
-    check whether local open_points are active 
-'''
-
-def get_active_open_points(local_open_pts, traversal_sights, robot_vision, center, goal):
-    local_active_open_pts = []
-    if len(local_open_pts):  # new local found
-        local_active_open_pts = local_open_pts
-
-        # remove local_point which is inside explored area
-        if len(traversal_sights) > 0:
-            local_open_pts_status = [inside_global_true_sight(pt, robot_vision, traversal_sights) for pt in local_active_open_pts]
-            local_active_open_pts = local_active_open_pts[np.logical_not(local_open_pts_status)]
-
-    return local_active_open_pts
 
 '''
     check if local open points are inside active arc (arc_limA, arc_limB)

@@ -4,7 +4,10 @@ from matplotlib import patches
 import matplotlib.patches as mpatches
 from matplotlib.collections import PatchCollection
 
-# import matplotlib.pyplot as plt
+from Robot_map_lib import Map
+from Robot_world_lib import World
+#from Robot_paths_lib import traveled_path_len
+config = Config()
 
 def plot_sight(plt, x, y, pair, cl="g", alpha=transparent_alpha, linestyle=":"):
     ptA, ptB = pair
@@ -160,7 +163,8 @@ def plot_center(plt, center_pts):
         plot_point_text(plt, center_pts[i], ".b", "{0}".format(i))
 
 
-def plot_robot(plt, x, y, yaw, config):  # pragma: no cover
+def plot_robot(plt, center, yaw, config):  # pragma: no cover
+    x,y = center
     if config.robot_type == RobotType.rectangle:
         outline = np.array([[-config.robot_length / 2, config.robot_length / 2,
                              (config.robot_length / 2), -config.robot_length / 2,
@@ -181,3 +185,78 @@ def plot_robot(plt, x, y, yaw, config):  # pragma: no cover
         out_x, out_y = (np.array([x, y]) +
                         np.array([np.cos(yaw), np.sin(yaw)]) * config.robot_radius)
         plt.plot([x, out_x], [y, out_y], "-k")
+
+def plt_show_animation(plt, Robot, world_name, map_name, iter_count, obstacles ,mpimg , ax, goal, 
+                    closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point):
+    if show_animation:
+        # clear plot
+        plt.cla()
+        
+        # for stopping simulation with the esc key.
+        plt.gcf().canvas.mpl_connect(
+            'key_release_event',
+            lambda event: [exit(0) if event.key == 'escape' else None])
+        
+        # draw world and map
+        if show_world and world_name is not None:
+            World().display(plt, mpimg, world_name)
+        
+        # draw map obstacles 
+        if show_map:
+            title = ""
+            if world_name is not None:
+                title = world_name + ".csv"  
+            else:
+                title = map_name 
+            title += ", run times: {0}".format(iter_count)
+            #title += ", path len: {:.2f}".format (traveled_path_len(visited_path))
+            Map().display(plt, title, obstacles.data())
+        
+        # show_traversalSights
+        if show_traversalSights:
+            for local in Robot.traversal_sights:
+                lcenter = local[0]  # center of robot at local
+                lc_sight = local[1]  # closed sight at local
+                lo_sight = local[2]  # open sight at local
+                plot_vision(plt, ax, lcenter[0], lcenter[1], Robot.vision_range, lc_sight, lo_sight)
+        
+        if show_robot:
+            plot_robot(plt, Robot.coordinate, 0, config)
+        
+        if show_goal:
+            plot_goal(plt, goal, Robot.reach_goal, Robot.saw_goal)
+        
+        # plot robot's vision at local (center)
+        plot_vision(plt, ax, Robot.coordinate[0], Robot.coordinate[1], Robot.vision_range, closed_sights, open_sights)
+        
+        if show_local_openpt and len(Robot.local_open_pts) > 0:
+            plot_points(plt, Robot.local_open_pts, ls_lopt)
+        
+        if show_active_openpt and len(Robot.global_active_open_pts) > 0:
+            plot_points(plt, Robot.global_active_open_pts, ls_aopt)
+        
+        if show_visibilityGraph:
+            plot_visibilityGraph(plt, Robot.visibility_graph, ls_vg)
+        
+        if show_visitedPath:
+            plot_paths(plt, Robot.visited_path, ls_vp, ls_goingp)
+        
+        if show_sketelonPath:
+            plot_lines(plt, skeleton_path, ls_sp)
+        
+        if show_approximately_shortest_path:
+            plot_lines(plt, asp, ls_asp)
+        
+        if show_critical_line_segments:
+            plot_critical_line_segments(plt, critical_ls, ls_cls)
+        
+            # display next point if existing
+        if show_next_point:
+            if len(next_point) > 0:
+                plot_point(plt, next_point, ls_nextpt)
+        
+        # to set equal make sure x y axises are same resolution 
+        plt.axis("equal")
+        plt.grid(True)
+        plt.pause(0.0001)
+    

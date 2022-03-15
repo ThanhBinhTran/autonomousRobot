@@ -384,7 +384,7 @@ def print_cpairs(message_ID, cpairs):  # print circle pairs
 
 
 def approximately_num(num):
-    return format(float(num), '.10f')
+    return float(format(float(num), '.10f'))
 
 
 import matplotlib.pyplot as plt
