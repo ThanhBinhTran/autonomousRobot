@@ -2,7 +2,7 @@ import math
 from enum import Enum
 
 '''
-CONTROL SIGNALs FOR SHOWING OR HIDING PLOT ELEMENTS
+Parameters to show/hide element(s) of animation 
 '''
 show_animation = True
 show_map = True
