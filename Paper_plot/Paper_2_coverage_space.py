@@ -6,19 +6,26 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+import os
+import argparse
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
-from Robot_lib import *
-from Robot_paths_lib import *
-from Robot_draw_lib import *
-from Robot_sight_lib import *
-from Robot_map_lib import map_display
-from Robot_csv_lib import read_map_csv
-from Program_config import *
-from Robot_control_panel import *
+import matplotlib.pyplot as plt
+try:
+    from Robot_lib import *
+    from Robot_paths_lib import *
+    from Robot_draw_lib import *
+    from Robot_sight_lib import *
+    from Robot_csv_lib import read_map_csv
+    from Program_config import *
+except ImportError:
+    raise
 
 
 
-config = Config()
+
+robot_parameters = Robot_parameters()
 
 def motion(current_position, next_pt):
     """
@@ -67,8 +74,8 @@ def check_goal(center, goal, config, radius, t_sight):
 def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     print(__file__ + " start!!")
 
-    config.robot_type = robot_type
-    robot_vision = config.robot_vision
+    robot_parameters.robot_type = robot_type
+    robot_vision = robot_parameters.robot_vision
     # set same window size to easy capture pictures
     plt.figure(figsize=(7,7))
     
@@ -118,7 +125,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         closed_sights, open_sights = scan_around(center, robot_vision, ob, goal)
         
         # check if the robot saw or reach the goal
-        r_goal, s_goal = check_goal(center, goal, config, robot_vision, closed_sights)
+        r_goal, s_goal = check_goal(center, goal, robot_parameters, robot_vision, closed_sights)
         
         if not s_goal and not r_goal:
             # get local open points
@@ -215,7 +222,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             
             if show_robot:
                 # plot robot 
-                plot_robot(plt, center[0], center[1], 0, config)
+                plot_robot(plt, center[0], center[1], 0, robot_parameters)
                 plt.text(center[0] + 1, center[1] + 1, "Robot's center")
                 vision = plt.Circle(center, robot_vision, color="red", linestyle  = "-", fill=False)
                 plt.gcf().gca().add_artist(vision)

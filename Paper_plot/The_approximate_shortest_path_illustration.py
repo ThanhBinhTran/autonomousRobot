@@ -3,21 +3,22 @@ autonomousRobot
 This project is to simulate an autonomousRobot that try to find a way to reach a goal (target) 
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
 """
-import math
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
-from Robot_lib import *
-from Robot_paths_lib import *
-from Robot_draw_lib import *
-from Robot_sight_lib import *
-from Robot_map_lib import map_display
-from Robot_csv_lib import read_map_csv
-from Program_config import *
-from Robot_control_panel import *
+import matplotlib.pyplot as plt
+try:
+    from Robot_draw_lib import *
+except ImportError:
+    raise
 
 
-def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
+plotter = Plotter((7,7), "The_approximate_shortest_path_illustration")
+
+def main():
     start = [0,1]
     
     ob_d = np.array([
@@ -41,15 +42,14 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     ])
                     
     end = [4,3]
-    plt.figure(figsize=(7,7))
-    plt.axis("off")   # turns off axes
-    plt.axis("tight")  # gets rid of white border
-    #plt.axis("image")  # square up the image instead of filling the "figure" space    
+    plotter.plt.axis("off")   # turns off axes
+    plotter.plt.axis("tight")  # gets rid of white border
+    #plotter.plt.axis("image")  # square up the image instead of filling the "figure" space    
 
-    plot_point(plt, start, "or")
-    plot_point(plt, end, "or")
+    plotter.point(start, "or")
+    plotter.point(end, "or")
     
-    plt.fill(ob_d[:,0], ob_d[:,1], color = 'k', alpha = 0.2, hatch='//')
+    plt.fill(ob_d[:,0], ob_d[:,1], color = 'k', alpha = 0.2, hatch='/')
     plt.fill(ob_u[:,0], ob_u[:,1], color = 'k', alpha = 0.3, hatch='/')
     plt.axis("equal")
     #plt.grid(True)
@@ -72,28 +72,29 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     capture_file_extension = "svg"
     capture_file_extension = "eps"
     capture_file_extension = "pdf"
-    
+    capture_file_extension = "png"
+
     if imageID == 0:
         draw_config_space = 0
         draw_line_segment = 0
         shortest_path_step_1 = 0
         shortest_path_final_step  = 0
         shortest_path = 0
-        capture_file_name = "0_robotsworld.{0}".format(capture_file_extension) 
+        capture_file_name = "The_approximate_shortest_path_illustration_0.{0}".format(capture_file_extension) 
     elif imageID == 1:
         draw_config_space = 1
         draw_line_segment = 1
         shortest_path_step_1 = 1
         shortest_path_final_step  = 0
         shortest_path = 0
-        capture_file_name = "0_APS_step1.{0}".format(capture_file_extension) 
+        capture_file_name = "The_approximate_shortest_path_illustration_1.{0}".format(capture_file_extension) 
     else:
         draw_config_space = 1
         draw_line_segment = 1
         shortest_path_step_1 = 0
         shortest_path_final_step  = 0
         shortest_path = 1
-        capture_file_name = "0_APS_result.{0}".format(capture_file_extension) 
+        capture_file_name = "The_approximate_shortest_path_illustration_2.{0}".format(capture_file_extension) 
     
     
 
@@ -106,7 +107,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         #
         i = 0
         for line in ls:
-            plot_line(plt, line, ls="-b")
+            plotter.line_segment(line, ls="-b")
             spt = line [0]
             ept = line [1]
             if i == 0:
@@ -124,46 +125,44 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         plt.text(p2[0] + 0.1 , p2[1]-0.1, "P2") 
         plt.text(p3[0] , p3[1]+0.1, "P3") 
         
-        plot_line(plt, (start,p1), ls="--k")
-        plot_line(plt, (p1, p2), ls="--k")
+        plotter.line_segment((start,p1), ls="--k")
+        plotter.line_segment((p1, p2), ls="--k")
 
-        plot_line(plt, (start,ls[0][0]), ls="-r")
-        plot_line(plt, (ls[0][0], p2), ls="-r")
-        plot_line(plt, (p3, p2), ls="-r")
-        plot_line(plt, (p3, end), ls="-r")
+        plotter.line_segment( (start,ls[0][0]), ls="-r")
+        plotter.line_segment( (ls[0][0], p2), ls="-r")
+        plotter.line_segment( (p3, p2), ls="-r")
+        plotter.line_segment( (p3, end), ls="-r")
         
-        plot_point(plt, p1, ".b")
-        plot_point(plt, p2, ".b")
-        plot_point(plt, p3, ".b")
-        plot_point(plt, ls[0][0], ls = "or")
+        plotter.point(p1, ls = ".b")
+        plotter.point(p2, ls = ".b")
+        plotter.point(p3, ls = ".b")
+        plotter.point( ls[0][0], ls = "or")
         plt.text(ls[0][0][0]- 0.2, ls[0][0][1]+ 0.085, "P1_new")
  
     #shortest path final step 
     if shortest_path_final_step:
         p3_final = line_intersection((ls[1][1],end), ls[2])
-        plot_line(plt, (start,ls[0][0]), ls="-r")
-        plot_line(plt, (ls[0][0], ls[1][1]), ls="-r")
-        plot_line(plt, (ls[1][1], end), ls="-r")
-        plot_point(plt, ls[0][0], ls = ".r")
-        plot_point(plt, ls[1][1], ls = ".r")
-        plot_point(plt, p3_final, ls = ".r")
+        plotter.line_segment( (start,ls[0][0]), ls="-r")
+        plotter.line_segment( (ls[0][0], ls[1][1]), ls="-r")
+        plotter.line_segment( (ls[1][1], end), ls="-r")
+        plotter.line_segment( ls[0][0], ls = ".r")
+        plotter.line_segment( ls[1][1], ls = ".r")
+        plotter.line_segment( p3_final, ls = ".r")
         plt.text(ls[0][0][0], ls[0][0][1] + 0.1, "P1")
         plt.text(ls[1][1][0] + 0.1, ls[1][1][1] - 0.1, "P2")
         plt.text(p3_final[0], p3_final[1] + 0.1, "P3")
         
     #shortest path
     if shortest_path:
-        plot_line(plt, (start,end), ls="-..r")
-        plot_line(plt, (start,ls[0][0]), ls="-r")
-        plot_line(plt, (ls[0][0], ls[1][1]), ls="-r")
-        plot_line(plt, (ls[1][1], end), ls="-r")
+        plotter.line_segment( (start,end), ls="-..r")
+        plotter.line_segment( (start,ls[0][0]), ls="-r")
+        plotter.line_segment( (ls[0][0], ls[1][1]), ls="-r")
+        plotter.line_segment( (ls[1][1], end), ls="-r")
+    
     #plt.show()
-    #plt.savefig("test_rasterization.pdf", dpi=150)
-    #plt.savefig("test_rasterization.eps", dpi=150)
-    plt.savefig(capture_file_name, dpi=150)
+    plt.savefig(capture_file_name, 
+            bbox_inches ="tight",
+            dpi=150)
 
 if __name__ == '__main__':
-    
-    main(robot_type=RobotType.rectangle)
-    
-    #main(robot_type=RobotType.circle)
+    main()

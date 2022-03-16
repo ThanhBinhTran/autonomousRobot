@@ -3,31 +3,37 @@ autonomousRobot
 This project is to simulate an autonomousRobot that try to find a way to reach a goal (target) 
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
 """
-import math
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
-from Robot_lib import *
-from Robot_paths_lib import *
-from Robot_draw_lib import *
-from Robot_sight_lib import *
-from Robot_map_lib import map_display
-from Robot_csv_lib import read_map_csv
-from Program_config import *
-from Robot_control_panel import *
+import matplotlib.pyplot as plt
+try:
+    from Robot_paths_lib import *
+    from Robot_draw_lib import *
+    from Robot_sight_lib import *
+    from Robot import Robot
+    from Robot_csv_lib import Obstacles
+except ImportError:
+    raise
 
 pt_offset = np.zeros((100,2))  # 100 offsets of point
-
-def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
+plotter = Plotter((7,7), "The_ASP_for_Autonomous_Robot_2_node")
+def main():
     goal = [10,10]
     robot_vision = 2
-    center = []
-    center.append([1,0.5])
-    center.append([2,2.2])
-    center.append([4,2.2])
+    center_points = []
+    center_points.append([1,0.5])
+    center_points.append([2,2.2])
+    center_points.append([4,2.2])
     # read map 
-    ob = read_map_csv("_paper_map.csv") # obstacles
-    ob = np.array(ob)
+    
+    obstacles_data = Obstacles()
+    ''' get obstacles data whether from world (if indicated) or map (by default)'''
+    obstacles_data.read(None, "_paper_map.csv")
+    obstacles = np.array(obstacles_data.data())
     
     start_line = np.array([
                     [0.5, 1.5],
@@ -38,8 +44,8 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     [4.7, 0],
                     [4.7, 2]
                     ])
-    spts = intersection(center[0][0], center[0][1], robot_vision, start_line)
-    epts = intersection(center[-1][0], center[-1][1], robot_vision, end_line) 
+    spts = intersection(center_points[0][0], center_points[0][1], robot_vision, start_line)
+    epts = intersection(center_points[-1][0], center_points[-1][1], robot_vision, end_line) 
     
     if inside_ls(spts[0], start_line):
         start = spts[0]
@@ -51,19 +57,20 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     else:
         end = epts[1]
         
-    plt.figure(figsize=(7,7))
-    
     skeleton_path = []
     skeleton_path.append(start)
-    skeleton_path.append(center[0])
-    skeleton_path.append(center[1])
-    skeleton_path.append(center[2])
+    skeleton_path.append(center_points[0])
+    skeleton_path.append(center_points[1])
+    skeleton_path.append(center_points[2])
     skeleton_path.append(end)
 
     csights = []
     osights = []
-    for centerpt in center:
-        cs, os = scan_around(centerpt, robot_vision, ob, goal)
+    robot = Robot(start, robot_vision, 0.3)
+
+    for center_point in center_points:
+        robot.coordinate = center_point
+        cs, os = scan_around(robot, obstacles, goal)
         csights.append(cs)
         osights.append(os)
     
@@ -96,21 +103,21 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     # crosspoint_temp = 1
 
     if draw_circle_range_temp:
-        for centerpt in center:
-            draw_vision_area(plt, centerpt[0], centerpt[1], robot_vision)
-            #draw_vision_area(plt, centerpt[0], centerpt[1], robot_vision/2)
+        for center_point in center_points:
+            plotter.vision_area(center_point, robot_vision)
+            #plotter.vision_area(center_point, robot_vision/2)
   
-    for ob_part in ob:
+    for ob_part in obstacles:
         plt.fill(ob_part[:,0], ob_part[:,1], color = 'k', alpha = 0.4, hatch='//')
     
     # text points
-    plot_point(plt, start, ".b")
-    plot_point(plt, end, ".b")
-    for pt in center:
-        plot_point(plt, pt, ".b")
-    plt.text(center[0][0] , center[0][1] - 0.2, "a")
-    plt.text(center[1][0] +0.1, center[1][1] +0.2, "b")
-    plt.text(center[2][0] +0.1, center[2][1] +0.2, "c")
+    plotter.point(start, ".b")
+    plotter.point(end, ".b")
+    for pt in center_points:
+        plotter.point(pt, ".b")
+    plt.text(center_points[0][0] , center_points[0][1] - 0.2, "a")
+    plt.text(center_points[1][0] +0.1, center_points[1][1] +0.2, "b")
+    plt.text(center_points[2][0] +0.1, center_points[2][1] +0.2, "c")
         
     plt.text(start[0], start[1]+0.2, "s")
     plt.text(end[0], end[1]-0.2, "e")
@@ -120,7 +127,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     traversal_sight = []
     i = 0
     for sight in osights: 
-        traversal_sight.append([center[i], csights[i], osights[i]])
+        traversal_sight.append([center_points[i], csights[i], osights[i]])
         i = i + 1
 
     asp, critical_ls = approximately_shortest_path(skeleton_path, traversal_sight, robot_vision)
@@ -131,7 +138,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         j = 0
         for ls in critical_ls:
             pt = ls[1]
-            plot_line(plt, ls[1:3], "-b")
+            plotter.line_segment( ls[1:3], "-b")
             if 0:
                 if i < 3:
                     plt.text(pt[0], pt[1] +0.1, "CE_a{0}".format(j))
@@ -147,18 +154,18 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                 
             
     if skeleton_path_temp:    # skeleton path
-        plot_lines(plt, skeleton_path, ls="--.b")
+        plotter.line_segments(  skeleton_path, ls="--.b")
     
     if strange_line_temp: # strange line
-        plot_line(plt, (start,end), ls="-..r")
+        plotter.line_segment(  (start,end), ls="-..r")
     
     if collision_free_area_temp: # collision-free area
         pt = []
         pt.append(start)
         for ls in critical_ls:
             if i == 3:
-                pt.append(center[1])
-                pt.append(center[2])
+                pt.append(center_points[1])
+                pt.append(center_points[2])
                 pt.append(end)
                 break
             pt.append(ls[1])
@@ -169,14 +176,14 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             pt.append(ls[1])
             if i == 6:
                 break
-        pt.append(center[0])
+        pt.append(center_points[0])
         pt = np.array(pt)
         
         plt.fill(pt[:,0], pt[:,1], color = "g", alpha = 0.3, ls="-")
         
     # final approximate shortest path
     if final_approximate_shortest_path_temp:
-        plot_lines(plt, asp, "-r")
+        plotter.line_segments(  asp, "-r")
         i = 0
         pt_offset[0] = [ -0.2 ,  -0.2]
         pt_offset[1] = [ 0    ,  0.15]
@@ -195,22 +202,22 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             textpt = pt + pt_offset[i]
             plt.text(textpt[0], textpt[1], "p{0}".format(i))
             i += 1
-            plot_point(plt, pt, ".k")
+            plotter.point(  pt, ".k")
     pt3 = asp[3]
     pt4 = asp[4]
-    ptA = center[0]
-    ptB = center[1]
+    ptA = center_points[0]
+    ptB = center_points[1]
     print (ptA, ptB, pt3, pt4)
     crosspoint = line_intersection((ptA,ptB), (pt3,pt4))
     
     if crosspoint_temp: # crosspoint
-        plot_point(plt, crosspoint, ".r")
+        plotter.point(  crosspoint, ".r")
         plt.text(crosspoint[0],crosspoint[1]-0.2,"m")
-        plot_line(plt, (start,crosspoint), ls=":k")
-        plot_line(plt, (crosspoint,end), ls=":k")
+        plotter.line_segment(  (start,crosspoint), ls=":k")
+        plotter.line_segment(  (crosspoint,end), ls=":k")
     plt.axis("equal")
     plt.grid(True)
     plt.show()
 
 if __name__ == '__main__':
-    main(robot_type=RobotType.rectangle)
+    main()

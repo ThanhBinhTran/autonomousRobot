@@ -3,24 +3,28 @@ autonomousRobot
 This project is to simulate an autonomousRobot that try to find a way to reach a goal (target) 
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
 """
-import math
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
-from Robot_lib import *
-from Robot_paths_lib import *
-from Robot_draw_lib import *
-from Robot_sight_lib import *
-from Robot_map_lib import map_display
-from Robot_csv_lib import read_map_csv
-from Program_config import *
-from Robot_control_panel import *
+import matplotlib.pyplot as plt
+try:
+    from Robot_paths_lib import *
+    from Robot_draw_lib import *
+    from Robot_sight_lib import *
+    from Robot import Robot
+except ImportError:
+    raise
+
 
 pt_offset = np.zeros((100,2))  # 100 offsets of point
-def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
+plotter = Plotter((7,7), "The_ASP_for_Autonomous_Robot_1_node")
+
+def main():
     
     robot_vision = 3
-        
     ob = np.array([
                 [4, 0],
                 [4, 1],
@@ -34,8 +38,8 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                  ])
     center = [3, 3.5]
     center1 = [4, 4]
-    obs = []
-    obs.append(ob)
+    obstacles = []
+    obstacles.append(ob)
     start_line = np.array([
                     [3.7, 0],
                     [3.7, 2]
@@ -57,17 +61,19 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         end = epts[0]
     else:
         end = epts[1]
-
-    plt.figure(figsize=(7,7))
-    
+  
     skeleton_path = []
     skeleton_path.append(start)
     skeleton_path.append(center)
     skeleton_path.append(end)
-    csights_0, osights_0 = scan_around(center, robot_vision, obs, end)
-    csights_1, osights_1 = scan_around(center1, robot_vision, obs, end)
+
+    robot = Robot(start, robot_vision, 0.3)
+    robot.coordinate = center
+    csights_0, osights_0 = scan_around(robot, obstacles, end)
+    robot.coordinate = center1
+    csights_1, osights_1 = scan_around(robot, obstacles, end)
     
-    draw_vision_area(plt, center[0], center[1], robot_vision)
+    plotter.vision_area(center, robot_vision)
     
     # map drawing
     plt.fill(ob[:,0], ob[:,1], color = 'k', alpha = 0.4, hatch='//')
@@ -88,20 +94,20 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         pt_offset[5] = [-0.1, -0.2]
         for ls in critical_ls:
             pt = ls[1]
-            plot_line(plt, ls[1:3], "-b")
+            plotter.line_segment(ls[1:3], "-b")
             textpt = pt + pt_offset[i]
-            plt.text(textpt[0], textpt[1], "CE_c{0}".format(i))
+            plotter.plt.text(textpt[0], textpt[1], "CE_c{0}".format(i))
             i += 1
         # show_approximately_shortest_path
         if 0:
-            plot_lines(plt, asp, "-r")
+            plotter.line_segments( asp, "-r")
             print ("________________")
             print (asp)
             print ("________________")
             i = 0
             for pt in asp:
-                plot_point(plt, pt, ".r")
-                plt.text(pt[0] , pt[1] , "P{0}".format(i))
+                plotter.point( pt, ".r")
+                plotter.plt.text(pt[0] , pt[1] , "P{0}".format(i))
                 i = i + 1
     
     if 1: # collision-free area
@@ -114,7 +120,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         pt.append(center)
         pt = np.array(pt)
         
-        plt.fill(pt[:,0], pt[:,1], color = "g", alpha = 0.3, ls="-")
+        plotter.plt.fill(pt[:,0], pt[:,1], color = "g", alpha = 0.3, ls="-")
         
     bound_pts = []
     for ls in critical_ls:
@@ -130,15 +136,15 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         
     #plot_line(plt, (start,end), ls="-..r")
     
-    plt.text(start[0] + 0.1, start[1] + 0.1, "s")
-    plt.text(end[0] + 0.1, end[1] + 0.1, "e")
-    plt.text(center[0] + 0.1, center[1] + 0.1, "c")
+    plotter.plt.text(start[0] + 0.1, start[1] + 0.1, "s")
+    plotter.plt.text(end[0] + 0.1, end[1] + 0.1, "e")
+    plotter.plt.text(center[0] + 0.1, center[1] + 0.1, "c")
     
     # draw midpoint 
     if 0:
         i = 0
         for pt in mid_pts:
-            plot_point(plt, pt, ls=".k")
+            plotter.point( pt, ls=".k")
             plt.text(pt[0] + 0.1, pt[1] + 0.1, "p{0}".format(i+1))
             i = i + 1
         plt.text(start[0] + 0.1, start[1] + 0.1, "p0")
@@ -146,15 +152,15 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         
         
     # skeleton path
-    plot_lines(plt, skeleton_path, ls="--.b")
+    plotter.line_segments(skeleton_path, ls="--.b")
     
 
     # mid path
     if 0:
-        plot_line(plt, (start,mid_pts[0]), "-r")
-        plot_line(plt, (end,  mid_pts[-1]), "-r")
+        plotter.line_segment((start,mid_pts[0]), "-r")
+        plotter.line_segment( (end,  mid_pts[-1]), "-r")
         for i in range (len(mid_pts)-1):
-            plot_line(plt, (mid_pts[i],mid_pts[i+1]), ":r")
+            plotter.line_segment( (mid_pts[i],mid_pts[i+1]), ":r")
        
      
     # new path
@@ -166,15 +172,15 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
         p_new = line_intersection(new_mid_pts, (center, bound_pts[1]))
         
         # draw new p1
-        plot_point(plt, p_new, ls=".r")
+        plotter.point( p_new, ls=".r")
         plt.text(p_new[0]+0.1, p_new[1] , "p2_new")
         mid_pts[1] = p_new
         for i in range (len(mid_pts)-1):
-            plot_line(plt, (mid_pts[i],mid_pts[i+1]), "-r")
+            plotter.line_segment( (mid_pts[i],mid_pts[i+1]), "-r")
         
     # final approximate shortest path
     if 1:
-        plot_lines(plt, asp, "-r")
+        plotter.line_segments( asp, "-r")
         i = 0
         pt_offset[0] = [0, -0.1]
         pt_offset[1] = [+0.1, + 0.1]
@@ -188,7 +194,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             textpt = pt + pt_offset[i]
             plt.text(textpt[0], textpt[1], "p{0}".format(i))
             i = i + 1
-            plot_point(plt, pt, ".k")
+            plotter.point(pt, ".k")
         
     plt.axis("equal")
     #plt.grid(True)
@@ -197,4 +203,4 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     plt.show()
 
 if __name__ == '__main__':
-    main(robot_type=RobotType.rectangle)
+    main()
