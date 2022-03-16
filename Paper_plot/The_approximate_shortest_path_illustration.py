@@ -58,9 +58,9 @@ def main():
     plt.text(end[0] - 0.2, end[1] + 0.1, "B({0},{1})".format(end[0], end[1]))
     #plt.text(start[0] + 0.1, start[1] + 0.2, "P0")
     #plt.text(end[0] - 0.2, end[1]- 0.4, "P4")    
-    p1 = midpoint(ls[0][0], ls[0][1])
-    p2 = midpoint(ls[1][0], ls[1][1])
-    p3 = midpoint(ls[2][0], ls[2][1])
+    p1 = mid_point(ls[0][0], ls[0][1])
+    p2 = mid_point(ls[1][0], ls[1][1])
+    p3 = mid_point(ls[2][0], ls[2][1])
     
     config_space = np.array([
                     start, 

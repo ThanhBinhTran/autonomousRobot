@@ -47,12 +47,12 @@ def main():
     spts = intersection(center_points[0][0], center_points[0][1], robot_vision, start_line)
     epts = intersection(center_points[-1][0], center_points[-1][1], robot_vision, end_line) 
     
-    if inside_ls(spts[0], start_line):
+    if inside_line_segment(spts[0], start_line):
         start = spts[0]
     else:
         start = spts[1]
         
-    if inside_ls(epts[0], end_line):
+    if inside_line_segment(epts[0], end_line):
         end = epts[0]
     else:
         end = epts[1]

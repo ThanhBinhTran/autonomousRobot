@@ -52,12 +52,12 @@ def main():
     spts = intersection(center[0], center[1], robot_vision, start_line)
     epts = intersection(center[0], center[1], robot_vision, end_line) 
     
-    if inside_ls(spts[0], start_line):
+    if inside_line_segment(spts[0], start_line):
         start = spts[0]
     else:
         start = spts[1]
         
-    if inside_ls(epts[0], end_line):
+    if inside_line_segment(epts[0], end_line):
         end = epts[0]
     else:
         end = epts[1]
@@ -130,7 +130,7 @@ def main():
     mid_pts = []
     
     for pt in bound_pts:
-        mid_pts.append(midpoint(center, pt))
+        mid_pts.append(mid_point(center, pt))
     
 
         
@@ -167,8 +167,8 @@ def main():
     if 0:
         #new mid point
         new_mid_pts = []
-        new_mid_pts.append(midpoint(mid_pts[1], mid_pts[0]))
-        new_mid_pts.append(midpoint(mid_pts[1], mid_pts[2]))
+        new_mid_pts.append(mid_point(mid_pts[1], mid_pts[0]))
+        new_mid_pts.append(mid_point(mid_pts[1], mid_pts[2]))
         p_new = line_intersection(new_mid_pts, (center, bound_pts[1]))
         
         # draw new p1
