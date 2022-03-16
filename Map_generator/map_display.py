@@ -1,3 +1,10 @@
+'''
+AutonomousRobot
+This project simulates our path-planning for an autonomous robot that tries to find a way to reach a goal (target)
+in certainly environment 
+author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.com
+'''
+
 import matplotlib.pyplot as plt
 import sys
 import os
@@ -12,21 +19,16 @@ except ImportError:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-            description="map (obstacle) generation",
-            epilog="Binh Tran (thanhbinh.hcmut@gmail.com",
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-mn", metavar="map name", default="_map_temp.csv", help="map name")
-    parser.add_argument("-n", metavar="-number of obstacle(s)", default=1, type= int , help="--number of obstacle(s)")
+            description="map (obstacle) display",)
+    parser.add_argument("-mn", metavar="map name", default="_map_temp.csv", help="display map from map_name data file")
     args = parser.parse_args()
 
     map_name = args.mn
-    win_size = 100
     
     map = Map()
     obstacles = Obstacles()
     
     plt.axis("equal")
-    plt.axis([0, win_size, 0, win_size])
     plt.grid(True)
     
     # read data obstacles
