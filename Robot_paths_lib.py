@@ -1,7 +1,5 @@
 import numpy as np
-from sys import float_info
 from Robot_lib import *
-from Robot_sight_lib import inside_global_true_sight
 from collections import defaultdict
 
 def motion(current_position, next_pt):
@@ -253,7 +251,7 @@ def approximately_sp_ls_B(critical_ls, spt, gpt):
         # initialize the path by choosing mid points of critical line segment
         path.append(spt)  # start point
         for ls in critical_ls:
-            pt = midpoint(ls[1], ls[2])
+            pt = mid_point(ls[1], ls[2])
             path.append(pt)  # middle point of critical line segments
             i = i + 1
         path.append(gpt)  # end point
@@ -261,7 +259,7 @@ def approximately_sp_ls_B(critical_ls, spt, gpt):
         for j in range(100):
             midpts = []
             for i in range(len(path) - 1):
-                midpts.append(midpoint(path[i], path[i + 1]))
+                midpts.append(mid_point(path[i], path[i + 1]))
 
             # find all new points for the path
             for i in range(len(midpts) - 1):
@@ -290,7 +288,7 @@ def approximately_sp_ls(critical_ls, spt, gpt):
         # initialize the path by choosing mid points of critical line segment
         path.append(spt)  # start point
         for ls in critical_ls:
-            pt = midpoint(ls[1], ls[2])
+            pt = mid_point(ls[1], ls[2])
             path.append(pt)  # middle point of critical line segments
             i = i + 1
         path.append(gpt)  # end point

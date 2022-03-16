@@ -2,13 +2,15 @@ import numpy as np
 import math
 
 
-def intersection(x, y, radius, ls_points):  # line segment points
-    ''' 
-    find the two different points where a line intersections a circle 
+
+def intersection(x, y, radius, line_segments):
     '''
+    find two different points where a line intersects with a circle
+    '''
+
     is_pt = []
-    p1x, p1y = ls_points[0]
-    p2x, p2y = ls_points[1]
+    p1x, p1y = line_segments[0]
+    p2x, p2y = line_segments[1]
     dx, dy = np.subtract(p2x, p1x), np.subtract(p2y, p1y)
     a = dx ** 2 + dy ** 2
     b = 2 * (dx * (p1x - x) + dy * (p1y - y))
@@ -24,36 +26,36 @@ def intersection(x, y, radius, ls_points):  # line segment points
     return is_pt
 
 
-def inside_ls(point, ls_points):  # line segment points
+def inside_line_segment(point, line_segment):
     '''
     check if a point is whether inside given line segment 
     return True if inside, otherwise return False
     using total distance to check, 
     '''
-    dp1 = point_dist(point, ls_points[0])
-    dp2 = point_dist(point, ls_points[1])
-    dls = point_dist(ls_points[1], ls_points[0])
+    dp1 = point_dist(point, line_segment[0])
+    dp2 = point_dist(point, line_segment[1])
+    dls = point_dist(line_segment[1], line_segment[0])
     dp = dp1 + dp2
     return math.isclose(dp, dls)
 
 
-def rotate_vector_center(center, v, radians):
+def rotate_vector_center(center, v, radian):
     '''
     rotate a vector with a angle of radians around center point
     '''
     vector_vc = np.subtract(v, center)
-    r_vector_vc = rotate_vector(vector_vc, radians)
+    r_vector_vc = rotate_vector(vector_vc, radian)
     result = np.add(center, r_vector_vc)
     return np.add(center, r_vector_vc)
 
 
-def rotate_vector(v, radians):
+def rotate_vector(v, radian):
     '''
     rotate vector with a angle of radians around (0,0)
     '''
     x, y = v
-    rx = x * math.cos(radians) + y * math.sin(radians)
-    ry = -x * math.sin(radians) + y * math.cos(radians)
+    rx = x * math.cos(radian) + y * math.sin(radian)
+    ry = -x * math.sin(radian) + y * math.cos(radian)
     return rx, ry
 
 
@@ -66,7 +68,7 @@ def unit_vector(vector):
 
 def unsigned_angle(v1, v2):
     '''
-    Find angle between two vectors
+    Find unsigned angle between two vectors
     '''
     usa = signed_angle(v1, v2)
     if usa < 0:
@@ -75,7 +77,7 @@ def unsigned_angle(v1, v2):
 
 def unsigned_angle(center, ptA, ptB):
     '''
-    Find angle among 3 points (ptA- center- ptB)
+    Find unsigned angle among 3 points (ptA- center- ptB)
     '''
     vector_a = np.subtract(ptA, center)
     vector_b = np.subtract(ptB, center)
@@ -117,7 +119,7 @@ def signed_angle(v1, v2):
 
 def get_angle_info(center, ptA, ptB):
     '''
-    return angle, start edge , end edge of given angle in anti-clockwise
+    return angle, start edge , end edge (in anti-clockwise)
     '''
 
     vector_a = np.subtract(ptA, center)
@@ -134,19 +136,19 @@ def get_angle_info(center, ptA, ptB):
     return angle, vs, ve
 
 
-def inside_angle_area(check_pt, center, ref_boundaries):
+def inside_angle_area(point, center, ref_boundaries):
     ''' 
-    check if a check_pt is where inside (ref[start]- center - ref[end]) area
+    check if a point is inside (ref[0]- center - ref[1]) area
     return True if inside
         additional code = 0, on the first of edge ref_boundaries
         additional code = 1, on the second of edge ref_boundaries
         additional code = 2, in closed area of ref_boundaries
     return Flase if outside
-    using math.isclose to avoid the error of floating check_pt computation
+    using math.isclose to avoid the error of floating point computation
     '''
     vector_a = np.subtract(ref_boundaries[0], center)
     vector_b = np.subtract(ref_boundaries[1], center)
-    vector_p = np.subtract(check_pt, center)
+    vector_p = np.subtract(point, center)
 
     ref_angle = signed_angle(vector_a, vector_b)
     cpt_angle = signed_angle(vector_a, vector_p)
@@ -180,19 +182,19 @@ def inside_angle_area(check_pt, center, ref_boundaries):
     return ret_result, ret_code
 
 
-def inside_closed_angle_area(check_pt, center, ref_boundaries):
+def inside_closed_angle_area(point, center, ref_boundaries):
     ''' 
-    check if a check_pt is where inside closed angle of (ref[start]- center - ref[end]) area
+    check if a check_pt is inside closed area of (ref[0]- center - ref[1])
     return True if inside (not boundary)
     return False if outside
     '''
-    in_status, in_code = inside_angle_area(check_pt, center, ref_boundaries)
+    in_status, in_code = inside_angle_area(point, center, ref_boundaries)
     return in_status and in_code == 2
 
 
 def center_triangle(triangle):
     '''
-    return center of triangle
+    return center of a triangle
     '''
     return np.mean(triangle, axis=0)
 
@@ -242,20 +244,19 @@ def belong_triangle(point, triangle):
     return at_a, at_b, at_c
 
 
-def mutual_edge(triA, triB):
+def mutual_edge(triangleA, triangleB):
     '''
-    return true if 2 triangle have mutual edge
+    return true if 2 triangles have a mutual edge
     '''
-    ret_result = False
-    check_a = belong_triangle(triA[0], triB)
-    check_b = belong_triangle(triA[1], triB)
-    check_c = belong_triangle(triA[2], triB)
+    check_a = belong_triangle(triangleA[0], triangleB)
+    check_b = belong_triangle(triangleA[1], triangleB)
+    check_c = belong_triangle(triangleA[2], triangleB)
     result = np.logical_or(check_a, check_b)
     result = np.logical_or(result, check_c)
     return np.sum(result) == 2
 
 
-def get_pairs_triangles(triangles):
+def get_pairs_of_triangles(triangles):
     '''
     return list of the edges of triangles
     '''
@@ -267,7 +268,7 @@ def get_pairs_triangles(triangles):
     return edges
 
 
-def midpoint(P, Q):
+def mid_point(P, Q):
     '''
     return mid point of 2 point Q, P
     '''
@@ -310,7 +311,7 @@ def line_across(line1, line2):
     '''
     is_pt = line_intersection(line1, line2)
     ret_result = None
-    if is_pt is not None and inside_ls(is_pt, line1) and inside_ls(is_pt, line2):
+    if is_pt is not None and inside_line_segment(is_pt, line1) and inside_line_segment(is_pt, line2):
         ret_result = is_pt
     return ret_result
 
@@ -336,32 +337,32 @@ def line_intersection(line1, line2):
     return x, y
 
 
-def get_middle_direction(center, radius, pair):
+def get_middle_direction(center, radius, points):
     '''
     given 2 points and a center, this function finds a direction where is from center to middle 
     of 2 points with length of radius
     '''
-    midpt = midpoint(pair[0], pair[1])
-    pt_is = intersection(center[0], center[1], radius, [center, midpt])
+    mid_pt = mid_point(points[0], points[1])
+    pt_is = intersection(center[0], center[1], radius, [center, mid_pt])
 
-    if inside_ls(midpt, [pt_is[0], center]):
+    if inside_line_segment(mid_pt, [pt_is[0], center]):
         return pt_is[0]
     else:
         return pt_is[1]
 
 
-def get_index_true(status):
+def get_index_true(array_idx_status):
     ''' 
-    return index of true elements
+    return index of true elements of array
     '''
-    return np.where(status)[0]
+    return np.where(array_idx_status)[0]
 
 
-def get_index_false(status):
+def get_index_false(array_idx_status):
     ''' 
     return index of False elements
     '''
-    not_status = np.logical_not(status)
+    not_status = np.logical_not(array_idx_status)
     return np.where(not_status)[0]
 
 
@@ -385,10 +386,6 @@ def print_cpairs(message_ID, cpairs):  # print circle pairs
 
 def approximately_num(num):
     return float(format(float(num), '.10f'))
-
-
-import matplotlib.pyplot as plt
-
 
 def find_configure_space(obstacles, robot_radius):
     ''' this function is to find a configure space which is robot free-collision ares '''
@@ -419,11 +416,8 @@ def find_configure_space(obstacles, robot_radius):
         lim_lss.append(lim_ls)
 
     for lim_ls in lim_lss:
-        print("__________________", lim_ls)
         i = 0
         for ls in lim_ls:
-            plt.plot(ls[0], ls[1], ".r")
-            plt.text(ls[0], ls[1], ".{0}".format(i))
             i = i + 1
 
     # find extend of obstacles
@@ -444,8 +438,6 @@ def find_configure_space(obstacles, robot_radius):
     for extend_cspace in extend_cspaces:
         i = 0
         for pt in extend_cspace:
-            plt.plot(pt[0], pt[1], ".b")
-            plt.text(pt[0], pt[1], ",{0}".format(i))
             i = i + 1
 
     # find boundary of configuration spaces
@@ -498,7 +490,7 @@ def cal_bisector(ptA, ptMid, ptB, robot_radius):
     return line_segment_bs
 
 
-def get_intersections_2circles(center_0, r0, center_1, r1):
+def get_intersections_2circles(center_0, radius_0, center_1, radius_1):
     '''
     get intersection of 2 circles
     '''
@@ -509,17 +501,17 @@ def get_intersections_2circles(center_0, r0, center_1, r1):
     d = math.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2)
 
     # non intersecting
-    if d > r0 + r1:
+    if d > radius_0 + radius_1:
         return None
     # One circle within other
-    if d < abs(r0 - r1):
+    if d < abs(radius_0 - radius_1):
         return None
     # coincident circles
-    if d == 0 and r0 == r1:
+    if d == 0 and radius_0 == radius_1:
         return None
     else:
-        a = (r0 ** 2 - r1 ** 2 + d ** 2) / (2 * d)
-        h = math.sqrt(r0 ** 2 - a ** 2)
+        a = (radius_0 ** 2 - radius_1 ** 2 + d ** 2) / (2 * d)
+        h = math.sqrt(radius_0 ** 2 - a ** 2)
         x2 = x0 + a * (x1 - x0) / d
         y2 = y0 + a * (y1 - y0) / d
         x3 = x2 + h * (y1 - y0) / d

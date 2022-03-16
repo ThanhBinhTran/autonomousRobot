@@ -26,7 +26,7 @@ def divide_sight_R_C_R_C(center, A, B, C, D):  # line [A,C], [B, D], B inside AC
 def divide_sight_R_C_C_R(center, r, c):  # divide  R-C-C-R into 3 parts
     is_c0R = line_intersection([center, c[0]], [r[0], r[1]])
     is_c1R = line_intersection([center, c[1]], [r[0], r[1]])
-    if inside_ls(is_c0R, [r[0], is_c1R]):  # R0 isC0R isC1R R1
+    if inside_line_segment(is_c0R, [r[0], is_c1R]):  # R0 isC0R isC1R R1
         divided_sight = [[r[0], is_c0R], [c[0], c[1]], [is_c1R, r[1]]]
     else:  # R0 isC1R isC0R R1
         divided_sight = [[r[0], is_c1R], [c[0], c[1]], [is_c0R, r[1]]]
@@ -275,16 +275,16 @@ def get_boundary_linesegments_single_obstacle(center, robot_vision, ob):
             b_pts = []  # boundary points
 
             for point in is_points:
-                pt_in = inside_ls(point, [ptA, ptB])
+                pt_in = inside_line_segment(point, [ptA, ptB])
                 # print ("inside_ls status *%# ", pt_in, " of point ", point)
                 if pt_in:  # found intersection point is inside the line segment
                     b_pts.append(point)
                 else:  # intersection point is not inside the line segment
-                    ptA_in = inside_ls(ptA, is_points)
+                    ptA_in = inside_line_segment(ptA, is_points)
 
                     if ptA_in:  # found intersection point is inside the line segment
                         b_pts.append(ptA)
-                    ptB_in = inside_ls(ptB, is_points)
+                    ptB_in = inside_line_segment(ptB, is_points)
                     if ptB_in:  # found intersection point is inside the line segment
                         b_pts.append(ptB)
 
@@ -311,9 +311,9 @@ def get_boudary_points_theory(center, robot_vision, ob, goal):
                 continue
             else:
                 if is_points[0] != is_points[1]:
-                    if inside_ls(is_points[0], [ptA, ptB]):
+                    if inside_line_segment(is_points[0], [ptA, ptB]):
                         boundary_pts.append(is_points[0])
-                    if inside_ls(is_points[1], [ptA, ptB]):
+                    if inside_line_segment(is_points[1], [ptA, ptB]):
                         boundary_pts.append(is_points[1])
     return np.array(boundary_pts)
 
@@ -336,7 +336,7 @@ def get_open_sights_in_active_arc_theory(arc_pts, parent_arc, robot_vision, ob, 
 
     # sort all arc points by its angle delegation, which is rorated to align X-axis
     # get mid point parent arc
-    pArc_mpt = midpoint(parent_arc[0], parent_arc[1])
+    pArc_mpt = mid_point(parent_arc[0], parent_arc[1])
     # calculate angle forming by (center -> midpt) and (X-axis)
     vector_mpt = np.subtract(pArc_mpt, center)
     vector_Xaxis_unit = [1,0]
@@ -424,14 +424,14 @@ def get_ref_csight_lss(center, radius, closed_sights):
     # circle point 0
     cpt_is = intersection(x, y, radius, [cspt0, center])
 
-    if inside_ls(cpt_is[0], [cspt0, center]):
+    if inside_line_segment(cpt_is[0], [cspt0, center]):
         cpoints.append(cpt_is[0])
     else:
         cpoints.append(cpt_is[1])
 
     # circle point 1
     cpt_is = intersection(x, y, radius, [cspt1, center])
-    if inside_ls(cpt_is[0], [cspt1, center]):
+    if inside_line_segment(cpt_is[0], [cspt1, center]):
         cpoints.append(cpt_is[0])
     else:
         cpoints.append(cpt_is[1])
