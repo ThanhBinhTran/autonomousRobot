@@ -3,32 +3,30 @@ autonomousRobot
 This project is to simulate an autonomousRobot that try to find a way to reach a goal (target)
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.com
 """
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+
 import numpy as np
 
 from Robot_lib import *
 from Robot_paths_lib import *
-from Robot_draw_lib import *
+from Robot_draw_lib import Plotter
 from Robot_sight_lib import *
 from Robot_map_lib import Map
-from Robot_world_lib import World
 from Robot_csv_lib import *
 from Program_config import *
 from Robot import Robot
-
+from Robot_parameters import Robot_parameters, RobotType
+from Robot_ranking import Ranker
 import argparse
 
-config = Config()
+robot_parameters = Robot_parameters()
 
 def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius):
     
     robot = Robot(start, robot_vision, robot_radius)
+    ranker = Ranker(alpha=0.9, beta= 0.1)
 
-    # set same window size to capture pictures
-    fig, ax = plt.subplots(figsize=(6, 6))
-    fig.canvas.set_window_title('Path Planning Problem for an Autonomous Robot')
-
+    # declare potter within window size
+    plotter = Plotter((6,6), "Path Planning Problem for an Autonomous Robot")
     
     obstacles = Obstacles()
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
@@ -53,7 +51,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
 
         # scan to get sights at local
         closed_sights, open_sights = scan_around(robot, obstacles.data(), goal)
-
+        
         # check whether the robot saw or reach the given goal
         robot.check_goal(goal, closed_sights)
         #Robot.show_status()
@@ -68,7 +66,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
             ranks_new = []
             # Ranking new active openPts then stack to global set.
             if len(robot.local_active_open_pts) > 0:
-                ranks_new = np.array([ranking(robot.coordinate, pt, goal) for pt in robot.local_active_open_pts])
+                ranks_new = np.array([ranker.rank(robot.coordinate, pt, goal) for pt in robot.local_active_open_pts])
 
             # stack local active open point to global set
             robot.global_active_open_pts = store_global_active_points(robot.global_active_open_pts, robot.local_active_open_pts, ranks_new)
@@ -77,7 +75,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
             graph_add_lOpenPts(robot.visibility_graph, robot.coordinate, robot.local_active_open_pts)
 
             # pick next point to make a move
-            next_point, next_pt_idx = robot.pick_next_point()
+            next_point, next_pt_idx = robot.pick_next_point(robot.global_active_open_pts)
 
             if next_point is not None:
                 # find the shortest skeleton path from current position (center) to next point
@@ -109,9 +107,9 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
         if not robot.no_way_to_goal:
             robot.next_coordinate = motion(robot.coordinate, next_point)  # simulate robot
 
-        plt_show_animation(plt, robot, world_name, map_name, iter_count, obstacles ,mpimg , ax, goal, 
+        plotter.show_animation(robot, world_name, map_name, iter_count, obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
-
+        
         # Run n times for debugging
         if  iter_count == num_iter:
             break
@@ -127,7 +125,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
     robot.print_visited_path()
     print("Done")
 
-    plt.show()
+    plotter.show()
 
 
 if __name__ == '__main__':
@@ -150,13 +148,13 @@ if __name__ == '__main__':
     map_name = menu_result.m
     world_name = menu_result.w
     # get start point and goal point
-    start = np.array([menu_result.sx, menu_result.sy])
-    goal = np.array([menu_result.gx, menu_result.gy])
+    start = menu_result.sx, menu_result.sy
+    goal = menu_result.gx, menu_result.gy
     robot_radius = menu_result.radius
     robot_vision = menu_result.r 
     # get vision range 
     if robot_vision == -1:  # default == -1
-        robot_vision = config.robot_vision
+        robot_vision = robot_parameters.robot_vision
     robot_type=RobotType.circle
 
     # run robot

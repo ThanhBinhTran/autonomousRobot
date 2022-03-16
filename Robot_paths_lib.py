@@ -4,60 +4,12 @@ from Robot_lib import *
 from Robot_sight_lib import inside_global_true_sight
 from collections import defaultdict
 
-#from Robot_draw_lib import *
-
-
 def motion(current_position, next_pt):
     '''
     motion model
     '''
     current_position = (approximately_num(next_pt[0]), approximately_num(next_pt[1]))
     return current_position
-
-
-def ranking_score(angle, distance):
-    # ranking = alpha/(distance**2) + beta/abs(angle**2)
-    alpha = 0.9
-    beta = 0.1
-    angle = angle / math.pi
-    distance = distance / 150
-    # print ("Ranking score: angle {0}, distance {1}".format(angle, distance) )
-    if not math.isclose(angle, 0.0) and not math.isclose(distance, 0.0):
-        r_score = alpha / (distance) + beta / abs(angle)
-    else:
-        r_score = float_info.max
-    return r_score
-
-
-def ranking(center, pt, goal):
-    '''
-    score the open point by its angle (from center to point and to goal) and its distance (to goal)
-    '''
-
-    sa = signed_angle(goal - center, pt - center)
-    dist = point_dist(goal, pt)
-    rank_score = ranking_score(sa, dist)
-    return [rank_score]
-
-
-def pick_next(ao_gobal):
-    '''
-    return index and value of next point if there exist any active open point
-    otherwise -1
-    '''
-    pick_idx = -1
-    next_pt = []
-    if len(ao_gobal) > 0:
-        ranks = ao_gobal[:, 2]
-        # print ("global open points: ", ao_gobal[:,0:2])
-        # print ("global ranks: ",ranks)
-        # print ("pick index ", np.argmax(ranks))
-        # print ("picked rank ", np.amax(ranks))
-        pick_idx = np.argmax(ranks)
-        next_pt = ao_gobal[pick_idx, 0:2]
-
-    return pick_idx, next_pt
-
 
 def all_remaining_point_same_side(a, b, c, obstacle_list):
     ab = np.array([[a, b]])
@@ -393,12 +345,3 @@ def store_global_active_points(g_active_open_pts, l_active_open_pts, ranking_sco
             g_active_open_pts = np.concatenate((g_active_open_pts, local_active_open_pts_info), axis=0)
     return g_active_open_pts
 
-'''
-calcualte traveled path length
-'''
-def traveled_path_len(visitedpaths):
-    vp_len = 0
-    for path in visitedpaths:
-        for i in range(len(path)-1):
-            vp_len += point_dist(path[i], path[i+1])
-    return vp_len

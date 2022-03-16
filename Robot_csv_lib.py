@@ -58,7 +58,7 @@ class Obstacles:
                     obstacle = []                       # clear and prepare for next obstacle
                     continue
                 else:
-                    obstacle.append([float(row[0]), float(row[1])]) # get point data
+                    obstacle.append( tuple( (float(row[0]), float(row[1])) ) ) # get point data
             if len(obstacle) > 1:   # append the last one
                 obstacle.append(obstacle[0])
                 self.obstacles.append(obstacle)

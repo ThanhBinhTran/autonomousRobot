@@ -90,17 +90,25 @@ class Robot:
 
         return self.local_active_open_pts
 
-    ''' pick next point where its ranking is heighest '''
-    def pick_next_point(self):
+    ''' pick next point, where its ranking is heighest, in given list '''
+    def pick_next_point(self, open_points_list):
         next_point = None
         next_pt_idx = -1
-        if len(self.global_active_open_pts) > 0:
-            ranks = self.global_active_open_pts[:, 2]
+        if len(open_points_list) > 0:
+            ranks = open_points_list[:, 2]
             next_pt_idx = np.argmax(ranks)
-            next_point = self.global_active_open_pts[next_pt_idx, 0:2]
+            next_point = open_points_list[next_pt_idx, 0:2]
 
         return next_point, next_pt_idx
 
     ''' remove active point form active list '''
     def global_list_remove(self, point_idx):
         self.global_active_open_pts = np.delete(self.global_active_open_pts, point_idx, axis=0)
+
+    ''' calcualte traveled path length '''
+    def calculate_traveled_path_cost(self):
+        cost = 0.0
+        for path in self.visited_path:
+            for i in range(len(path)-1):
+                cost += point_dist(path[i], path[i+1])
+        return cost
