@@ -29,16 +29,22 @@ python Robot_theory.py -n 0 -r  80 -m _forest.csv -gx 500 -gy 500
 * Set robot_vision parameter (option -r ) to see the different outcomes of experiments
 
 ##### To generate a map: 
-``` python map_generator.py -n <number of points> -m <map name> ```
+``` python map_generator.py -n <number of obstacles> -mn <map name> -img <from_image>```
 
-Example: 
-``` 
-python map_generator.py -n 5 -mn _map_temp.csv 
-python map_generator.py -img _world.png 
-```
+* mn: input map name, default _map_temp.csv
+* n: number of obstacles.
 
+Example 1 (generating map from user input):  ``` python map_generator.py -n 5 -mn _map_temp.csv  ```
 - Click on the given plot to input points
 - Middle mouse click to turn next obstacle. Each obstacle contains a maximum of 100000 vertices
+
+<img src="https://github.com/ThanhBinhTran/autonomousRobot/blob/main/Map_generator/map_display_user_input_demo.png" width="70" alt="world image">
+
+Example 2 (generating map from image):  ``` python map_generator.py -img _world.png ```
+
+From world image <img src="https://github.com/ThanhBinhTran/autonomousRobot/blob/main/Map_generator/_world.png" width="70" alt="world image"> to map data (csv) <img src="https://github.com/ThanhBinhTran/autonomousRobot/blob/main/Map_generator/map_display_world_demo.png" width="70" alt="map data csv">
+
+
 
 ##### To display a map: 
 ``` python map_display.py -m <map name> ```
