@@ -20,7 +20,7 @@ except ImportError:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
             description="map (obstacle) display",)
-    parser.add_argument("-mn", metavar="map name", default="_map_temp.csv", help="display map from map_name data file")
+    parser.add_argument("-m", metavar="map name", default="_map_temp.csv", help="display map from map_name data file")
     args = parser.parse_args()
 
     map_name = args.mn
