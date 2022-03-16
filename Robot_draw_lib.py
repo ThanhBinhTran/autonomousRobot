@@ -180,7 +180,7 @@ class Plotter(plt_basic):
             self.plot_title = world_name + ".csv"  
         else:
             self.plot_title = map_name 
-        self.plot_title += ", number of iteration: {0}".format(iter_count + 1)
+        self.plot_title += ", number of iteration: {0}".format(iter_count)
         self.plot_title += ", path len: {:.2f}".format (Robot.calculate_traveled_path_cost())
 
     def show_animation(self, Robot, world_name, map_name, iter_count, obstacles , goal, 
