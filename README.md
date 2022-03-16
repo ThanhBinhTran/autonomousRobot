@@ -21,7 +21,11 @@ python Robot_main.py -n 0 -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
 python Robot_main.py -n 0 -w _world.png -sx 5 -sy 10 -gx 180.0 -gy 180
 ```
 ##### To run demo for the the assumption of An and Hoai's Theory:
-``` python Robots_theory.py -n 0 -m _forest.csv -gx 500 -gy 500 ```
+``` 
+python Robot_theory.py -n 0 -r 100 -m _forest.csv -gx 500 -gy 500
+python Robot_theory.py -n 0 -r  90 -m _forest.csv -gx 500 -gy 500
+python Robot_theory.py -n 0 -r  80 -m _forest.csv -gx 500 -gy 500
+```
 * set robot_vision parameter in Program_config.py to see the different outcome of experiments
 
 ##### To generate a map: 
