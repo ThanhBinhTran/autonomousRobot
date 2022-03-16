@@ -16,7 +16,7 @@ if __name__ == '__main__':
             description="map (obstacle) generation",
             epilog="Binh Tran (thanhbinh.hcmut@gmail.com)",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-mn", metavar="map name", default="_map_temp.csv", help="map name")
+    parser.add_argument("-mn", metavar="map name", default="_map_temp_BINH.csv", help="map name")
     parser.add_argument("-n", metavar="-number of obstacle(s)", default=1, type= int , help="--number of obstacle(s)")
     args = parser.parse_args()
 
