@@ -34,15 +34,17 @@ python Robot_theory.py -n 0 -r  80 -m _forest.csv -gx 500 -gy 500
 * mn: input map name, default _map_temp.csv
 * n: number of obstacles.
 
-Example 1 (generating map from user input):  ``` python map_generator.py -n 5 -mn _map_temp.csv  ```
+Example 1 (generating map from user input):  
+``` python map_generator.py -n 5 -mn _map_temp.csv  ```
 - Click on the given plot to input points
 - Middle mouse click to turn next obstacle. Each obstacle contains a maximum of 100000 vertices
 
-<img src="https://github.com/ThanhBinhTran/autonomousRobot/blob/main/Map_generator/map_display_user_input_demo.png" width="70" alt="world image">
+<img src="https://github.com/ThanhBinhTran/autonomousRobot/blob/main/Map_generator/map_display_user_input_demo.png" width="150" alt="world image">
 
-Example 2 (generating map from image):  ``` python map_generator.py -img _world.png ```
+Example 2 (generating map from image): 
+ ``` python map_generator.py -img _world.png ```
 
-From world image <img src="https://github.com/ThanhBinhTran/autonomousRobot/blob/main/Map_generator/_world.png" width="70" alt="world image"> to map data (csv) <img src="https://github.com/ThanhBinhTran/autonomousRobot/blob/main/Map_generator/map_display_world_demo.png" width="70" alt="map data csv">
+From world image <img src="https://github.com/ThanhBinhTran/autonomousRobot/blob/main/Map_generator/_world.png" width="150" alt="world image"> to map data (csv) <img src="https://github.com/ThanhBinhTran/autonomousRobot/blob/main/Map_generator/map_display_world_demo.png" width="150" alt="map data csv">
 
 
 
