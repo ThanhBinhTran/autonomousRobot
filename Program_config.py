@@ -29,11 +29,6 @@ show_start = True
 show_text_goal = True
 
 '''
-    transparent 
-'''
-transparent = 0.1
-
-'''
 Assumption of Hoai An Theory.
 '''
 # ALGORITHMS CONTROL
@@ -50,6 +45,7 @@ ls_bp_HA = "k."     # boundary points (HA Assumption)
 ls_aap_HA = "c."    # active arc points (HA Assumption)
 ls_pap_HA = "go"    # parent arc points (HA Assumption)
 
+transparent = 0.1   # closed sights
 '''
 parementers to hide/show information
 '''
@@ -63,7 +59,7 @@ print_csight_line_segments = False
 print_traversalSights = False
 
 '''
-LINE STYPE FOR DISPLAY PLOT
+stype for robot
 '''
 ls_is = ":.c"  # intersection
 ls_bp = "-r"  # boundary points
@@ -86,3 +82,11 @@ ls_goingp = "-1g"  # going path
 ls_cls = '--g'  # critical line segment
 ls_sp = "-r"  # shortest skeleton path
 ls_asp = "-m"  # approximately shortest path
+
+''' stype for RRTree'''
+ls_tree_node_active = ".b"         # tree's node
+ls_tree_node_inactive = ".k"
+ls_tree_edge = "-k"         # tree's edge
+ls_goal_path_edge = "-g"    # path to goal edge
+ls_goal_path_node = "1r"    # path to goal node
+ls_node_active = "or"
