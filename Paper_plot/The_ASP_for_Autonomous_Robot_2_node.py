@@ -15,12 +15,12 @@ try:
     from Robot_draw_lib import *
     from Robot_sight_lib import *
     from Robot import Robot
-    from Robot_csv_lib import Obstacles
+    from Obstacles import Obstacles
 except ImportError:
     raise
 
 pt_offset = np.zeros((100,2))  # 100 offsets of point
-plotter = Plotter((7,7), "The_ASP_for_Autonomous_Robot_2_node")
+plotter = Plot_robot(title="The_ASP_for_Autonomous_Robot_2_node")
 def main():
     goal = [10,10]
     robot_vision = 2
@@ -66,7 +66,7 @@ def main():
 
     csights = []
     osights = []
-    robot = Robot(start, robot_vision, 0.3)
+    robot = Robot(start=start, vision_range=robot_vision)
 
     for center_point in center_points:
         robot.coordinate = center_point

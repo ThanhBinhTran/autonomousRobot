@@ -24,7 +24,7 @@ try:
 except ImportError:
     raise
 
-plotter = Plotter((7,7), "Ranking visualization")
+plotter = Plot_robot(title="Ranking visualization")
 plotter.ax = plotter.fig.add_subplot(projection='3d')
 
 map_size = 100

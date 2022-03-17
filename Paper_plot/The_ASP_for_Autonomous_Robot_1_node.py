@@ -20,7 +20,7 @@ except ImportError:
 
 
 pt_offset = np.zeros((100,2))  # 100 offsets of point
-plotter = Plotter((7,7), "The_ASP_for_Autonomous_Robot_1_node")
+plotter = Plot_robot(title="The_ASP_for_Autonomous_Robot_1_node")
 
 def main():
     
@@ -67,7 +67,7 @@ def main():
     skeleton_path.append(center)
     skeleton_path.append(end)
 
-    robot = Robot(start, robot_vision, 0.3)
+    robot = Robot(start=start, vision_range=robot_vision)
     robot.coordinate = center
     csights_0, osights_0 = scan_around(robot, obstacles, end)
     robot.coordinate = center1

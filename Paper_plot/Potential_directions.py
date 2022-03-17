@@ -15,8 +15,9 @@ try:
     from Robot_draw_lib import *
     from Robot_sight_lib import *
     from Robot import Robot
-    from Robot_csv_lib import Obstacles
+    from Obstacles import Obstacles
     from Robot_ranking import Ranker
+    from Robot_map_lib import Map
 except ImportError:
     raise
 
@@ -25,7 +26,7 @@ def main():
     map_name = "_map.csv"
     robot_vision = 20
     ranker = Ranker()
-    plotter = Plotter((7,7), "The_ASP_for_Autonomous_Robot_2_node")
+    plotter = Plot_robot(title="The_ASP_for_Autonomous_Robot_2_node")
     # display map
     obstacles = Obstacles()
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
@@ -41,8 +42,7 @@ def main():
                        [90, 10.0]
                        ])
     vision_list = []
-
-    robot = Robot(start, robot_vision, 0.3)
+    robot = Robot(start=start, vision_range=robot_vision)
 
     for center in center_points:
         robot.coordinate = center
@@ -82,7 +82,7 @@ def main():
         # display next point if existing
         if len(next_pt) > 0:
             plotter.point(next_pt, "or")
-        plotter.robot(robot.coordinate, 0, robot_parameters)
+        plotter.robot(robot)
 
         plt.axis("equal")
     plt.show()

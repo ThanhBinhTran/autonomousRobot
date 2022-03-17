@@ -17,7 +17,7 @@ try:
     from Robot_paths_lib import *
     from Robot_draw_lib import *
     from Robot_sight_lib import *
-    from Robot_csv_lib import read_map_csv
+    from Obstacles import read_map_csv
     from Program_config import *
 except ImportError:
     raise

@@ -16,7 +16,7 @@ except ImportError:
     raise
 
 
-plotter = Plotter((7,7), "The_approximate_shortest_path_illustration")
+
 
 def main():
     start = [0,1]
@@ -42,6 +42,8 @@ def main():
                     ])
                     
     end = [4,3]
+
+    plotter = Plot_robot(title="The_approximate_shortest_path_illustration")
     plotter.plt.axis("off")   # turns off axes
     plotter.plt.axis("tight")  # gets rid of white border
     #plotter.plt.axis("image")  # square up the image instead of filling the "figure" space    
