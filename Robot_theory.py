@@ -12,7 +12,7 @@ from Robot_paths_lib import *
 from Robot_draw_lib import Plot_robot
 from Robot_sight_lib import *
 from Robot_map_lib import Map
-from Robot_csv_lib import *
+from Obstacles import *
 from Program_config import *
 from Robot import Robot, RobotType
 from Robot_ranking import Ranker
