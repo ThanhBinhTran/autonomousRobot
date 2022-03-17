@@ -7,7 +7,7 @@ from Robot_lib import *
 
 from RRT_user_input import menu_RRT
 from Program_config import *
-from Robot_csv_lib import Obstacles
+from Obstacles import Obstacles
 
 class RRTree_x(RRTree):
 
