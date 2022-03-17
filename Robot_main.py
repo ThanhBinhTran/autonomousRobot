@@ -30,9 +30,6 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
     obstacles = Obstacles()
     obstacles.read(world_name, map_name)
 
-    # find configure space
-    # ob1 = find_configure_space(ob)
-
     # for display information
     iter_count = 0
 
