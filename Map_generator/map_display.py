@@ -13,7 +13,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 try:
     from Robot_map_lib import *
-    from Robot_csv_lib import *
+    from Obstacles import *
 except ImportError:
     raise
 
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     parser.add_argument("-m", metavar="map name", default="_map_temp.csv", help="display map from map_name data file")
     args = parser.parse_args()
 
-    map_name = args.mn
+    map_name = args.m
     
     map = Map()
     obstacles = Obstacles()

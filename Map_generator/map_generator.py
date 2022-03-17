@@ -13,7 +13,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 import matplotlib.pyplot as plt
 try:
     from Robot_map_lib import *
-    from Robot_csv_lib import *
+    from Obstacles import *
 except ImportError:
     raise
 
