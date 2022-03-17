@@ -7,7 +7,7 @@ get user inputs
 def menu_RRT():
     parser = argparse.ArgumentParser(description='RRT animation.')
     parser.add_argument('-n', metavar="number of iteration", type=int, help='number of iteration', default=1)
-    parser.add_argument('-m', metavar="data_map", help='map data', default='_map.csv')
+    parser.add_argument('-m', metavar="map name", help='map name', default='_map.csv')
     parser.add_argument('-w', metavar="world_image", help='world model')
     parser.add_argument('-step_size', metavar="step_size", type=float, help='step size', default=5.0)
     parser.add_argument('-rx', metavar="random_area x lim ", type=float, help='random area x_lim', default=0.0)

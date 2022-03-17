@@ -112,7 +112,7 @@ if __name__ == '__main__':
     radius = menu_result.radius
     sample_size = menu_result.ss
     random_area = (menu_result.rx, menu_result.ry)
-    map_name = "_map_room.csv"
+    map_name = menu_result.m
     world_name = None
 
     ''' Running '''
