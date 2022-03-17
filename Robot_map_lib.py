@@ -1,6 +1,7 @@
 win_size = 100
 
 class Map:
+    
     def generate(self, plt, i, part, MAX_VERTICES):
         # displaying the title 
         plt.title("Obstacle part[{0}/{1}]: Click on plot to generate data\n".format(i, part) +
@@ -9,10 +10,10 @@ class Map:
 
         return plt.ginput(MAX_VERTICES, show_clicks=True, timeout=-1)  # no timeout
 
-    def display(self, plt, mapname, obstacles):
+    def display(self, plt, title, obstacles):
         
         # displaying the title 
-        plt.title("Map: {0}".format(mapname))
+        plt.title(title)
         for obstacle in obstacles:
             x = [point[0] for point in obstacle]
             y = [point[1] for point in obstacle]

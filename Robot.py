@@ -1,14 +1,14 @@
 from Robot_paths_lib import *
 from Robot_lib import *
 from Robot_sight_lib import inside_local_true_sight, inside_global_true_sight
+from Robot_base import Robot_base, RobotType
 
-class Robot:
-    def __init__(self, start, vision_range, robot_radius= 0.2): 
+class Robot(Robot_base):
+    def __init__(self, start, vision_range=20, robot_type= RobotType.circle, robot_radius= 0.2):
+        super().__init__(vision_range, robot_type, robot_radius)
+
         self.coordinate = tuple(start)      # hold current coordinate of robot
         self.next_coordinate = tuple(start) # hold next coordinate where robot moves to
-        self.vision_range = vision_range
-        self.robot_radius = robot_radius
-
         self.reach_goal = False             # True if robot reach goal
         self.saw_goal = False               # True if robot saw goal
         self.no_way_to_goal = False         # True if there is no path to goal
@@ -53,7 +53,7 @@ class Robot:
 
     ''' Check if robot reached goal '''
     def is_reach_goal(self, goal):
-        self.reach_goal = point_dist(self.coordinate, goal) <= self.robot_radius
+        self.reach_goal = point_dist(self.coordinate, goal) <= self.radius
 
     ''' Check if robot whether reached or saw goal '''
     def check_goal(self, goal, true_sight):

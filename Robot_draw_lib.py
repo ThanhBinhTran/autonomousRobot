@@ -3,17 +3,10 @@ from Program_config import *
 from matplotlib import patches
 import matplotlib.image as mpimg
 from matplotlib.collections import PatchCollection
-import matplotlib.pyplot as plt
 
-from Robot_map_lib import Map
-from Robot_world_lib import World
-from Robot_parameters import Robot_parameters, RobotType
-from Plotter_base_lib import Plotter_base
-
-robot_parameters = Robot_parameters()
-
-
-class Plotter(Plotter_base):
+from Plot_base_lib import Plot_base
+ 
+class Plot_robot(Plot_base):
     def __init__(self, size=(6,6), title="Path Planning Problem for an Autonomous Robot"):
         super().__init__(size, title)
 
@@ -43,8 +36,8 @@ class Plotter(Plotter_base):
 
     def vision_area(self, center, radius, ls=":"):
         """ draw a circle that limits the vision of robot """
-        vision = plt.Circle(center, radius, color="red", linestyle=ls, fill=False)
-        plt.gcf().gca().add_artist(vision)
+        vision = self.plt.Circle(center, radius, color="red", linestyle=ls, fill=False)
+        self.plt.gcf().gca().add_artist(vision)
 
     def vision(self, center, radius, csight, osight):
         if show_circleRange:
@@ -55,19 +48,6 @@ class Plotter(Plotter_base):
 
         if show_openSight:
             self.open_sights_arc(center, osight, radius)
-
-    def goal(self, goal, r_goal=False, s_goal=False):
-        self.point(goal, ls_goal)
-        if show_text_goal:
-            if r_goal: 
-                self.text(goal, "reached goal!")
-            elif s_goal:
-                self.text(goal, "saw goal!")
-            else:
-                self.text(goal, "goal")
-
-    def start(self, start):
-        self.point_text(start, ls_start, "start!")
 
     def paths(self, paths, ls="-r", ls_next="-b"):
         for i in range(len(paths)):
@@ -90,54 +70,12 @@ class Plotter(Plotter_base):
                 self.text(ls[1], i)
                 i += 1
 
-    def robot(self, center, yaw, config):  # pragma: no cover
-        x,y = center
-        if config.robot_type == RobotType.rectangle:
-            outline = np.array([[-config.robot_length / 2, config.robot_length / 2,
-                                (config.robot_length / 2), -config.robot_length / 2,
-                                -config.robot_length / 2],
-                                [config.robot_width / 2, config.robot_width / 2,
-                                - config.robot_width / 2, -config.robot_width / 2,
-                                config.robot_width / 2]])
-            Rot1 = np.array([[math.cos(yaw), math.sin(yaw)],
-                            [-math.sin(yaw), math.cos(yaw)]])
-            outline = (outline.T.dot(Rot1)).T
-            outline[0, :] += x
-            outline[1, :] += y
-            plt.plot(np.array(outline[0, :]).flatten(),
-                    np.array(outline[1, :]).flatten(), "-k")
-        elif config.robot_type == RobotType.circle:
-            circle = plt.Circle((x, y), config.robot_radius, color="b")
-            plt.gcf().gca().add_artist(circle)
-            out_x, out_y = (np.array([x, y]) +
-                            np.array([np.cos(yaw), np.sin(yaw)]) * config.robot_radius)
-            plt.plot([x, out_x], [y, out_y], "-k")
-
-    def show_map(self, world_name, map_name, iter_count, obstacles, Robot):
-        # draw world and map
-        if show_world and world_name is not None:
-            World().display(self.plt, mpimg, world_name)
-            
-        # draw map obstacles 
-        if show_map:
-            self.perpare_title(world_name, map_name, iter_count, Robot)
-            Map().display(self.plt, self.plot_title, obstacles.data())
-
     def show_traversal_sights(self, traversal_sights, vision_range):
         for local in traversal_sights:
             local_center = local[0]  # center of robot at local
             local_closed_sights = local[1]  # closed sight at local
             local_open_sights = local[2]  # open sight at local
             self.vision(local_center, vision_range, local_closed_sights, local_open_sights)
-
-    def perpare_title(self, world_name, map_name, iter_count, Robot):
-        self.plot_title = ""
-        if world_name is not None:
-            self.plot_title = world_name + ".csv"  
-        else:
-            self.plot_title = map_name 
-        self.plot_title += ", number of iteration: {0}".format(iter_count)
-        self.plot_title += ", path len: {:.2f}".format (Robot.calculate_traveled_path_cost())
 
     def show_animation(self, Robot, world_name, map_name, iter_count, obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point):
@@ -150,15 +88,18 @@ class Plotter(Plotter_base):
                 'key_release_event',
                 lambda event: [exit(0) if event.key == 'escape' else None])
                       
-            # draw map obstacles/world 
-            self.show_map(world_name, map_name, iter_count, obstacles, Robot)
-            
+            '''draw map obstacles/world '''            
+            # prepare title
+            cost = Robot.calculate_traveled_path_cost()
+            status_title = self.prepare_title(iter_count, cost)
+            self.show_map(world_name=None, obstacles=obstacles, plot_title=status_title)
+
             # show_traversalSights
             if show_traversalSights:
                 self.show_traversal_sights(Robot.traversal_sights, Robot.vision_range)
             
             if show_robot:
-                self.robot(Robot.coordinate, 0, robot_parameters)
+                self.robot(Robot,0)
             
             if show_goal:
                 self.goal(goal, Robot.reach_goal, Robot.saw_goal)

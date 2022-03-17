@@ -9,7 +9,7 @@ from sklearn.metrics import top_k_accuracy_score
 
 from Robot_lib import *
 from Robot_paths_lib import *
-from Robot_draw_lib import Plotter
+from Robot_draw_lib import Plot_robot
 from Robot_sight_lib import *
 from Robot_map_lib import Map
 from Robot_csv_lib import *
@@ -27,10 +27,10 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
     ranker = Ranker(alpha=0.9, beta= 0.1)
 
     # declare potter within window size
-    plotter = Plotter((6,6), "Path Planning Problem for an Autonomous Robot")
+    plotter = Plot_robot(title="Path Planning Problem for an Autonomous Robot, map:{0}".format(map_name))
     
-    obstacles = Obstacles()
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
+    obstacles = Obstacles()
     obstacles.read(world_name, map_name)
 
     # find configure space

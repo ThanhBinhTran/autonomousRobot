@@ -8,28 +8,26 @@ import numpy as np
 
 from Robot_lib import *
 from Robot_paths_lib import *
-from Robot_draw_lib import Plotter
+from Robot_draw_lib import Plot_robot
 from Robot_sight_lib import *
 from Robot_map_lib import Map
 from Robot_csv_lib import *
 from Program_config import *
-from Robot import Robot
-from Robot_parameters import Robot_parameters, RobotType
 from Robot_ranking import Ranker
+from Robot import Robot
+from Robot_base import RobotType
 import argparse
-
-robot_parameters = Robot_parameters()
 
 def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius):
     
-    robot = Robot(start, robot_vision, robot_radius)
+    robot = Robot(start, robot_vision, robot_type, robot_radius)
     ranker = Ranker(alpha=0.9, beta= 0.1)
 
     # declare potter within window size
-    plotter = Plotter((6,6), "Path Planning Problem for an Autonomous Robot")
+    plotter = Plot_robot(title="Path Planning Problem for an Autonomous Robot, map:{0}".format(map_name))
     
-    obstacles = Obstacles()
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
+    obstacles = Obstacles()
     obstacles.read(world_name, map_name)
 
     # find configure space
@@ -130,13 +128,12 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
 
 if __name__ == '__main__':
     
-    
     parser = argparse.ArgumentParser(description='Code for Autonomous Robot.')
     parser.add_argument('-n', metavar="number of iteration", type=int, help='number of iteration', default=1)
     parser.add_argument('-m', metavar="data_map", help='map data', default='_map.csv')
     parser.add_argument('-w', metavar="world_image", help='world model')
-    parser.add_argument('-r', metavar="vision_range", type=float, help='vision range', default=-1.0)
-    parser.add_argument('-radius', metavar="robot radius", type=float, help='robot radius', default=0.2)
+    parser.add_argument('-r', metavar="vision_range", type=float, help='vision range', default=20.0)
+    parser.add_argument('-radius', metavar="robot radius", type=float, help='robot radius', default=1)
     parser.add_argument('-sx', metavar="start_x", type=float, help='start point x', default=0.0)
     parser.add_argument('-sy', metavar="start_y", type=float, help='start point y', default=0.0)
     parser.add_argument('-gx', metavar="goal_x", type=float, help='goal point x', default=50.0)
@@ -151,11 +148,8 @@ if __name__ == '__main__':
     start = menu_result.sx, menu_result.sy
     goal = menu_result.gx, menu_result.gy
     robot_radius = menu_result.radius
-    robot_vision = menu_result.r 
-    # get vision range 
-    if robot_vision == -1:  # default == -1
-        robot_vision = robot_parameters.robot_vision
-    robot_type=RobotType.circle
+    robot_vision = menu_result.r
+    robot_type = RobotType.circle
 
     # run robot
     robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius)
