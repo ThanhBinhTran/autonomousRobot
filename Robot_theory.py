@@ -14,16 +14,13 @@ from Robot_sight_lib import *
 from Robot_map_lib import Map
 from Robot_csv_lib import *
 from Program_config import *
-from Robot import Robot
-from Robot_parameters import Robot_parameters, RobotType
+from Robot import Robot, RobotType
 from Robot_ranking import Ranker
 import argparse
 
-robot_parameters = Robot_parameters()
-
 def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius):
     
-    robot = Robot(start, robot_vision, robot_radius)
+    robot = Robot(start, robot_vision, robot_type, robot_radius)
     ranker = Ranker(alpha=0.9, beta= 0.1)
 
     # declare potter within window size
@@ -32,9 +29,6 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
     obstacles.read(world_name, map_name)
-
-    # find configure space
-    # ob1 = find_configure_space(ob)
 
     # for display information
     iter_count = 0
@@ -127,8 +121,11 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
                 'key_release_event',
                 lambda event: [exit(0) if event.key == 'escape' else None])
                       
-            # draw map obstacles/world 
-            plotter.show_map(world_name, map_name, iter_count, obstacles, robot)
+            '''draw map obstacles/world '''            
+            # prepare title
+            cost = robot.calculate_traveled_path_cost()
+            status_title = plotter.prepare_title(iter_count, cost)
+            plotter.show_map(world_name=None, obstacles=obstacles, plot_title=status_title)
             
             ########################################################
             # active point (Assumptions of Hoai_An's theory)
@@ -152,7 +149,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
                 plotter.show_traversal_sights(robot.traversal_sights, robot.vision_range)
             
             if show_robot:
-                plotter.robot(robot.coordinate, 0, robot_parameters)
+                plotter.robot(robot)
             
             if show_goal:
                 plotter.goal(goal, robot.reach_goal, robot.saw_goal)
