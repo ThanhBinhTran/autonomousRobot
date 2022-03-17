@@ -4,7 +4,7 @@ from Tree import Tree, Node
 from RRT_draw_lib import Plot_RRT
 from Robot_lib import *
 
-from Robot_user_input_RRT import menu_RRT
+from RRT_user_input import menu_RRT
 from Program_config import *
 from Robot_csv_lib import Obstacles
 
