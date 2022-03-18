@@ -231,9 +231,6 @@ if __name__ == '__main__':
     goal = menu_result.gx, menu_result.gy
     robot_radius = menu_result.radius
     robot_vision = menu_result.r 
-    # get vision range 
-    if robot_vision == -1:  # default == -1
-        robot_vision = robot_parameters.robot_vision
     robot_type=RobotType.circle
 
     # run robot
