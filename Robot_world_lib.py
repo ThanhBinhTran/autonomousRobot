@@ -17,15 +17,18 @@ class World:
         canny_output = cv.Canny(src_gray, threshold, threshold * 2)
         # Find contours
         contours, hierarchy = cv.findContours(canny_output, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-
         file_name = world_name + ".csv"
         data_header = ["x", "y"]
         f = open(file_name, 'w', newline='')
         writer = csv.writer(f, delimiter=",")
-        for part in contours:
-            writer.writerow(data_header)
-            for pt in part:
-                writer.writerow([pt[0][0], pt[0][1]])
+        # only keep parents in list, remove its child(ren)
+        for i in range (len(contours)):
+            
+            if hierarchy[0][i][3] == -1:   # this contour is parent
+                part = contours[i]
+                writer.writerow(data_header)
+                for pt in part:
+                    writer.writerow([pt[0][0], pt[0][1]])
         f.close()
 
 
@@ -37,7 +40,6 @@ class World:
             exit(0)
 
         # Convert image to gray and blur it
-        print("find contours of world:", world_name)
         src_gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
         src_gray = cv.blur(src_gray, (3, 3))
 

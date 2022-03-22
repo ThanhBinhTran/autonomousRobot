@@ -82,6 +82,7 @@ ls_goingp = "-1g"  # going path
 ls_cls = '--g'  # critical line segment
 ls_sp = "-r"  # shortest skeleton path
 ls_asp = "-m"  # approximately shortest path
+ls_cspace = "-r"  # configuration space
 
 ''' stype for RRTree'''
 ls_tree_node_active = ".b"         # tree's node

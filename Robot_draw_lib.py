@@ -1,3 +1,5 @@
+from Obstacles import Obstacles
+from Robot import Robot
 from Robot_lib import *
 from Program_config import *
 from matplotlib import patches
@@ -53,10 +55,13 @@ class Plot_robot(Plot_base):
         for i in range(len(paths)):
             path = paths[i]
             if i == len(paths) - 1:
-                self.line_segments(path, ls_next)
+                self.path(path, ls_next)
             else:
-                self.line_segments(path, ls)
+                self.path(path, ls)
 
+    def show_configuration_space(self, config_space: list):
+        self.polygons(config_space, ls = ls_cspace)
+        
     def visibility_graph(self, visibility_graph, ls_vg):
         for pnode in visibility_graph:
             for verteces in visibility_graph[pnode]:
@@ -77,7 +82,7 @@ class Plot_robot(Plot_base):
             local_open_sights = local[2]  # open sight at local
             self.vision(local_center, vision_range, local_closed_sights, local_open_sights)
 
-    def show_animation(self, Robot, world_name, map_name, iter_count, obstacles , goal, 
+    def show_animation(self, Robot: Robot, world_name, map_name, iter_count, obstacles:Obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point):
         if show_animation:
             # clear plot
@@ -92,14 +97,14 @@ class Plot_robot(Plot_base):
             # prepare title
             cost = Robot.calculate_traveled_path_cost()
             status_title = self.prepare_title(iter_count, cost)
-            self.show_map(world_name=None, obstacles=obstacles, plot_title=status_title)
-
+            self.show_map(world_name=world_name, obstacles=obstacles, plot_title=status_title)
+            self.show_configuration_space(obstacles.config_space)
             # show_traversalSights
             if show_traversalSights:
                 self.show_traversal_sights(Robot.traversal_sights, Robot.vision_range)
             
             if show_robot:
-                self.robot(Robot,0)
+                self.robot(Robot,yaw=0)
             
             if show_goal:
                 self.goal(goal, Robot.reach_goal, Robot.saw_goal)
@@ -120,10 +125,10 @@ class Plot_robot(Plot_base):
                 self.paths(Robot.visited_path, ls_vp, ls_goingp)
             
             if show_sketelonPath:
-                self.line_segments(skeleton_path, ls_sp)
+                self.path(skeleton_path, ls_sp)
             
             if show_approximately_shortest_path:
-                self.line_segments(asp, ls_asp)
+                self.path(asp, ls_asp)
             
             if show_critical_line_segments:
                 self.critical_line_segments(critical_ls, ls_cls)

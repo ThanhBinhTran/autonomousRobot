@@ -154,7 +154,7 @@ def main():
                 
             
     if skeleton_path_temp:    # skeleton path
-        plotter.line_segments(  skeleton_path, ls="--.b")
+        plotter.path(  skeleton_path, ls="--.b")
     
     if strange_line_temp: # strange line
         plotter.line_segment(  (start,end), ls="-..r")
@@ -183,7 +183,7 @@ def main():
         
     # final approximate shortest path
     if final_approximate_shortest_path_temp:
-        plotter.line_segments(  asp, "-r")
+        plotter.path(  asp, "-r")
         i = 0
         pt_offset[0] = [ -0.2 ,  -0.2]
         pt_offset[1] = [ 0    ,  0.15]

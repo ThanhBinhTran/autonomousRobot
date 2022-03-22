@@ -29,6 +29,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
     obstacles.read(world_name, map_name)
+    obstacles.configuration_space(robot.radius)
 
     # for display information
     iter_count = 0
@@ -45,7 +46,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
         next_point = []
 
         # scan to get sights at local
-        closed_sights, open_sights = scan_around(robot, obstacles.data(), goal)
+        closed_sights, open_sights = scan_around(robot, obstacles.config_space, goal)
         
         # check whether the robot saw or reach the given goal
         robot.check_goal(goal, closed_sights)
@@ -130,7 +131,7 @@ if __name__ == '__main__':
     parser.add_argument('-m', metavar="data_map", help='map data', default='_map.csv')
     parser.add_argument('-w', metavar="world_image", help='world model')
     parser.add_argument('-r', metavar="vision_range", type=float, help='vision range', default=20.0)
-    parser.add_argument('-radius', metavar="robot radius", type=float, help='robot radius', default=1)
+    parser.add_argument('-radius', metavar="robot radius", type=float, help='robot radius', default=3)
     parser.add_argument('-sx', metavar="start_x", type=float, help='start point x', default=0.0)
     parser.add_argument('-sy', metavar="start_y", type=float, help='start point y', default=0.0)
     parser.add_argument('-gx', metavar="goal_x", type=float, help='goal point x', default=50.0)
@@ -140,7 +141,9 @@ if __name__ == '__main__':
     # get user input
     num_iter = menu_result.n
     map_name = menu_result.m
+    map_name = r"Map_generator\_map_temp.csv"
     world_name = menu_result.w
+
     # get start point and goal point
     start = menu_result.sx, menu_result.sy
     goal = menu_result.gx, menu_result.gy

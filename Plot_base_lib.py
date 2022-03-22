@@ -16,6 +16,7 @@ class Plot_base:
         self.fig.canvas.set_window_title(title)
         self.plt.xlim(0, 100)
         self.plt.ylim(0, 100)
+
     show = lambda self: self.plt.show()
     pause = lambda self, x: self.plt.pause(x)
     clear = lambda self: self.plt.cla()
@@ -23,25 +24,33 @@ class Plot_base:
     show_grid = lambda self: self.plt.grid(True)
     
     ''' plot point(s)'''
-    point  = lambda self, point,  ls="xr": self.plt.plot(point[0], point[1], ls)
-    points = lambda self, points, ls="xr": self.plt.plot(points[:, 0], points[:, 1], ls)
+    point  = lambda self, point,  ls=".r": self.plt.plot(point[0], point[1], ls)
+    points = lambda self, points, ls=".r": self.plt.plot(points[:, 0], points[:, 1], ls)
 
     ''' plot text at near point coordinate '''
     text = lambda self, point, str: self.plt.text(point[0], point[1] + 2, str)
 
+    ''' plot text and point'''
     def point_text(self, point, ls, text):
         self.point(point, ls)
         self.text(point, text)
 
-    ''' plot line segment '''
-    line_segment = lambda self, line, ls="-xr": self.plt.plot((line[0][0], line[1][0]), (line[0][1], line[1][1]), ls)
+    ''' plot line segment connecting 2 points'''
+    line_segment = lambda self, line, ls="-.k": self.plt.plot((line[0][0], line[1][0]), (line[0][1], line[1][1]), ls)
     
-    ''' plot line segment(s) '''
-    def line_segments(self, lines, ls="-xr"):
-        xs = [i[0] for i in lines]
-        ys = [i[1] for i in lines]
-        self.plt.plot(xs, ys, ls)
+    ''' plot path containing list of points '''
+    def path(self, points, ls="-xr"):
+        new_point = np.array(points)
+        self.points(points=new_point, ls=ls)
 
+    def polygon(self, polygon: list, ls= "-r"):
+        new_points = polygon.copy()
+        new_points.append(new_points[0])
+        self.path(points= new_points, ls=ls)
+    
+    def polygons(self, polygons: list, ls= "-r"):   # polygons is list of polygon
+        for polygon in polygons:
+            self.polygon(polygon=polygon, ls = ls)
 
     ''' plot triangle (out fill) '''
     def plot_triangle(self, triangle, ls=":c"):
@@ -76,7 +85,7 @@ class Plot_base:
             
         # draw map obstacles 
         if show_map:
-            Map().display(self.plt, plot_title, obstacles.data())
+            Map().display(self.plt, plot_title, obstacles.obstacles)
     
     ''' set plot's title'''
     title = lambda self, x: self.plt.title(x)

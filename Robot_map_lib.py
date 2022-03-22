@@ -10,7 +10,7 @@ class Map:
 
         return plt.ginput(MAX_VERTICES, show_clicks=True, timeout=-1)  # no timeout
 
-    def display(self, plt, title, obstacles):
+    def display(self, plt, title, obstacles, alpha: float = 0.4, hatch: str = '//////'):
         
         # displaying the title 
         plt.title(title)
@@ -19,4 +19,4 @@ class Map:
             y = [point[1] for point in obstacle]
             x.append(obstacle[0][0])
             y.append(obstacle[0][1])
-            plt.fill(x, y, color='k', alpha=0.4, hatch='//////')
+            plt.fill(x, y, color='k', alpha=alpha, hatch=hatch)

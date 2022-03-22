@@ -100,7 +100,7 @@ def main():
             i += 1
         # show_approximately_shortest_path
         if 0:
-            plotter.line_segments( asp, "-r")
+            plotter.path( asp, "-r")
             print ("________________")
             print (asp)
             print ("________________")
@@ -152,7 +152,7 @@ def main():
         
         
     # skeleton path
-    plotter.line_segments(skeleton_path, ls="--.b")
+    plotter.path(skeleton_path, ls="--.b")
     
 
     # mid path
@@ -180,7 +180,7 @@ def main():
         
     # final approximate shortest path
     if 1:
-        plotter.line_segments( asp, "-r")
+        plotter.path( asp, "-r")
         i = 0
         pt_offset[0] = [0, -0.1]
         pt_offset[1] = [+0.1, + 0.1]

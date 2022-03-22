@@ -47,13 +47,13 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
         # scan to get sights at local
         #closed_sights, open_sights = scan_around(robot, obstacles.data(), goal)
         # get boundary points, which is intersection between circle and linesegments
-        boundary_pts = get_boudary_points_theory(robot.coordinate, robot.vision_range, obstacles.data(), goal)
+        boundary_pts = get_boudary_points_theory(robot.coordinate, robot.vision_range, obstacles.obstacles, goal)
 
         # get arc points in active arc which is limited by parent_arc
         arc_pts, parent_arc = is_inside_active_arc(boundary_pts, robot.vision_range, robot.coordinate, goal)
         
         # get local open sights
-        open_sights, arc_pts = get_open_sights_in_active_arc_theory(arc_pts, parent_arc, robot.vision_range, obstacles.data(), robot.coordinate)
+        open_sights, arc_pts = get_open_sights_in_active_arc_theory(arc_pts, parent_arc, robot.vision_range, obstacles.obstacles, robot.coordinate)
         # closed sights
         closed_sights = []
 
@@ -170,10 +170,10 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
                 plotter.paths(robot.visited_path, ls_vp, ls_goingp)
             
             if show_sketelonPath:
-                plotter.line_segments(skeleton_path, ls_sp)
+                plotter.path(skeleton_path, ls_sp)
             
             if show_approximately_shortest_path:
-                plotter.line_segments(asp, ls_asp)
+                plotter.path(asp, ls_asp)
             
             if show_critical_line_segments:
                 plotter.critical_line_segments(critical_ls, ls_cls)
