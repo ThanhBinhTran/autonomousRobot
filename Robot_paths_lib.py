@@ -191,7 +191,7 @@ def get_critical_ls(skeleton_path, traversal_sight, robot_vision):
             local_ls.append([0, midpt, c_pt])
 
         critical_ls.extend(local_ls)
-        print("critical_ls", critical_ls)
+        print("critical_ls ", critical_ls)
     return critical_ls
 
 
