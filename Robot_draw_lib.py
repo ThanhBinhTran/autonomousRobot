@@ -98,7 +98,8 @@ class Plot_robot(Plot_base):
             cost = Robot.calculate_traveled_path_cost()
             status_title = self.prepare_title(iter_count, cost)
             self.show_map(world_name=world_name, obstacles=obstacles, plot_title=status_title)
-            self.show_configuration_space(obstacles.config_space)
+            if obstacles.enable_config_space:
+                self.show_configuration_space(obstacles.config_space)
             # show_traversalSights
             if show_traversalSights:
                 self.show_traversal_sights(Robot.traversal_sights, Robot.vision_range)

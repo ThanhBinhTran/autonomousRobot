@@ -12,7 +12,7 @@ class Obstacles:
     def __init__(self):
         self.obstacles = []     # list of obstacles
         self.config_space = []  # configuration space 
-
+        self.enable_config_space = False    # set True for using configuration space
     ''' 
     write vertices of obstacles into csv file in form of (x,y)
     x,y is casted to integer for easy debug/observe 
@@ -61,6 +61,7 @@ class Obstacles:
             if len(obstacle) > 1:   # append the last one
                 obstacle.append(obstacle[0])
                 self.obstacles.append(obstacle)
+        self.config_space = self.obstacles
         return self.obstacles
     
     ''' serialize obstacle in to list of linesegments'''
@@ -91,8 +92,9 @@ class Obstacles:
     ''' this function is to find a configure space which is robot free-collision ares 
         NOTE: polygon getting from opencv.findcontour is clockwise 
     '''
-    def configuration_space(self, robot_radius):
+    def find_configuration_space(self, robot_radius):
         if len(self.obstacles) > 0:
+            self.enable_config_space = True
             normal_vectors = []        # list of normal vectors
             self.config_space = []
             obstacles_line_segments = self.line_segments()

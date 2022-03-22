@@ -29,7 +29,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
     obstacles.read(world_name, map_name)
-    obstacles.configuration_space(robot.radius)
+    obstacles.find_configuration_space(robot.radius)
 
     # for display information
     iter_count = 0
@@ -46,7 +46,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
         next_point = []
 
         # scan to get sights at local
-        closed_sights, open_sights = scan_around(robot, obstacles.config_space, goal)
+        closed_sights, open_sights = scan_around(robot, obstacles, goal)
         
         # check whether the robot saw or reach the given goal
         robot.check_goal(goal, closed_sights)
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     # get user input
     num_iter = menu_result.n
     map_name = menu_result.m
-    map_name = r"Map_generator\_map_temp.csv"
+    #map_name = r"Map_generator\_map_temp.csv"
     world_name = menu_result.w
 
     # get start point and goal point

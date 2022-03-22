@@ -1,9 +1,8 @@
 from Robot_lib import *
 from Robot_draw_lib import *
 from Program_config import *
+from Obstacles import Obstacles
 import numpy as np
-
-import matplotlib.pyplot as plt
 
 rel_tol = 0.0000001
 
@@ -702,12 +701,16 @@ def get_open_sights(Robot, goal, closed_sights):
     return open_sights
 
 
-def scan_around(Robot, obstacles, goal):
+def scan_around(Robot: Robot, obstacles: Obstacles, goal):
     '''
     this function is to scan obstacles 
     return true sight = (closed sights and open sights)
     '''
-    closed_sights = get_closed_sights(Robot, obstacles)
+    if obstacles.enable_config_space:
+        obstacles_data = obstacles.config_space
+    else:
+        obstacles_data = obstacles.obstacles
+    closed_sights = get_closed_sights(Robot, obstacles_data)
     open_sights = get_open_sights(Robot, goal, closed_sights)
     return closed_sights, open_sights
     
