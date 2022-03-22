@@ -71,7 +71,6 @@ class Robot(Robot_base):
         if len(open_sights) > 0:
             open_sights = np.array(open_sights)
             self.local_open_pts = open_sights[:, 2]  # local_openPts
-            #print("local_openPts,", local_open_pts)
             for i in range(len(self.local_open_pts)):
                 self.local_open_pts[i][0] = approximately_num(self.local_open_pts[i][0])
                 self.local_open_pts[i][1] = approximately_num(self.local_open_pts[i][1])

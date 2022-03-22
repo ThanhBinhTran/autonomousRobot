@@ -9,7 +9,7 @@ show_traversalSights = True
 
 show_openSight = True
 show_closedSight = True
-show_circleRange = True
+show_circleRange = False
 
 show_sketelonPath = True
 show_approximately_shortest_path = True

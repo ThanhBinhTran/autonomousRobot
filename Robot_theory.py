@@ -24,7 +24,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
     ranker = Ranker(alpha=0.9, beta= 0.1)
 
     # declare potter within window size
-    plotter = Plot_robot(title="Path Planning Problem for an Autonomous Robot, map:{0}".format(map_name))
+    plotter = Plot_robot(title="Path Planning for Autonomous Robot: {0}".format(map_name))
     
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
@@ -33,11 +33,11 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
     # for display information
     iter_count = 0
 
-    print("\n____Robot is reaching to goal: {0} from start {1}".format(goal, start))
+    print("\nRobot is reaching to goal: {0} from start {1}".format(goal, start))
 
     while True:
         iter_count += 1
-        print("\n_____number of iteration:{0}, current robot coordinate{1}".format(iter_count, robot.coordinate))
+        print("\n_number of iteration:{0}, current robot coordinate{1}".format(iter_count, robot.coordinate))
         
         robot.update_coordinate(robot.next_coordinate)
 

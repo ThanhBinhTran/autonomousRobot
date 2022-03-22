@@ -92,7 +92,7 @@ class Plot_base:
     
     ''' prepare title for display'''
     def prepare_title(self, iter_count, path_cost):
-        plot_title = "Number of iteration: {0}".format(iter_count+1)
+        plot_title = "Number of iteration: {0}".format(iter_count)
         if path_cost > 0 and path_cost != float('inf'):
             plot_title += ", path len: {:.2f}".format (path_cost)
         else:

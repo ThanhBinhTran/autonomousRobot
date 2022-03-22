@@ -24,7 +24,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
     ranker = Ranker(alpha=0.9, beta= 0.1)
 
     # declare potter within window size
-    plotter = Plot_robot(title="Path Planning Problem for an Autonomous Robot, map:{0}".format(map_name))
+    plotter = Plot_robot(title="Path Planning for Autonomous Robot: {0}".format(map_name))
     
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
@@ -34,11 +34,11 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
     # for display information
     iter_count = 0
 
-    print("\n____Robot is reaching to goal: {0} from start {1}".format(goal, start))
+    print("\nRobot is reaching to goal: {0} from start {1}".format(goal, start))
 
     while True:
         iter_count += 1
-        print("\n_____number of iteration:{0}, current robot coordinate{1}".format(iter_count, robot.coordinate))
+        print("\n_number of iteration:{0}, current robot coordinate{1}".format(iter_count, robot.coordinate))
         
         robot.update_coordinate(robot.next_coordinate)
 
@@ -103,7 +103,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
         if not robot.no_way_to_goal:
             robot.next_coordinate = motion(robot.coordinate, next_point)  # simulate robot
 
-        plotter.show_animation(robot, world_name, map_name, iter_count, obstacles , goal, 
+        plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
         
         # Run n times for debugging
@@ -131,7 +131,7 @@ if __name__ == '__main__':
     parser.add_argument('-m', metavar="data_map", help='map data', default='_map.csv')
     parser.add_argument('-w', metavar="world_image", help='world model')
     parser.add_argument('-r', metavar="vision_range", type=float, help='vision range', default=20.0)
-    parser.add_argument('-radius', metavar="robot radius", type=float, help='robot radius', default=3)
+    parser.add_argument('-radius', metavar="robot radius", type=float, help='robot radius', default=0.5)
     parser.add_argument('-sx', metavar="start_x", type=float, help='start point x', default=0.0)
     parser.add_argument('-sy', metavar="start_y", type=float, help='start point y', default=0.0)
     parser.add_argument('-gx', metavar="goal_x", type=float, help='goal point x', default=50.0)

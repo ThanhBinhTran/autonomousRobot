@@ -360,7 +360,6 @@ def get_open_sights_in_active_arc_theory(arc_pts, parent_arc, robot_vision, ob, 
 def get_closed_sights(Robot, ob):
     # get boundary line segments where is limited by obstacles
     b_lss = get_boundary_linesegments(Robot.coordinate, Robot.vision_range, ob)
-    print(b_lss)
     if print_boundary_line_segments:
         print_pairs("print_boundary_linesegments", b_lss)
 
@@ -701,7 +700,7 @@ def get_open_sights(Robot, goal, closed_sights):
     return open_sights
 
 
-def scan_around(Robot: Robot, obstacles: Obstacles, goal):
+def scan_around(Robot, obstacles: Obstacles, goal):
     '''
     this function is to scan obstacles 
     return true sight = (closed sights and open sights)
@@ -713,84 +712,3 @@ def scan_around(Robot: Robot, obstacles: Obstacles, goal):
     closed_sights = get_closed_sights(Robot, obstacles_data)
     open_sights = get_open_sights(Robot, goal, closed_sights)
     return closed_sights, open_sights
-    
-
-
-def get_explorered_sight(center, goal, robot_vision, csight, osight):
-    '''     
-    extend map from local true sights
-    '''
-    map = []
-    temp_csight = np.array(csight)
-    temp_osight = np.array(osight)
-    print("temp_csight", temp_csight)
-    print("temp_osight", temp_osight)
-
-    angle_tpairs = [math.degrees(unsigned_angle_xAxis(point)) for point in temp_csight[:, 0]]
-    angle_osight = [math.degrees(unsigned_angle_xAxis(point)) for point in temp_osight[:, 0]]
-
-    print("angle_tpairs", angle_tpairs)
-    print("angle_osight", angle_osight)
-
-    angle_tpairs_idx_sort = np.argsort(angle_tpairs)
-    angle_osight_idx_sort = np.argsort(angle_osight)
-    print("angle_tpairs_idx_sort", angle_tpairs_idx_sort)
-    print("angle_osight_idx_sort", angle_osight_idx_sort)
-    i = 0
-    j = 0
-    lasti = False
-    lastj = False
-    idx_i = 0
-    idx_j = 0
-    while i < len(angle_tpairs):
-        while j < len(angle_osight):
-            pre_i = idx_i
-            pre_j = idx_j
-            idx_i = angle_tpairs_idx_sort[i]
-            idx_j = angle_osight_idx_sort[j]
-            print("idx_i idx_j", idx_i, idx_j, temp_csight[idx_i], osight[idx_j][0:2])
-            if angle_tpairs[idx_i] < angle_osight[idx_j]:
-                if lastj:
-                    map.append([osight[pre_j][1], temp_csight[idx_i][0]])
-                map.append(temp_csight[idx_i])
-
-                lasti = True
-                lastj = False
-                break
-            else:
-                if lasti:
-                    map.append([temp_csight[idx_i][1], osight[pre_j][1]])
-                map.append([osight[idx_j][0], osight[idx_j][2]])
-                map.append([osight[idx_j][2], osight[idx_j][1]])
-                lasti = True
-                lastj = False
-            j += 1
-        i += 1
-    if i != len(angle_tpairs):  # i remain
-        while i < len(angle_tpairs):
-            idx_i = angle_tpairs_idx_sort[i]
-            map.append(temp_csight[idx_i])
-        i += 1
-    else:
-        while j < len(angle_osight):
-            idx_j = angle_osight_idx_sort[j]
-            map.append([osight[idx_j][0], osight[idx_j][2]])
-            map.append([osight[idx_j][2], osight[idx_j][1]])
-            j += 1
-    map = np.array(map)
-
-    return map
-    '''
-    extend map from local true sights
-    '''
-    if len(emap) > 0:
-        new_map = np.array(ltsight)
-        if len(new_map) > 0:
-            emap = np.concatenate((emap, ltsight), axis=0)
-            emap = np.unique(emap, axis=0)
-        # print ("new map", new_map)
-        # is_belongline = [belong_line(new_map, eline) for eline in emap]
-        # print ("is_belongline", is_belongline)
-    else:
-        emap = np.array(ltsight)
-    return emap

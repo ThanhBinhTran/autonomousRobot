@@ -82,7 +82,7 @@ class Plot_robot(Plot_base):
             local_open_sights = local[2]  # open sight at local
             self.vision(local_center, vision_range, local_closed_sights, local_open_sights)
 
-    def show_animation(self, Robot: Robot, world_name, map_name, iter_count, obstacles:Obstacles , goal, 
+    def show_animation(self, Robot: Robot, world_name, iter_count, obstacles:Obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point):
         if show_animation:
             # clear plot
