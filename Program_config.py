@@ -49,7 +49,7 @@ transparent = 0.1   # closed sights
 '''
 parementers to hide/show information
 '''
-print_boundary_line_segments = False
+print_local_obstacles_boundary = False
 print_closed_sights = False
 print_closed_line_segments = False
 print_open_sights = False

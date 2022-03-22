@@ -247,43 +247,45 @@ def get_closed_sights_from_blss(center, b_lss):
         closed_sights = remove_blind_lss(center, b_lss)
     return closed_sights
 
-
-def get_boundary_linesegments(center, robot_vision, obstacles):
-    b_lss = []
+''' find all intersection among robot_local (Circle) and obstacles,
+return list of pairs of intersection points
+'''
+def get_local_obstacles_boundary(center, robot_vision, obstacles):
+    local_obs_boundary = []
     for obstacle_part in obstacles:
-        b_lss_part = get_boundary_linesegments_single_obstacle(center, robot_vision, obstacle_part)
-        b_lss.extend(b_lss_part)
-    return b_lss
+        local_ob_boundary = get_local_obstacle_boundary(center, robot_vision, obstacle_part)
+        local_obs_boundary.extend(local_ob_boundary)
+    return local_obs_boundary
 
 
-def get_boundary_linesegments_single_obstacle(center, robot_vision, ob):
+def get_local_obstacle_boundary(center, robot_vision, obstacles):
     ''' 
     find all boundary pairs among all obstacle line segments and circle 
     '''
     x, y = center
     b_lss = []
-    for i in range(len(ob) - 1):
-        ptA = ob[i]
-        ptB = ob[i + 1]
-        if belong_line(center, [ptA, ptB]):
+    for i in range(len(obstacles) - 1):
+        ptA = obstacles[i]
+        ptB = obstacles[i + 1]
+        if belong_line(center, [ptA, ptB]): # robot stands too closed obstacles
             continue
-        is_points = intersection(x, y, robot_vision, [ptA, ptB])
+        intersection_points = intersection(x, y, robot_vision, [ptA, ptB])
 
-        if len(is_points) > 0:
+        if len(intersection_points) > 0:
             ''' find boundary pair between a single line segment and circle '''
             b_pts = []  # boundary points
 
-            for point in is_points:
+            for point in intersection_points:
                 pt_in = inside_line_segment(point, [ptA, ptB])
                 # print ("inside_ls status *%# ", pt_in, " of point ", point)
                 if pt_in:  # found intersection point is inside the line segment
                     b_pts.append(point)
                 else:  # intersection point is not inside the line segment
-                    ptA_in = inside_line_segment(ptA, is_points)
+                    ptA_in = inside_line_segment(ptA, intersection_points)
 
                     if ptA_in:  # found intersection point is inside the line segment
                         b_pts.append(ptA)
-                    ptB_in = inside_line_segment(ptB, is_points)
+                    ptB_in = inside_line_segment(ptB, intersection_points)
                     if ptB_in:  # found intersection point is inside the line segment
                         b_pts.append(ptB)
 
@@ -357,13 +359,13 @@ def get_open_sights_in_active_arc_theory(arc_pts, parent_arc, robot_vision, ob, 
 
     return np.array(open_sights), arc_pts
 
-def get_closed_sights(Robot, ob):
+def get_closed_sights(Robot, obstacles):
     # get boundary line segments where is limited by obstacles
-    b_lss = get_boundary_linesegments(Robot.coordinate, Robot.vision_range, ob)
-    if print_boundary_line_segments:
-        print_pairs("print_boundary_linesegments", b_lss)
+    local_obs_boundary = get_local_obstacles_boundary(Robot.coordinate, Robot.vision_range, obstacles)
+    if print_local_obstacles_boundary:
+        print_pairs("local_obs_boundary", local_obs_boundary)
 
-    closed_sights = get_closed_sights_from_blss(Robot.coordinate, b_lss)
+    closed_sights = get_closed_sights_from_blss(Robot.coordinate, local_obs_boundary)
     if print_closed_sights:
         print_pairs("print_closed_sights", closed_sights)
 
