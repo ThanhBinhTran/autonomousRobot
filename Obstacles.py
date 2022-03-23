@@ -137,6 +137,7 @@ class Obstacles:
                         jointPtB = line_intersection(bisector_ls[i], extend_ob_ls[i])
                         cspace.append(jointPtA)
                         cspace.append(jointPtB)
+                cspace.append(cspace[0])    # make a polygon by appending the beginning
                 self.config_space.append(cspace)
         else:
             print ("No obststacle detected")
