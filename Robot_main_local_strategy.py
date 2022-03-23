@@ -50,30 +50,45 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
         
         # check whether the robot saw or reach the given goal
         robot.check_goal(goal, closed_sights)
-        robot.show_status()
+        #robot.show_status()
         if not robot.saw_goal and not robot.reach_goal:
+            len_global_ranking = len (robot.global_active_open_rank_pts)
+            
             # get local active point and its ranking
             robot.get_local_active_open_ranking_points(open_sights, ranker, goal)
 
             # stack local active open point to global set
-            robot.append_global_by_local_active_points(robot.local_active_open_rank_pts)
+            robot.expand_global_open_ranking_points(robot.local_active_open_rank_pts)
             
 
             # add new active open points to graph_insert
             graph_add_lOpenPts(robot.visibility_graph, robot.coordinate, robot.local_active_open_pts)
 
-            # pick next point to make a move
-            next_point, next_pt_idx = robot.pick_next_point(robot.global_active_open_rank_pts)
+            print ("___________________ local ", len (robot.local_active_open_rank_pts))
+            print ("___________________ global (before) ", len (robot.global_active_open_rank_pts))
+            
+            
+            if len(robot.local_active_open_rank_pts) > 0:   # pick local first 
+                # pick next point to make a move
+                next_point, next_pt_idx = robot.pick_next_point(robot.local_active_open_rank_pts)                
+            else:   # if no local point detected, consider global set.
+                len_global_ranking = 0
+                # pick next point to make a move
+                next_point, next_pt_idx = robot.pick_next_point(robot.global_active_open_rank_pts)
 
             if next_point is not None:
+                
                 # find the shortest skeleton path from current position (center) to next point
                 skeleton_path = BFS_skeleton_path(robot.visibility_graph, robot.coordinate, tuple(next_point))
 
                 # then remove picked point from active global open point
-                robot.remove_global_active_pts_by_index(next_pt_idx)
+                robot.remove_global_active_pts_by_index(len_global_ranking + next_pt_idx)
+                print ("___________________ global (after) ", len (robot.global_active_open_rank_pts))
+
             else:
                 print("No way to reach the goal!")
                 robot.is_no_way_to_goal(True)
+
 
         else:
             next_point = goal
