@@ -62,7 +62,7 @@ def graph_insert(graph, pnode, leafs):
 
 # path between two nodes of a graph
 def BFS_skeleton_path(graph, start, goal):
-    print("BFS_skeleton_path: Current {0}, Next {1}".format(start, goal))
+    #print("BFS_skeleton_path: Current {0}, Next {1}".format(start, goal))
     explored = []
 
     # Queue for traversing the  
@@ -111,7 +111,6 @@ def approximately_shortest_path(skeleton_path, traversal_sight, robot_vision):
     if len(skeleton_path) <= 2:
         return skeleton_path, []
     else:
-        print("skeleton_path:", skeleton_path)
         spt = skeleton_path[0]
         gpt = skeleton_path[-1]
         critical_ls = get_critical_ls(skeleton_path, traversal_sight, robot_vision)
@@ -191,7 +190,7 @@ def get_critical_ls(skeleton_path, traversal_sight, robot_vision):
             local_ls.append([0, midpt, c_pt])
 
         critical_ls.extend(local_ls)
-        print("critical_ls ", critical_ls)
+        #print("critical_ls ", critical_ls)
     return critical_ls
 
 
@@ -281,18 +280,4 @@ def is_inside_active_arc(local_open_pts, robot_vision, center, goal):
         return local_active_open_pts, np.array((arc_limA, arc_limB))
     else:
         return None, None
-
-'''
-    add local active and its ranking to global active points set
-'''
-
-
-def store_global_active_points(g_active_open_pts, l_active_open_pts, ranking_score):
-    if len(l_active_open_pts) > 0:
-        local_active_open_pts_info = np.concatenate((l_active_open_pts, ranking_score), axis=1)
-        if len(g_active_open_pts) == 0:
-            g_active_open_pts = np.array(local_active_open_pts_info)
-        else:
-            g_active_open_pts = np.concatenate((g_active_open_pts, local_active_open_pts_info), axis=0)
-    return g_active_open_pts
 

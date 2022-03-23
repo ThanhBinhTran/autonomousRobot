@@ -116,8 +116,8 @@ class Plot_robot(Plot_base):
             if show_local_openpt and len(Robot.local_open_pts) > 0:
                 self.points(Robot.local_open_pts, ls_lopt)
             
-            if show_active_openpt and len(Robot.global_active_open_pts) > 0:
-                self.points(Robot.global_active_open_pts, ls_aopt)
+            if show_active_openpt and len(Robot.global_active_open_rank_pts) > 0:
+                self.points(Robot.global_active_open_rank_pts, ls_aopt)
             
             if show_visibilityGraph:
                 self.visibility_graph(Robot.visibility_graph, ls_vg)
@@ -142,5 +142,5 @@ class Plot_robot(Plot_base):
             # to set equal make sure x y axises are same resolution 
             self.set_equal()
             self.show_grid()
-            self.plt.pause(0.00001)
+            self.plt.pause(0.0000001)
         

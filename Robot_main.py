@@ -23,7 +23,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
     robot = Robot(start, robot_vision, robot_type, robot_radius)
     ranker = Ranker(alpha=0.9, beta= 0.1)
 
-    # declare potter within window size
+    # declare potter
     plotter = Plot_robot(title="Path Planning for Autonomous Robot: {0}".format(map_name))
     
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
@@ -38,9 +38,9 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
 
     while True:
         iter_count += 1
-        print("\n_number of iteration:{0}, current robot coordinate{1}".format(iter_count, robot.coordinate))
-        
         robot.update_coordinate(robot.next_coordinate)
+
+        print("\n_number of iteration: {0}, current robot coordinate {1}".format(iter_count, robot.coordinate))
 
         # clean old data
         next_point = []
@@ -50,35 +50,27 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
         
         # check whether the robot saw or reach the given goal
         robot.check_goal(goal, closed_sights)
-        #Robot.show_status()
-
+        robot.show_status()
         if not robot.saw_goal and not robot.reach_goal:
-            # get local open points
-            robot.get_local_open_points(open_sights)
-
-            # check whether local open points are active
-            robot.get_local_active_open_points()
-
-            ranks_new = []
-            # Ranking new active openPts then stack to global set.
-            if len(robot.local_active_open_pts) > 0:
-                ranks_new = np.array([ranker.rank(robot.coordinate, pt, goal) for pt in robot.local_active_open_pts])
+            # get local active point and its ranking
+            robot.get_local_active_open_ranking_points(open_sights, ranker, goal)
 
             # stack local active open point to global set
-            robot.global_active_open_pts = store_global_active_points(robot.global_active_open_pts, robot.local_active_open_pts, ranks_new)
+            robot.append_global_by_local_active_points(robot.local_active_open_rank_pts)
+            
 
             # add new active open points to graph_insert
             graph_add_lOpenPts(robot.visibility_graph, robot.coordinate, robot.local_active_open_pts)
 
             # pick next point to make a move
-            next_point, next_pt_idx = robot.pick_next_point(robot.global_active_open_pts)
+            next_point, next_pt_idx = robot.pick_next_point(robot.global_active_open_rank_pts)
 
             if next_point is not None:
                 # find the shortest skeleton path from current position (center) to next point
                 skeleton_path = BFS_skeleton_path(robot.visibility_graph, robot.coordinate, tuple(next_point))
 
                 # then remove picked point from active global open point
-                robot.global_list_remove(next_pt_idx)
+                robot.remove_global_active_pts_by_index(next_pt_idx)
             else:
                 print("No way to reach the goal!")
                 robot.is_no_way_to_goal(True)
@@ -87,7 +79,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
             next_point = goal
             # find the shortest path from center to next point
             skeleton_path = [robot.coordinate, goal]
-
+        #print ("______________________ skeleton_path ", skeleton_path)
         # record the path and sight
         robot.expand_traversal_sights(closed_sights, open_sights)
 
@@ -118,7 +110,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
             print("No way to goal!!")
             break
 
-    robot.print_visited_path()
+    #robot.print_visited_path()
     print("Done")
 
     plotter.show()

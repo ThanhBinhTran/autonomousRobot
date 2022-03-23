@@ -15,7 +15,8 @@ class Robot(Robot_base):
         
         self.local_open_pts = []            # local open point
         self.local_active_open_pts = []     # local active open point
-        self.global_active_open_pts = []    # global active open points
+        self.local_active_open_rank_pts = []     # local active open point and its ranking
+        self.global_active_open_rank_pts = []    # global active open points and its ranking
         self.next_point = []                # next point where robot move to
 
         self.traversal_sights = []          # hold traversal sights that robot visited
@@ -78,6 +79,8 @@ class Robot(Robot_base):
     
     ''' check whether local open_points are active '''
     def get_local_active_open_points(self):
+
+        # get local active point for local points
         self.local_active_open_pts = []
         if len(self.local_open_pts):  # new local found
             self.local_active_open_pts = self.local_open_pts
@@ -86,8 +89,28 @@ class Robot(Robot_base):
             if len(self.traversal_sights) > 0:
                 local_open_pts_status = [inside_global_true_sight(pt, self.vision_range, self.traversal_sights) for pt in self.local_active_open_pts]
                 self.local_active_open_pts = self.local_active_open_pts[np.logical_not(local_open_pts_status)]
+        
 
-        return self.local_active_open_pts
+    def ranking_active_open_point(self, ranker, goal):
+        ranks_new = []
+        self.local_active_open_rank_pts = []
+        # Ranking new active openPts then stack to global set.
+        if len(self.local_active_open_pts) > 0:
+            ranks_new = np.array([ranker.rank(self.coordinate, pt, goal) for pt in self.local_active_open_pts])
+
+            # store local open points and its ranking 
+            self.local_active_open_rank_pts = np.concatenate((self.local_active_open_pts, ranks_new), axis=1)
+
+    ''' check whether local open_points are active '''
+    def get_local_active_open_ranking_points(self, open_sights, ranker, goal):
+        # get all local points from open sights
+        self.get_local_open_points(open_sights)
+
+        # get only active open point
+        self.get_local_active_open_points()
+
+        # ranking and store it to local active open ranking points
+        self.ranking_active_open_point(ranker=ranker, goal=goal)
 
     ''' pick next point, where its ranking is heighest, in given list '''
     def pick_next_point(self, open_points_list):
@@ -101,8 +124,8 @@ class Robot(Robot_base):
         return next_point, next_pt_idx
 
     ''' remove active point form active list '''
-    def global_list_remove(self, point_idx):
-        self.global_active_open_pts = np.delete(self.global_active_open_pts, point_idx, axis=0)
+    def remove_global_active_pts_by_index(self, point_idx):
+        self.global_active_open_rank_pts = np.delete(self.global_active_open_rank_pts, point_idx, axis=0)
 
     ''' calcualte traveled path length '''
     def calculate_traveled_path_cost(self):
@@ -111,3 +134,11 @@ class Robot(Robot_base):
             for i in range(len(path)-1):
                 cost += point_dist(path[i], path[i+1])
         return cost
+    
+    ''' add local active and its ranking to global active points set '''
+    def append_global_by_local_active_points(self, local_active_open_pts):
+        if len(local_active_open_pts) > 0:
+            if len(self.global_active_open_rank_pts) == 0:
+                self.global_active_open_rank_pts = np.array(local_active_open_pts)
+            else:
+                self.global_active_open_rank_pts = np.concatenate((self.global_active_open_rank_pts, local_active_open_pts), axis=0)
