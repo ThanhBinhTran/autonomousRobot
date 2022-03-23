@@ -136,7 +136,7 @@ class Robot(Robot_base):
         return cost
     
     ''' add local active and its ranking to global active points set '''
-    def append_global_by_local_active_points(self, local_active_open_pts):
+    def expand_global_open_ranking_points(self, local_active_open_pts):
         if len(local_active_open_pts) > 0:
             if len(self.global_active_open_rank_pts) == 0:
                 self.global_active_open_rank_pts = np.array(local_active_open_pts)

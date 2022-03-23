@@ -66,7 +66,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
             robot.get_local_active_open_ranking_points(open_sights, ranker, goal)
 
             # stack local active open point to global set
-            robot.append_global_by_local_active_points(robot.local_active_open_rank_pts)
+            robot.expand_global_open_ranking_points(robot.local_active_open_rank_pts)
             
 
             # add new active open points to graph_insert

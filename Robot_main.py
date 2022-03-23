@@ -50,13 +50,13 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
         
         # check whether the robot saw or reach the given goal
         robot.check_goal(goal, closed_sights)
-        robot.show_status()
+        #robot.show_status()
         if not robot.saw_goal and not robot.reach_goal:
             # get local active point and its ranking
             robot.get_local_active_open_ranking_points(open_sights, ranker, goal)
 
             # stack local active open point to global set
-            robot.append_global_by_local_active_points(robot.local_active_open_rank_pts)
+            robot.expand_global_open_ranking_points(robot.local_active_open_rank_pts)
             
 
             # add new active open points to graph_insert
