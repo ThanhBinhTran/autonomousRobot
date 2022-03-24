@@ -4,13 +4,10 @@ This project is to simulate an autonomousRobot that try to find a way to reach a
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.com
 """
 
-import numpy as np
-
 from Robot_lib import *
 from Robot_paths_lib import *
 from Robot_draw_lib import Plot_robot
 from Robot_sight_lib import *
-from Robot_map_lib import Map
 from Obstacles import *
 from Program_config import *
 from Robot_ranking import Ranker
@@ -34,13 +31,14 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
     # for display information
     iter_count = 0
 
-    print("\nRobot is reaching to goal: {0} from start {1}".format(goal, start))
+    if not easy_experiment: # skip printing if running easy experiment
+        print("\nRobot is reaching to goal: {0} from start {1}".format(goal, start))
 
     while True:
         iter_count += 1
         robot.update_coordinate(robot.next_coordinate)
-
-        print("\n_number of iteration: {0}, current robot coordinate {1}".format(iter_count, robot.coordinate))
+        if not easy_experiment:
+            print("\n_number of iteration: {0}, current robot coordinate {1}".format(iter_count, robot.coordinate))
 
         # clean old data
         next_point = []
@@ -53,7 +51,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
         #robot.show_status()
         if not robot.saw_goal and not robot.reach_goal:
             len_global_ranking = len (robot.global_active_open_rank_pts)
-            
+
             # get local active point and its ranking
             robot.get_local_active_open_ranking_points(open_sights, ranker, goal)
 
@@ -64,10 +62,6 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
             # add new active open points to graph_insert
             graph_add_lOpenPts(robot.visibility_graph, robot.coordinate, robot.local_active_open_pts)
 
-            print ("___________________ local ", len (robot.local_active_open_rank_pts))
-            print ("___________________ global (before) ", len (robot.global_active_open_rank_pts))
-            
-            
             if len(robot.local_active_open_rank_pts) > 0:   # pick local first 
                 # pick next point to make a move
                 next_point, next_pt_idx = robot.pick_next_point(robot.local_active_open_rank_pts)                
@@ -83,7 +77,6 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
 
                 # then remove picked point from active global open point
                 robot.remove_global_active_pts_by_index(len_global_ranking + next_pt_idx)
-                print ("___________________ global (after) ", len (robot.global_active_open_rank_pts))
 
             else:
                 print("No way to reach the goal!")
@@ -94,7 +87,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
             next_point = goal
             # find the shortest path from center to next point
             skeleton_path = [robot.coordinate, goal]
-        #print ("______________________ skeleton_path ", skeleton_path)
+
         # record the path and sight
         robot.expand_traversal_sights(closed_sights, open_sights)
 
@@ -110,7 +103,8 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
         if not robot.no_way_to_goal:
             robot.next_coordinate = motion(robot.coordinate, next_point)  # simulate robot
 
-        plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
+        if show_animation:
+            plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
         
         # Run n times for debugging
@@ -125,11 +119,25 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
             print("No way to goal!!")
             break
 
-    #robot.print_visited_path()
-    print("Done")
+    if print_traversalSights:
+        robot.print_visited_path()
 
-    plotter.show()
+    # showing the final result (for save image and display as well)
+    plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
+                    closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
 
+    if not easy_experiment: # skip printing and showing animation if running easy experiment
+        print("Done")
+        if show_animation:
+            plotter.show()
+    elif save_image:
+        fig_name = plot_img_name(range=robot.vision_range, start=start, goal=goal)
+        fig_name = fig_name + "_local_strategy"
+        plotter.save_figure(fig_name)
+        print ("Saved: ", fig_name)
+
+    return robot
+    
 
 if __name__ == '__main__':
     

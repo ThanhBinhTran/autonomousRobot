@@ -10,10 +10,12 @@ from Program_config import *
 
 
 class Plot_base:
-    def __init__(self, size, title):
+    def __init__(self, size=(7,7), title="Autonomous Robot"):
         self.plt   = plt
         self.fig, self.ax = plt.subplots(figsize=size)
-        self.fig.canvas.set_window_title(title)
+        #self.plt.figure(title)
+        self.fig.canvas.manager.set_window_title(title)
+        #self.fig.canvas.set_window_title(title)
         self.plt.xlim(0, 100)
         self.plt.ylim(0, 100)
 
@@ -131,3 +133,7 @@ class Plot_base:
             out_x, out_y = (np.array([x, y]) +
                             np.array([np.cos(yaw), np.sin(yaw)]) * robot.radius)
             plt.plot([x, out_x], [y, out_y], "-k")
+    
+    ''' save plot as image/pdf/svg/eps'''
+    def save_figure(self, fig_name = "image",  file_extension = ".png", dpi=150):
+        self.plt.savefig(fig_name + file_extension, bbox_inches ="tight", dpi=dpi)

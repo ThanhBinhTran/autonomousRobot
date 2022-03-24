@@ -84,63 +84,64 @@ class Plot_robot(Plot_base):
 
     def show_animation(self, Robot: Robot, world_name, iter_count, obstacles:Obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point):
-        if show_animation:
-            # clear plot
-            self.clear()
+
+        # clear plot
+        self.clear()
             
-            # for stopping simulation with the esc key.
-            self.plt.gcf().canvas.mpl_connect(
-                'key_release_event',
-                lambda event: [exit(0) if event.key == 'escape' else None])
-                      
-            '''draw map obstacles/world '''            
-            # prepare title
-            cost = Robot.calculate_traveled_path_cost()
-            status_title = self.prepare_title(iter_count, cost)
-            self.show_map(world_name=world_name, obstacles=obstacles, plot_title=status_title)
-            if obstacles.enable_config_space:
-                self.show_configuration_space(obstacles.config_space)
-            # show_traversalSights
-            if show_traversalSights:
-                self.show_traversal_sights(Robot.traversal_sights, Robot.vision_range)
-            
-            if show_robot:
-                self.robot(Robot,yaw=0)
-            
-            if show_goal:
-                self.goal(goal, Robot.reach_goal, Robot.saw_goal)
-            
-            # plot robot's vision at local (center)
-            self.vision(Robot.coordinate, Robot.vision_range, closed_sights, open_sights)
-            
-            if show_local_openpt and len(Robot.local_open_pts) > 0:
-                self.points(Robot.local_open_pts, ls_lopt)
-            
-            if show_active_openpt and len(Robot.global_active_open_rank_pts) > 0:
-                self.points(Robot.global_active_open_rank_pts, ls_aopt)
-            
-            if show_visibilityGraph:
-                self.visibility_graph(Robot.visibility_graph, ls_vg)
-            
-            if show_visitedPath:
-                self.paths(Robot.visited_path, ls_vp, ls_goingp)
-            
-            if show_sketelonPath:
-                self.path(skeleton_path, ls_sp)
-            
-            if show_approximately_shortest_path:
-                self.path(asp, ls_asp)
-            
-            if show_critical_line_segments:
-                self.critical_line_segments(critical_ls, ls_cls)
-            
-                # display next point if existing
-            if show_next_point:
-                if len(next_point) > 0:
-                    self.point(next_point, ls_nextpt)
-            
-            # to set equal make sure x y axises are same resolution 
-            self.set_equal()
-            self.show_grid()
+        # for stopping simulation with the esc key.
+        self.plt.gcf().canvas.mpl_connect(
+            'key_release_event',
+            lambda event: [exit(0) if event.key == 'escape' else None])
+                  
+        '''draw map obstacles/world '''            
+        # prepare title
+        cost = Robot.calculate_traveled_path_cost()
+        status_title = self.prepare_title(iter_count, cost)
+        self.show_map(world_name=world_name, obstacles=obstacles, plot_title=status_title)
+        if obstacles.enable_config_space:
+            self.show_configuration_space(obstacles.config_space)
+        # show_traversalSights
+        if show_traversalSights:
+            self.show_traversal_sights(Robot.traversal_sights, Robot.vision_range)
+        
+        if show_robot:
+            self.robot(Robot,yaw=0)
+        
+        if show_goal:
+            self.goal(goal, Robot.reach_goal, Robot.saw_goal)
+        
+        # plot robot's vision at local (center)
+        self.vision(Robot.coordinate, Robot.vision_range, closed_sights, open_sights)
+        
+        if show_local_openpt and len(Robot.local_open_pts) > 0:
+            self.points(Robot.local_open_pts, ls_lopt)
+        
+        if show_active_openpt and len(Robot.global_active_open_rank_pts) > 0:
+            self.points(Robot.global_active_open_rank_pts, ls_aopt)
+        
+        if show_visibilityGraph:
+            self.visibility_graph(Robot.visibility_graph, ls_vg)
+        
+        if show_visitedPath:
+            self.paths(Robot.visited_path, ls_vp, ls_goingp)
+        
+        if show_sketelonPath:
+            self.path(skeleton_path, ls_sp)
+        
+        if show_approximately_shortest_path:
+            self.path(asp, ls_asp)
+        
+        if show_critical_line_segments:
+            self.critical_line_segments(critical_ls, ls_cls)
+        
+            # display next point if existing
+        if show_next_point:
+            if len(next_point) > 0:
+                self.point(next_point, ls_nextpt)
+        
+        # to set equal make sure x y axises are same resolution 
+        self.set_equal()
+        self.show_grid()
+        if not easy_experiment:         # skip pause if run easy_experiment
             self.plt.pause(0.0000001)
         

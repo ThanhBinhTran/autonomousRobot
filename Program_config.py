@@ -3,7 +3,7 @@ Parameters to show/hide element(s) of animation
 '''
 show_animation = True
 show_map = True
-show_world = True
+show_world = False
 
 show_traversalSights = True
 
@@ -57,6 +57,7 @@ print_ref_sight = False
 print_ref_csight_line_segments = False
 print_csight_line_segments = False
 print_traversalSights = False
+print_visited_path = False
 
 '''
 stype for robot
@@ -91,3 +92,10 @@ ls_tree_edge = "-k"         # tree's edge
 ls_goal_path_edge = "-g"    # path to goal edge
 ls_goal_path_node = "1r"    # path to goal node
 ls_node_active = "or"
+
+
+################################################
+# instead of show plot, saving image
+################################################
+easy_experiment = False
+save_image = True       # set easy_experiment = True to enable save_image

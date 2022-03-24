@@ -97,7 +97,7 @@ def BFS_skeleton_path(graph, start, goal):
                 # Condition to check if the  
                 # neighbour node is the goal 
                 if neighbour == goal:
-                    print("BFS_skeleton_path = ", new_path)
+                    #print("BFS_skeleton_path = ", new_path)
                     return new_path
             explored.append(node)
 
