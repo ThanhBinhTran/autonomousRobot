@@ -26,7 +26,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
     obstacles.read(world_name, map_name)
-    obstacles.find_configuration_space(robot.radius)
+    #obstacles.find_configuration_space(robot.radius)
 
     # for display information
     iter_count = 0

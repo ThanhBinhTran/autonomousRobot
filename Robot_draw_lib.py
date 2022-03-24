@@ -143,5 +143,5 @@ class Plot_robot(Plot_base):
         self.set_equal()
         self.show_grid()
         if not easy_experiment:         # skip pause if run easy_experiment
-            self.plt.pause(0.0000001)
+            self.plt.pause(0.01)
         
