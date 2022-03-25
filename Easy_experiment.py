@@ -6,7 +6,7 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.
 import argparse
 from datetime import datetime
 
-from Robot_lib import plot_img_name
+from Robot_lib import set_image_name
 from Robot_base import RobotType
 from Robot_main import robot_main as robot_global_ranking_first
 from Robot_main_local_strategy import robot_main as robot_local_ranking_first
@@ -40,8 +40,7 @@ if __name__ == '__main__':
 
     goal_list = []
     goal_list.append ((50,50))
-    goal_list.append ((50,70))
-    goal_list.append ((70,50))
+    goal_list.append ((100,100))
 
 
 

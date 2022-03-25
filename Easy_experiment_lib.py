@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction import img_to_graph
-from Robot_lib import plot_img_name
+from Robot_lib import set_image_name
 
 class Experimental_Result:
     def __init__(self) -> None:
@@ -115,7 +115,7 @@ class Experimental_Result:
         imgs_array = []
         i = 0
         for vision_range in range_list:
-            file_name = plot_img_name(range=vision_range, start=start, goal=goal)
+            file_name = set_image_name(range=vision_range, start=start, goal=goal)
             file_name_g = file_name + "_global_strategy.png"
             file_name_l = file_name + "_local_strategy.png"
             # read images, add text note
@@ -123,9 +123,7 @@ class Experimental_Result:
             l_img = self.image_text(file_name_l, "local", start, goal, vision_range)
 
             imgs_array.append([g_img, l_img])
-            print ("----------------------------------------------------------", i)
             if ((i+1) %row_lim == 0) or (i == len(range_list)-1): # each big_image contains 2*10 imgs
-                print ("----------------------------------------------------------()", i)
 
                 images_array.append(imgs_array)
                 imgs_array = []
