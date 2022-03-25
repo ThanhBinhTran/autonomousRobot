@@ -69,7 +69,7 @@ class Experimental_Result:
         data = data_start[result_data["goal"] == g_value]
         self.draw_plot(data, s_value, g_value)
         
-        plt.xlabel("range")
+        plt.xlabel("vision range")
         plt.ylabel("path length")
         plt.legend(loc='upper left')
         plt.show()
@@ -123,7 +123,10 @@ class Experimental_Result:
             l_img = self.image_text(file_name_l, "local", start, goal, vision_range)
 
             imgs_array.append([g_img, l_img])
-            if (i % (row_lim-1) == 0 and i > 0 ) or i == len(range_list)-1: # each big_image contains 2*10 imgs
+            print ("----------------------------------------------------------", i)
+            if ((i+1) %row_lim == 0) or (i == len(range_list)-1): # each big_image contains 2*10 imgs
+                print ("----------------------------------------------------------()", i)
+
                 images_array.append(imgs_array)
                 imgs_array = []
             
@@ -176,4 +179,4 @@ class Experimental_Result:
 
 if __name__ == '__main__':
     result = Experimental_Result()
-    result.result_plot(result_file="result_03_24_15_10_58.csv")
+    result.result_plot(result_file="result_03_25_11_58_50.csv")

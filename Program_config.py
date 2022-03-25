@@ -97,5 +97,11 @@ ls_node_active = "or"
 ################################################
 # instead of show plot, saving image
 ################################################
-easy_experiment = False
+easy_experiment = True
 save_image = True       # set easy_experiment = True to enable save_image
+
+################################################
+# Note: in case there is no obstracles:
+# the system will create 6 open points if divide_6 = True
+# if divide_6 = false, 3 open points will be created
+divide_6 = True

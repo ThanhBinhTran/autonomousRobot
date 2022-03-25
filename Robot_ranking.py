@@ -20,8 +20,8 @@ class Ranker:
     def score_function(self, angle=math.pi/2, distance= 1, alpha = 0.9, beta = 0.1):
         # ranking = alpha/(distance**2) + beta/abs(angle**2)
         
-        angle = angle / math.pi
-        distance = distance / 150
+        angle = angle / math.pi     # norm angle
+        distance = distance / 100   # norm distance
         # print ("Ranking score: angle {0}, distance {1}".format(angle, distance) )
         score = float('inf')
         if not math.isclose(angle, 0.0) and not math.isclose(distance, 0.0):

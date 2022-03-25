@@ -18,8 +18,8 @@ from Easy_experiment_lib import Experimental_Result
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Code for Autonomous Robot.')
-    parser.add_argument('-n', metavar="number of iteration", type=int, help='number of iteration', default=20)
-    parser.add_argument('-m', metavar="data_map", help='map data', default='_map.csv')
+    parser.add_argument('-n', metavar="number of iteration", type=int, help='number of iteration', default=100)
+    parser.add_argument('-m', metavar="data_map", help='map data', default='_MuchMoreFun.csv')
     parser.add_argument('-w', metavar="world_image", help='world model')
     parser.add_argument('-r', metavar="vision_range", type=float, help='vision range', default=5.0)
     parser.add_argument('-radius', metavar="robot radius", type=float, help='robot radius', default=0.5)
@@ -36,17 +36,14 @@ if __name__ == '__main__':
 
     # get start point and goal point
     start_list = []
-    for i in range (0, 10, 2):
-        for j in range (0, 10, 2):
-            start_list.append((i,j))
+    start_list.append ((0,0))
 
     goal_list = []
-    for i in range (90, 93, 4):
-        for j in range (90, 93, 4):
-            goal_list.append((i,j))
+    goal_list.append ((50,50))
+    goal_list.append ((50,70))
+    goal_list.append ((70,50))
 
-    start = start_list[0]
-    goal = goal_list[0]
+
 
     # run robot
     
@@ -57,30 +54,31 @@ if __name__ == '__main__':
     #plotter_esay = Plot_base()
     result = Experimental_Result()
 
-    range_step = 3
-    range_max = 20
+    range_step = 5
+    range_max = 10
     range_begin = 5
+    for s in start_list:
+        start = s
+        for g in goal_list:
+            goal = g
 
-    for g in goal_list:
-        goal = g
+            range_experiment_list = []
 
-        range_experiment_list = []
+            for i in range (range_max):
+                vision_range = range_begin + range_step*i
+                range_experiment_list.append(vision_range)
 
-        for i in range (range_max):
-            vision_range = range_begin + range_step*i
-            range_experiment_list.append(vision_range)
+                print("Robot is reaching to goal: {0} from start: {1}, vision range: {2}".format(goal, start, vision_range))
+                robot_global = robot_global_ranking_first(start, goal, map_name, world_name, num_iter, vision_range, robot_type, robot_radius)
+                robot_local = robot_local_ranking_first(start, goal, map_name, world_name, num_iter, vision_range, robot_type, robot_radius)
+                
+                result.record_result(s=start, g=goal, r=vision_range, 
+                        gpc=robot_global.calculate_traveled_path_cost(), 
+                        lpc=robot_local.calculate_traveled_path_cost(), 
+                        grg=robot_global.reach_goal, lrg= robot_local.reach_goal)
 
-            print("Robot is reaching to goal: {0} from start: {1}, vision range: {2}".format(goal, start, vision_range))
-            robot_global = robot_global_ranking_first(start, goal, map_name, world_name, num_iter, vision_range, robot_type, robot_radius)
-            robot_local = robot_local_ranking_first(start, goal, map_name, world_name, num_iter, vision_range, robot_type, robot_radius)
-            
-            result.record_result(s=start, g=goal, r=vision_range, 
-                    gpc=robot_global.calculate_traveled_path_cost(), 
-                    lpc=robot_local.calculate_traveled_path_cost(), 
-                    grg=robot_global.reach_goal, lrg= robot_local.reach_goal)
-
-        if save_image:
-            result.compare_imgs(start, goal, range_experiment_list)
+            if save_image:
+                result.compare_imgs(start, goal, range_experiment_list)
     
     result_file= "result_{0}.csv".format(datetime.now().strftime("%m_%d_%H_%M_%S") )
     result.write_csv(file_name=result_file)

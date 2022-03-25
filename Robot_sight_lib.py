@@ -494,14 +494,29 @@ def divide_open_cpair(center, inangle, vs, ve):
     # print ("divide_open_cpair: ", math.degrees(inangle))
     angle = abs(inangle)
     if angle >= math.pi * 4 / 3:  # 240 degree
-        # divide into 3 parts
-        r_angle = angle / 3
-        # print ("divide into 3 parts, with angle = ", math.degrees(r_angle))
-        v1 = rotate_vector_center(center, vs, -r_angle)
-        v2 = rotate_vector_center(center, vs, -2 * r_angle)
-        return_pairs.append([vs, v1])
-        return_pairs.append([v1, v2])
-        return_pairs.append([v2, ve])
+        
+        if divide_6:
+            r_angle = angle / 6
+            # print ("divide into 3 parts, with angle = ", math.degrees(r_angle))
+            v1 = rotate_vector_center(center, vs, -r_angle)
+            v2 = rotate_vector_center(center, vs, -2 * r_angle)
+            v3 = rotate_vector_center(center, vs, -3 * r_angle)
+            v4 = rotate_vector_center(center, vs, -4 * r_angle)
+            v5 = rotate_vector_center(center, vs, -5 * r_angle)
+            return_pairs.append([vs, v1])
+            return_pairs.append([v1, v2])
+            return_pairs.append([v2, v3])
+            return_pairs.append([v3, v4])
+            return_pairs.append([v4, v5])
+            return_pairs.append([v5, ve])
+        else:   # default divide into 3 parts
+            r_angle = angle / 3
+            # print ("divide into 3 parts, with angle = ", math.degrees(r_angle))
+            v1 = rotate_vector_center(center, vs, -r_angle)
+            v2 = rotate_vector_center(center, vs, -2 * r_angle)
+            return_pairs.append([vs, v1])
+            return_pairs.append([v1, v2])
+            return_pairs.append([v2, ve])
     elif angle >= math.pi * 2 / 3:  # 120 degree:
         # divide into 2 parts
         r_angle = angle / 2
@@ -545,7 +560,10 @@ def get_osight_linesegments(center, radius, goal, close_cpairs):
             vector_cg_unit = [1, 0]
 
         vs = np.multiply(vector_cg_unit, radius) + center
-        vs = rotate_vector_center(center, vs, math.pi / 3)
+        if divide_6:
+            vs = rotate_vector_center(center, vs, math.pi / 6)
+        else:
+            vs = rotate_vector_center(center, vs, math.pi / 3)
 
         pairs_extend = divide_open_cpair_complement(center, [vs, vs])
         for pair in pairs_extend:
