@@ -97,11 +97,14 @@ ls_node_active = "or"
 ################################################
 # instead of show plot, saving image
 ################################################
-easy_experiment = True
+easy_experiment = False
 save_image = True       # set easy_experiment = True to enable save_image
+g_strategy = "_global_strategy"     # pick on open point global set
+l_strategy = "_local_strategy"     # pick on open point local set first, if not exist go for global
 
 ################################################
 # Note: in case there is no obstracles:
 # the system will create 6 open points if divide_6 = True
 # if divide_6 = false, 3 open points will be created
 divide_6 = True
+

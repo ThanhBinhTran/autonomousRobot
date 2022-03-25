@@ -489,5 +489,6 @@ def ray_tracing_method(x,y,poly):
 
 
 ''' prepare name figure '''
-def plot_img_name(range, start, goal):
-    return "start_{0}_{1}_goal_{2}_{3}_range_{4}".format(start[0],start[1], goal[0],goal[1], range)
+def set_image_name(range, start, goal, strategy):
+    return "start_{0}_{1}_goal_{2}_{3}_range_{4}_strategy_{4}".format(
+        start[0],start[1], goal[0],goal[1], range, strategy)

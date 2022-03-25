@@ -2,6 +2,7 @@ from Robot_paths_lib import *
 from Robot_lib import *
 from Robot_sight_lib import inside_local_true_sight, inside_global_true_sight
 from Robot_base import Robot_base, RobotType
+from Program_config import *
 
 class Robot(Robot_base):
     def __init__(self, start, vision_range=20, robot_type= RobotType.circle, robot_radius= 0.2):
@@ -21,7 +22,8 @@ class Robot(Robot_base):
 
         self.traversal_sights = []          # hold traversal sights that robot visited
         self.visited_path = []              # path that robot visited
-        
+        self.visited_path_direction = []    # status of visited subpath, true = forward, false = backward
+
         # visibility Graph which contains information of visited places
         self.visibility_graph = graph_intiailze()
     def is_no_way_to_goal(self, noway):
@@ -38,15 +40,16 @@ class Robot(Robot_base):
 
     def expand_traversal_sights(self, closed_sights, open_sights):
         self.traversal_sights.append([self.coordinate, closed_sights, open_sights])
-
-    def print_traversal_sights(self):
-        print("traversal_sights:", self.traversal_sights)
-
+   
     def expand_visited_path(self, path):
+        '''
+        set direction: true means robot goes forward (len (asp) ==2)
+                       false means robot back to explored area
+        '''
         self.visited_path.append(path)
 
-    def print_visited_path(self):
-        print("visited path:", self.visited_path)
+        direction = len(path) == 2
+        self.visited_path_direction.append(direction)
 
     ''' Check if robot saw goal '''
     def is_saw_goal(self, goal, true_sight):
@@ -62,10 +65,31 @@ class Robot(Robot_base):
         self.is_reach_goal(goal)
         if not self.reach_goal:
             self.is_saw_goal(goal, true_sight)
-    ''' print status of robot to goal '''
-    def show_status(self):
-        print ("_robot reached goal: {0}, saw goal: {1}".format(self.reach_goal, self.saw_goal))
 
+    ''' print status and information of robot '''
+    def print_infomation(self):
+        if self.no_way_to_goal:
+            print ("NO path to goal!")
+        elif self.reach_goal:
+            print ("Reached goal!")
+        elif self.saw_goal:
+            print ("Saw goal!")
+
+        if print_traversalSights:
+            print("traversal_sights:", self.traversal_sights)
+
+        if print_visited_path:
+            print("visited path:", self.visited_path)
+
+    def finish(self):
+        return self.no_way_to_goal or self.reach_goal
+
+    ''' clear local information '''
+    def clear_local(self):
+        self.local_open_pts = []
+        self.local_active_open_pts = []
+        self.local_active_open_rank_pts = []
+        
     ''' get local open points '''
     def get_local_open_points(self, open_sights):
         self.local_open_pts = []
@@ -113,10 +137,13 @@ class Robot(Robot_base):
         self.ranking_active_open_point(ranker=ranker, goal=goal)
 
     ''' pick next point, where its ranking is heighest, in given list '''
-    def pick_next_point(self, open_points_list):
+    def pick_next_point(self, open_points_list, goal):
         next_point = None
         next_pt_idx = -1
-        if len(open_points_list) > 0:
+
+        if self.saw_goal or self.reach_goal:
+            next_point = goal
+        elif len(open_points_list) > 0:
             ranks = open_points_list[:, 2]
             next_pt_idx = np.argmax(ranks)
             next_point = open_points_list[next_pt_idx, 0:2]

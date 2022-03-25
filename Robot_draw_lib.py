@@ -117,13 +117,14 @@ class Plot_robot(Plot_base):
             self.points(Robot.local_open_pts, ls_lopt)
         
         if show_active_openpt and len(Robot.global_active_open_rank_pts) > 0:
-            self.points(Robot.global_active_open_rank_pts, ls_aopt)
+            self.point_colors(Robot.global_active_open_rank_pts, Robot.global_active_open_rank_pts[:,2])
         
         if show_visibilityGraph:
             self.visibility_graph(Robot.visibility_graph, ls_vg)
         
         if show_visitedPath:
-            self.paths(Robot.visited_path, ls_vp, ls_goingp)
+            #self.paths(Robot.visited_path, ls_vp, ls_goingp)
+            self.paths_color(Robot.visited_path, Robot.visited_path_direction)
         
         if show_sketelonPath:
             self.path(skeleton_path, ls_sp)
@@ -143,5 +144,5 @@ class Plot_robot(Plot_base):
         self.set_equal()
         self.show_grid()
         if not easy_experiment:         # skip pause if run easy_experiment
-            self.plt.pause(0.1)
+            self.plt.pause(0.01)
         

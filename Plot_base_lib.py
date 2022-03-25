@@ -28,6 +28,18 @@ class Plot_base:
     ''' plot point(s)'''
     point  = lambda self, point,  ls=".r": self.plt.plot(point[0], point[1], ls)
     points = lambda self, points, ls=".r": self.plt.plot(points[:, 0], points[:, 1], ls)
+    
+    '''
+    plot points with color map
+    visit https://www.w3schools.com/python/matplotlib_scatter.asp to see more color map
+    '''
+    def point_colors(self, points, colors, colormap = 'winter_r'):
+        max_range = int(max(colors)) + 1
+        self.plt.scatter(points[:, 0], points[:, 1], c=colors, cmap=colormap)
+        self.plt.colorbar().remove() # remove old one
+        #self.plt.colorbar()          # update new one
+        cbar = plt.colorbar(ticks=[])   # dont show ticks number
+        #self.plt.clim(0, max_range)
 
     ''' plot text at near point coordinate '''
     text = lambda self, point, str: self.plt.text(point[0], point[1] + 2, str)
@@ -44,6 +56,22 @@ class Plot_base:
     def path(self, points, ls="-xr"):
         new_point = np.array(points)
         self.points(points=new_point, ls=ls)
+
+    ''' plot path color containing list of points '''
+    def path_color(self, points, color):
+        new_point = np.array(points)
+        plt.plot(new_point[:, 0], new_point[:, 1], c=color)
+
+    ''' plot path with color '''
+    def paths_color(self, paths, directions):
+        cmap = plt.get_cmap('jet_r')
+        c_forward = cmap(float(0.1))
+        c_backward = cmap(float(0))
+        for path,direction in zip(paths, directions):
+            if direction:
+                self.path_color(path, c_forward)
+            else:
+                self.path_color(path, c_backward)
 
     def polygon(self, polygon: list, ls= "-r"):
         new_points = polygon.copy()
