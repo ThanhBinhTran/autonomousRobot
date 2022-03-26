@@ -8,9 +8,11 @@ import cv2
 import csv
 import numpy as np
 import pandas as pd
+import argparse
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction import img_to_graph
 from Robot_lib import set_image_name
+from Program_config import *
 
 class Experimental_Result:
     def __init__(self) -> None:
@@ -115,9 +117,11 @@ class Experimental_Result:
         imgs_array = []
         i = 0
         for vision_range in range_list:
-            file_name = set_image_name(range=vision_range, start=start, goal=goal)
-            file_name_g = file_name + "_global_strategy.png"
-            file_name_l = file_name + "_local_strategy.png"
+            file_name_g = set_image_name(range=vision_range, start=start, goal=goal, strategy=g_strategy)
+            file_name_l = set_image_name(range=vision_range, start=start, goal=goal, strategy=l_strategy)
+            file_name_g += ".png"
+            file_name_l += ".png"
+            print ("----------------------------------", file_name_g, "_____" , file_name_l)
             # read images, add text note
             g_img = self.image_text(file_name_g, "global", start, goal, vision_range)
             l_img = self.image_text(file_name_l, "local", start, goal, vision_range)
@@ -176,5 +180,13 @@ class Experimental_Result:
         return ver
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Code for Autonomous Robot.')
+    parser.add_argument('-r', metavar="result file",  help='result file', default="result.csv")
+
+    menu_result = parser.parse_args()
+
+    # get user input
+    result_file = menu_result.r
+
     result = Experimental_Result()
-    result.result_plot(result_file="result_03_25_11_58_50.csv")
+    result.result_plot(result_file=result_file)

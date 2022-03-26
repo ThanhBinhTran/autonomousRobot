@@ -31,7 +31,7 @@ if __name__ == '__main__':
     map_name = menu_result.m
     world_name = menu_result.w
     robot_radius = menu_result.radius
-    robot_vision = menu_result.r
+    range_begin = menu_result.r
     robot_type = RobotType.circle
 
     # get start point and goal point
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     result = Experimental_Result()
 
     range_step = 5
-    range_max = 10
+    range_max = 1
     range_begin = 5
     for s in start_list:
         start = s
@@ -82,5 +82,6 @@ if __name__ == '__main__':
     result_file= "result_{0}.csv".format(datetime.now().strftime("%m_%d_%H_%M_%S") )
     result.write_csv(file_name=result_file)
     
-    print ("\nTo visualize the result run python Easy_experiment_lib with result_file = {0}".format(result_file))
+    print ("\nTo visualize the result run:\n" +
+              "python Easy_experiment_lib.py -r {0}".format(result_file))
     print ("\nDONE!  easy experiment....")
