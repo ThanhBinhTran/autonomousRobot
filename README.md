@@ -32,7 +32,7 @@ python Robot_theory.py -n 0 -r  80 -m _forest.csv -gx 500 -gy 500
 python Easy_experiment.py -n 100 -m _forest.csv
 python Easy_experiment.py -n 10 -w _world.png
 ```
-NOTE: recommend set following parameter in program_config file to skip animation and printing
+recommend setting the following parameters in the program_config file to skip animation/printing.
 ```
 easy_experiment = False
 save_image = True
