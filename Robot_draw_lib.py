@@ -33,7 +33,7 @@ class Plot_robot(Plot_base):
             theta2 = math.degrees(theta2radian)
             wedge = patches.Wedge(center, radius, theta1=theta1, theta2=theta2)
             arc_patches.append(wedge)
-        collection = PatchCollection(arc_patches, facecolor='g', linestyle='solid', edgecolor='r', alpha=transparent)
+        collection = PatchCollection(arc_patches, facecolor=cl, linestyle='solid', edgecolor='r', alpha=transparent)
         self.ax.add_collection(collection)
 
     def vision_area(self, center, radius, ls=":"):
@@ -144,5 +144,5 @@ class Plot_robot(Plot_base):
         self.set_equal()
         self.show_grid()
         if not easy_experiment:         # skip pause if run easy_experiment
-            self.plt.pause(0.01)
+            self.plt.pause(0.001)
         

@@ -19,7 +19,7 @@ show_cls_orderednumber = True  # show ordered number of critical line segments
 show_visitedPath = True
 show_visibilityGraph = True
 
-show_local_openpt = True
+show_local_openpt = False
 show_active_openpt = True
 show_next_point = True
 
@@ -31,8 +31,6 @@ show_text_goal = True
 '''
 Assumption of Hoai An Theory.
 '''
-# ALGORITHMS CONTROL
-THEORY_AR_ALGORITHMS = True
 # show animation
 show_active_openpt_HA_Assumption = True         # active open points (HA Assumption)
 show_activeArc_HA_Assumption = True             # arc points (HA Assumption)
@@ -51,9 +49,7 @@ parementers to hide/show information
 '''
 print_local_obstacles_boundary = False
 print_closed_sights = False
-print_closed_line_segments = False
 print_open_sights = False
-print_ref_sight = False
 print_ref_csight_line_segments = False
 print_csight_line_segments = False
 print_traversalSights = False
@@ -62,22 +58,14 @@ print_visited_path = False
 '''
 stype for robot
 '''
-ls_is = ":.c"  # intersection
-ls_bp = "-r"  # boundary points
 ls_ts = "-"  # true sight
 cl_ts = "m"  # color true sight
-cl_os = "c"
-ls_bp = ":g"  # blind sight
-ls_map = "-b"  # map
-ls_cs = ":m"  # close sight
-ls_os = "c"  # open sight
 ls_goal = "*r"  # goal
-ls_start = "*b"  # goal
+ls_start = "*b"  # start
 ls_nextpt = ".r"  # next points
 ls_lopt = ".k"  # local open_point
 ls_aopt = ".b"  # active open points
-ls_em = "-m"  # explored_map
-ls_vg = ":k"  # visible graph
+ls_vg = ":k"  # visibility graph
 ls_vp = "-r"  # visited path
 ls_goingp = "-1g"  # going path
 ls_cls = '--g'  # critical line segment
@@ -97,14 +85,14 @@ ls_node_active = "or"
 ################################################
 # instead of show plot, saving image
 ################################################
-easy_experiment = False
+easy_experiment = True
 save_image = True       # set easy_experiment = True to enable save_image
-g_strategy = "_global_strategy"     # pick on open point global set
-l_strategy = "_local_strategy"     # pick on open point local set first, if not exist go for global
+g_strategy = "global"     # pick on open point global set
+l_strategy = "local"     # pick on open point local set first, if not exist go for global
+
 
 ################################################
 # Note: in case there is no obstracles:
 # the system will create 6 open points if divide_6 = True
 # if divide_6 = false, 3 open points will be created
 divide_6 = True
-

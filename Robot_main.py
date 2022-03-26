@@ -72,8 +72,8 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
             else:
                 skeleton_path = BFS_skeleton_path(robot.visibility_graph, robot.coordinate, tuple(next_point))
 
-            # then remove picked point from active global open point
-            robot.remove_global_active_pts_by_index(next_pt_idx)
+                # then remove picked point from active global open point
+                robot.remove_global_active_pts_by_index(next_pt_idx)
         else:
             robot.is_no_way_to_goal(True)
 
