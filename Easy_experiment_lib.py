@@ -121,7 +121,6 @@ class Experimental_Result:
             file_name_l = set_image_name(range=vision_range, start=start, goal=goal, strategy=l_strategy)
             file_name_g += ".png"
             file_name_l += ".png"
-            print ("----------------------------------", file_name_g, "_____" , file_name_l)
             # read images, add text note
             g_img = self.image_text(file_name_g, "global", start, goal, vision_range)
             l_img = self.image_text(file_name_l, "local", start, goal, vision_range)
