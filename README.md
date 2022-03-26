@@ -18,7 +18,7 @@ Example:
 ```
 python Robot_main.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
 python Robot_main.py -n 0 -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
-python Robot_main.py -n 0 -w _world.png -sx 5 -sy 10 -gx 180.0 -gy 180
+python Robot_main.py -n 0 -w _world.png -sx 5 -sy 10 -gx 250 -gy 310 -r 40
 ```
 ##### To run demo for the the assumption of An and Hoai's Theory:
 ``` 
@@ -27,6 +27,25 @@ python Robot_theory.py -n 0 -r  90 -m _forest.csv -gx 500 -gy 500
 python Robot_theory.py -n 0 -r  80 -m _forest.csv -gx 500 -gy 500
 ```
 * Set robot_vision parameter (option -r ) to see the different outcomes of experiments
+##### To run experiment
+``` 
+python Easy_experiment.py -n 100 -m _forest.csv
+python Easy_experiment.py -n 10 -w _world.png
+```
+NOTE: recommend set following parameter in program_config file to skip animation and printing
+```
+easy_experiment = False
+save_image = True
+```
+
+The results of experiment are:
+* result<date_time>.csv file: contains all infomation in text form.
+* pdf, images file: are plots at final step.
+###### to visualize results of experiments:
+
+```
+python Easy_experiment_lib.py -r result<date_time>.csv
+```
 
 ##### To generate a map:
 Usage:
