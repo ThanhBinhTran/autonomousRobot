@@ -33,12 +33,12 @@ class Plot_base:
     plot points with color map
     visit https://www.w3schools.com/python/matplotlib_scatter.asp to see more color map
     '''
-    def point_colors(self, points, colors, colormap = 'winter_r'):
+    def point_colors(self, points, colors, colormap = 'winter_r', marker='.'):
         max_range = int(max(colors)) + 1
-        self.plt.scatter(points[:, 0], points[:, 1], c=colors, cmap=colormap)
-        self.plt.colorbar().remove() # remove old one
+        self.plt.scatter(points[:, 0], points[:, 1], c=colors, cmap=colormap, marker=marker)
+        #self.plt.colorbar().remove() # remove old one
         #self.plt.colorbar()          # update new one
-        cbar = plt.colorbar(ticks=[])   # dont show ticks number
+        #cbar = plt.colorbar(ticks=[])   # dont show ticks number
         #self.plt.clim(0, max_range)
 
     ''' plot text at near point coordinate '''
@@ -54,8 +54,7 @@ class Plot_base:
     
     ''' plot path containing list of points '''
     def path(self, points, ls="-xr"):
-        new_point = np.array(points)
-        self.points(points=new_point, ls=ls)
+        self.points(points=np.array(points), ls=ls)
 
     ''' plot path color containing list of points '''
     def path_color(self, points, color):
@@ -67,8 +66,10 @@ class Plot_base:
         cmap = plt.get_cmap('jet_r')
         c_forward = cmap(float(0.1))
         c_backward = cmap(float(0))
-        for path,direction in zip(paths, directions):
-            if direction:
+        # draw paths with 2 colors, red if direction = forward(true)
+        # dark read if direction = backward (false)
+        for path, direction in zip(paths, directions):
+            if direction:   
                 self.path_color(path, c_forward)
             else:
                 self.path_color(path, c_backward)
