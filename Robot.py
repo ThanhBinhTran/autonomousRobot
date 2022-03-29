@@ -3,7 +3,7 @@ from Robot_lib import *
 from Robot_sight_lib import inside_local_true_sight, inside_global_true_sight
 from Robot_base import Robot_base, RobotType
 from Program_config import *
-
+from Graph import Graph
 class Robot(Robot_base):
     def __init__(self, start, vision_range=20, robot_type= RobotType.circle, robot_radius= 0.2):
         super().__init__(vision_range, robot_type, robot_radius)
@@ -25,7 +25,7 @@ class Robot(Robot_base):
         self.visited_path_direction = []    # status of visited subpath, true = forward, false = backward
 
         # visibility Graph which contains information of visited places
-        self.visibility_graph = graph_intiailze()
+        self.visibility_graph = Graph()
     def is_no_way_to_goal(self, noway):
         self.no_way_to_goal = noway
 
@@ -158,8 +158,7 @@ class Robot(Robot_base):
     def calculate_traveled_path_cost(self):
         cost = 0.0
         for path in self.visited_path:
-            for i in range(len(path)-1):
-                cost += point_dist(path[i], path[i+1])
+            cost += path_cost(path)
         return cost
     
     ''' add local active and its ranking to global active points set '''

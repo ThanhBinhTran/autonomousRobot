@@ -60,7 +60,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
             robot.expand_global_open_ranking_points(robot.local_active_open_rank_pts)
             
             # add new active open points to graph_insert
-            graph_add_lOpenPts(robot.visibility_graph, robot.coordinate, robot.local_active_open_pts)
+            robot.visibility_graph.add_local_open_points(robot.coordinate, robot.local_active_open_pts)
         
         # pick next point to make a move
         next_point, next_pt_idx = robot.pick_next_point(robot.global_active_open_rank_pts, goal)
@@ -70,7 +70,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
             if tuple(next_point) == tuple(goal):
                 skeleton_path = [robot.coordinate, goal]
             else:
-                skeleton_path = BFS_skeleton_path(robot.visibility_graph, robot.coordinate, tuple(next_point))
+                skeleton_path = robot.visibility_graph.BFS_skeleton_path(robot.coordinate, tuple(next_point))
 
                 # then remove picked point from active global open point
                 robot.remove_global_active_pts_by_index(next_pt_idx)
@@ -94,7 +94,8 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
         
         robot.print_infomation()
-        
+        # debug ------------------------------------
+        robot.visibility_graph.get_all_non_leaf()
         # Run n times for debugging
         if  iter_count == num_iter:
             break
@@ -102,20 +103,19 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
         if robot.finish():
             break
     
-
-    # showing the final result (for save image and display as well)
-    plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
-                    closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
-
     if not easy_experiment: # skip printing and showing animation if running easy experiment
         print("Done")
         if show_animation:
             plotter.show()
+
     elif save_image:
+        # showing the final result (for save image and display as well)
+        plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
+                    closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
         fig_name = set_image_name(range=robot.vision_range, start=start, goal=goal, strategy=g_strategy)
         plotter.save_figure(fig_name, file_extension=".png")
         plotter.save_figure(fig_name, file_extension=".pdf")
-        print ("Saved: ", fig_name)
+        print ("Saved: {0}.pdf".format(fig_name))
 
     return robot
     

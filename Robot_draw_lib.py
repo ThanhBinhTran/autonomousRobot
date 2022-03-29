@@ -7,7 +7,8 @@ import matplotlib.image as mpimg
 from matplotlib.collections import PatchCollection
 
 from Plot_base_lib import Plot_base
- 
+from Graph import Graph
+
 class Plot_robot(Plot_base):
     def __init__(self, size=(6,6), title="Path Planning Problem for an Autonomous Robot"):
         super().__init__(size, title)
@@ -62,7 +63,8 @@ class Plot_robot(Plot_base):
     def show_configuration_space(self, config_space: list):
         self.polygons(config_space, ls = ls_cspace)
         
-    def visibility_graph(self, visibility_graph, ls_vg):
+    def visibility_graph(self, graph: Graph , ls_vg):
+        visibility_graph = graph.graph
         for pnode in visibility_graph:
             for verteces in visibility_graph[pnode]:
                 self.line_segment([pnode, verteces], ls_vg)
@@ -116,6 +118,7 @@ class Plot_robot(Plot_base):
         if show_local_openpt and len(Robot.local_open_pts) > 0:
             self.points(Robot.local_open_pts, ls_lopt)
         
+        # ranking points
         if show_active_openpt and len(Robot.global_active_open_rank_pts) > 0:
             self.point_colors(Robot.global_active_open_rank_pts, Robot.global_active_open_rank_pts[:,2])
         

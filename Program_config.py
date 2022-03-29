@@ -14,7 +14,7 @@ show_circleRange = False
 show_sketelonPath = True
 show_approximately_shortest_path = True
 show_critical_line_segments = True
-show_cls_orderednumber = True  # show ordered number of critical line segments
+show_cls_orderednumber = False  # show ordered number of critical line segments
 
 show_visitedPath = True
 show_visibilityGraph = True
@@ -85,7 +85,7 @@ ls_node_active = "or"
 ################################################
 # instead of show plot, saving image
 ################################################
-easy_experiment = True
+easy_experiment = False
 save_image = True       # set easy_experiment = True to enable save_image
 g_strategy = "global"     # pick on open point global set
 l_strategy = "local"     # pick on open point local set first, if not exist go for global
