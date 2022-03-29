@@ -56,7 +56,7 @@ class Node:
 ''' Tree class '''
 class Tree:
     """ Tree class for generating final path """
-    def __init__(self, root):
+    def __init__(self, root: Node):
         self.root   = root
         self.dict   = {root.coords: self.root}
 
@@ -159,6 +159,12 @@ class Tree:
         for child in node.children:
             self.printTree(child, depth+1)
     
+    # return the root of subtree from node
+    def find_root(self, node: Node):
+        while(node.parent is not None):
+            node = node.parent
+        return node
+
     def rewire(self, new_node, neighbour_nodes):
         if new_node is None:
             return None

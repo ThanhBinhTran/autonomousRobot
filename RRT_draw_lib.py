@@ -55,4 +55,4 @@ class Plot_RRT(Plot_base):
         self.goal(goal_coords, reach_goal, None)
         self.start(start_coords)
         self.path(path)
-        self.pause(0.0000000001)
+        self.pause(0.1)

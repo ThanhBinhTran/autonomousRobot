@@ -11,7 +11,7 @@ from Obstacles import Obstacles
 class RRTree(Tree):
 
     """ RRTree class from Tree class """
-    def __init__(self, root, step_size = 5, radius=5, random_area=(0, 100), sample_size = 100):
+    def __init__(self, root: Node, step_size = 5, radius=5, random_area=(0, 100), sample_size = 100):
         super().__init__(root)
         self.step_size = step_size
         self.radius = radius
