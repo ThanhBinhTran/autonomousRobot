@@ -489,6 +489,10 @@ def ray_tracing_method(x,y,poly):
 
 
 ''' prepare name figure '''
-def set_image_name(range, start, goal, strategy):
-    return "start_{0}_{1}_goal_{2}_{3}_range_{4}_strategy_{5}".format(
-        start[0],start[1], goal[0],goal[1], range, strategy)
+def set_figure_name(range=0, start=0, goal=0, strategy=0, ranking_function=0, fig_type= None):
+    if fig_type == ".png":
+        return "start_{0}_{1}_goal_{2}_{3}_{4}_range_{5}_strategy_{6}.png".format(
+            start[0],start[1], goal[0],goal[1], ranking_function, range, strategy)
+    else:
+        return "start_{0}_{1}_goal_{2}_{3}_{4}_range_{5}_strategy_{6}".format(
+            start[0],start[1], goal[0],goal[1], ranking_function, range, strategy)

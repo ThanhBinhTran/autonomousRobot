@@ -85,7 +85,7 @@ ls_node_active = "or"
 ################################################
 # instead of show plot, saving image
 ################################################
-easy_experiment = False
+easy_experiment = True
 save_image = True       # set easy_experiment = True to enable save_image
 g_strategy = "global"     # pick on open point global set
 l_strategy = "local"     # pick on open point local set first, if not exist go for global

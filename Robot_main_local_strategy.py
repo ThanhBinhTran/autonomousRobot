@@ -10,15 +10,17 @@ from Robot_draw_lib import Plot_robot
 from Robot_sight_lib import *
 from Obstacles import *
 from Program_config import *
-from Robot_ranking import Ranker
+from Robot_ranking import Ranker, Ranking_function
 from Robot import Robot
 from Robot_base import RobotType
 import argparse
 
-def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius):
+def robot_main( start, goal, map_name, world_name, num_iter, 
+                robot_vision, robot_type, robot_radius, 
+                ranking_function =Ranking_function.angular_similarity):
     
     robot = Robot(start, robot_vision, robot_type, robot_radius)
-    ranker = Ranker(alpha=0.9, beta= 0.1)
+    ranker = Ranker(alpha=0.9, beta= 0.1, ranking_function=ranking_function)
 
     # declare potter
     plotter = Plot_robot(title="Path Planning for Autonomous Robot: {0}".format(map_name))
@@ -101,8 +103,6 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
         
         robot.print_infomation()
-        # debug ------------------------------------
-        robot.visibility_graph.get_all_non_leaf()
         # Run n times for debugging
         if  iter_count == num_iter:
             break
@@ -119,7 +119,8 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
         # showing the final result (for save image and display as well)
         plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
-        fig_name = set_image_name(range=robot.vision_range, start=start, goal=goal, strategy=l_strategy)
+        fig_name = set_figure_name(range=robot.vision_range, start=start, goal=goal, 
+            strategy=l_strategy, ranking_function=ranking_function)
         plotter.save_figure(fig_name, file_extension=".png")
         plotter.save_figure(fig_name, file_extension=".pdf")
         print ("Saved: {0}.pdf".format(fig_name))
