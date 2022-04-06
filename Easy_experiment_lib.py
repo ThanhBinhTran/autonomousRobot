@@ -3,56 +3,30 @@ autonomousRobot
 This project is to simulate an autonomousRobot that try to find a way to reach a goal (target)
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.com
 """
+from email.policy import default
 import os
 import cv2
-import csv
 import numpy as np
-import pandas as pd
 import argparse
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction import img_to_graph
-from Robot_lib import set_image_name
+from Robot_lib import set_figure_name
 from Program_config import *
+from Result_log import Result_Log
 
-class Experimental_Result:
-    def __init__(self) -> None:
-        self.start = []
-        self.goal = []
-        self.range = []
-        self.global_path_cost = []
-        self.local_path_cost = []
-        self.global_reach_goal = []
-        self.local_reach_goal = []
-        self.header = ["start","goal","range","global_reached_goal","global_cost","local_reached_goal","local_cost"]
+from enum import Enum
+class Experiment_type(Enum):
+    COMPARE_LOCAL_GLOBAL = 0
+    COMPARE_RANKING_FUNCTION = 1
+
+class Experimental_Result(Result_Log):
+    def __init__(self, header_csv = ["start","goal", "range","global_reached_goal","global_cost","local_reached_goal","local_cost"]):
+        super().__init__(header_csv = header_csv)
     
-    ''' save result in to list '''
-    def record_result(self, s, g, r, gpc, lpc, grg, lrg):
-        self.start.append(s)
-        self.goal.append(g)
-        self.range.append(r)
-        self.global_path_cost.append(gpc)
-        self.local_path_cost.append(lpc)
-        self.global_reach_goal.append(grg)
-        self.local_reach_goal.append(lrg)
-    
-    ''' set header '''
-    def set_header (self, header_title):
-        self.header = header_title
-
-    ''' write result to csv file '''
-    def write_csv(self, file_name):
-        f = open(file_name, 'w', newline='', encoding="utf-8")
-        writer = csv.writer(f, delimiter=",")
-        writer.writerow(self.header)
-        for s,g,r,grg,gpc,lrg,lpc in zip(self.start, self.goal, self.range, self.global_reach_goal,
-            self.global_path_cost,self.local_reach_goal, self.local_path_cost):
-            writer.writerow([s,g,r,grg,gpc,lrg,lpc])
-        f.close()
-
     ''' visualizate result from result file '''
     def result_plot(self, result_file):
         # read result as frame
-        result_data = pd.read_csv(result_file)
+        result_data = self.read_csv_as_dataframe(result_file=result_file)
 
         #get unique vaule of start and goal
         goal_unique_values = result_data["goal"].unique()
@@ -99,49 +73,67 @@ class Experimental_Result:
             group.plot(ax=ax, kind='scatter', x='range', y='local_cost', color=colors_marker[key])
     
     ''' read image then note onto it '''
-    def image_text(self, img_name, strategy, start, goal, vision_range):
+    def image_text(self, img_name, title, start, goal, vision_range):
         # image read
         img = cv2.imread(img_name)
             
         # add note
-        note = "{0}: start {1}, goal {2}, range {3}".format(strategy, start, goal, vision_range)
-        return cv2.putText(img, note, org=(50, 80), fontFace=cv2.FONT_HERSHEY_SIMPLEX, 
+        note = "{0}, s {1} -> g {2}, range {3}".format(title, start, goal, vision_range)
+        return cv2.putText(img, note, org=(20, 80), fontFace=cv2.FONT_HERSHEY_SIMPLEX, 
                    fontScale=1, color=(255, 0, 0), thickness=2)
 
     ''' put all images of start and goal into some bigger images for comparison '''
-    def compare_imgs(self, start, goal, range_list):
+    def compare_imgs(self, start, goal, range_list, experiment_type: Experiment_type, 
+                    robotA_ranking_function, robotB_ranking_function):
 
         # group all images of start and goal into arrays of images
-        row_lim = 5        # image row limmited by 10
+        row_lim = 10        # image row limmited by 10
         images_array = []
         imgs_array = []
         i = 0
         for vision_range in range_list:
-            file_name_g = set_image_name(range=vision_range, start=start, goal=goal, strategy=g_strategy)
-            file_name_l = set_image_name(range=vision_range, start=start, goal=goal, strategy=l_strategy)
-            file_name_g += ".png"
-            file_name_l += ".png"
             # read images, add text note
-            g_img = self.image_text(file_name_g, "global", start, goal, vision_range)
-            l_img = self.image_text(file_name_l, "local", start, goal, vision_range)
+            if experiment_type == Experiment_type.COMPARE_RANKING_FUNCTION:
+                image_name_A = set_figure_name(range=vision_range, start=start, goal=goal, fig_type=".png",
+                                            strategy=g_strategy, ranking_function=robotA_ranking_function)
+                image_name_B = set_figure_name(range=vision_range, start=start, goal=goal, fig_type=".png",
+                                            strategy=g_strategy, ranking_function=robotB_ranking_function)
+                img_A = self.image_text(image_name_A, "ranking:linear", start, goal, vision_range)
+                img_B = self.image_text(image_name_B, "ranking:cosin", start, goal, vision_range)
+            
+            else:   # default compare global and local 
+                image_name_A = set_figure_name(range=vision_range, start=start, goal=goal, fig_type=".png",
+                                            strategy=g_strategy, ranking_function=robotA_ranking_function)
+                image_name_B = set_figure_name(range=vision_range, start=start, goal=goal, fig_type=".png",
+                                            strategy=l_strategy, ranking_function=robotB_ranking_function)
+                img_A = self.image_text(image_name_A, "global", start, goal, vision_range)
+                img_B = self.image_text(image_name_B, "local", start, goal, vision_range)
 
-            imgs_array.append([g_img, l_img])
+            imgs_array.append([img_A, img_B])
             if ((i+1) %row_lim == 0) or (i == len(range_list)-1): # each big_image contains 2*10 imgs
 
                 images_array.append(imgs_array)
                 imgs_array = []
             
             # clean up dispace space
-            os.remove(file_name_g) 
-            os.remove(file_name_l)
+            os.remove(image_name_A) 
+            os.remove(image_name_B)
             i = i + 1
         
         # compositing image arrays into bigger ones
         i = 0
         for imgs_array in images_array:
 
-            imgStack = self.stack_images(1, imgs_array)
-            imgStack_name = "compare_start_{0}_{1}_goal_{2}_{3}_part{4}.png".format(start[0], start[1], 
+            imgStack = self.stack_images(scale=1, imgArray=imgs_array)
+            # read images, add text note
+            if experiment_type == Experiment_type.COMPARE_LOCAL_GLOBAL:
+                imgStack_name = "compare_local_global_start_{0}_{1}_goal_{2}_{3}_part{4}.png".format(start[0], start[1], 
+                    goal[0],goal[1], i)
+            elif experiment_type == Experiment_type.COMPARE_RANKING_FUNCTION:
+                imgStack_name = "compare_ranking_function_{0}_{1}_goal_{2}_{3}_part{4}.png".format(start[0], start[1], 
+                    goal[0],goal[1], i)
+            else:   # default
+                imgStack_name = "compare_start_{0}_{1}_goal_{2}_{3}_part{4}.png".format(start[0], start[1], 
                     goal[0],goal[1], i)
             cv2.imwrite(imgStack_name, imgStack)
             i += 1
