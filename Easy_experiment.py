@@ -39,8 +39,8 @@ if __name__ == '__main__':
     start_list.append ((0,0))
 
     goal_list = []
-    #goal_list.append ((50,50))
-    goal_list.append ((100,100))
+    goal_list.append ((50,50))
+    #goal_list.append ((100,100))
 
 
 
@@ -55,13 +55,16 @@ if __name__ == '__main__':
     experiment_type= Experiment_type.COMPARE_LOCAL_GLOBAL
     #experiment_type= Experiment_type.COMPARE_RANKING_FUNCTION
 
-    robotA_ranking_function = Ranking_function.angular_similarity
-    robotB_ranking_function = Ranking_function.consine_similarity
+    robotA_ranking_function = Ranking_function.Angular_similarity
+    robotB_ranking_function = Ranking_function.Cosine_similarity
+    robotB_ranking_function = Ranking_function.Angular_similarity
 
     range_step = 5
-    range_max = 1
-    range_begin = 30
+    range_max = 80
+    range_begin = 20
 
+    print ("\n{0}, RobotA: {1}, RobotB {2}".format(experiment_type, 
+                    robotA_ranking_function, robotB_ranking_function ))
     for s in start_list:
         start = s
         for g in goal_list:
@@ -69,30 +72,23 @@ if __name__ == '__main__':
 
             range_experiment_list = []
 
-            for i in range (range_max):
+            for i in range (int ((range_max-range_begin)/range_step)):
                 vision_range = range_begin + range_step*i
                 range_experiment_list.append(vision_range)
 
-                print("Robot is reaching to goal: {0} from start: {1}, vision range: {2}".format(goal, start, vision_range))
-                # if compare local vs global pick strategy
-                if experiment_type == Experiment_type.COMPARE_LOCAL_GLOBAL:
-                    robotA = robot_global_ranking_first(start, goal, map_name, world_name, 
-                            num_iter, vision_range, robot_type, robot_radius, robotA_ranking_function)
-                    robotB = robot_local_ranking_first(start, goal, map_name, world_name, 
-                            num_iter, vision_range, robot_type, robot_radius, robotB_ranking_function)
-                
+                print("\nStart: {0} --> goal: {1}, range: {2}".format(start, goal, vision_range))
                 # compare ranking function
-                elif experiment_type == Experiment_type.COMPARE_RANKING_FUNCTION:
+                if experiment_type == Experiment_type.COMPARE_RANKING_FUNCTION:
                     robotA = robot_global_ranking_first(start, goal, map_name, world_name, 
                             num_iter, vision_range, robot_type, robot_radius, robotA_ranking_function)
                     robotB = robot_global_ranking_first(start, goal, map_name, world_name, 
                             num_iter, vision_range, robot_type, robot_radius, robotB_ranking_function)
                 
-                else:   # compare local and global is default
+                else:   # compare local vs global pick strategy is default
                     robotA = robot_global_ranking_first(start, goal, map_name, world_name, 
-                            num_iter, vision_range, robot_type, robot_radius)
+                            num_iter, vision_range, robot_type, robot_radius, robotA_ranking_function)
                     robotB = robot_local_ranking_first(start, goal, map_name, world_name, 
-                            num_iter, vision_range, robot_type, robot_radius)
+                            num_iter, vision_range, robot_type, robot_radius, robotB_ranking_function)
 
                 # Log the result, careful with the data order (start, goal, vision....)
                 result.add_result([start, goal, vision_range, 
