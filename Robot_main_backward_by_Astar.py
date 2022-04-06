@@ -166,10 +166,12 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
         print ("Saved: {0}.pdf".format(fig_name))
 
     # log time and past cost
-    if len(experiment_results) > 0:
-        result_file= "result_Astar_ASP{0}.csv".format(datetime.now().strftime("%m_%d_%H_%M_%S") )
+    if len(experiment_results.results_data) > 0:
+        result_file= "result_Astar_ASP_{0}.csv".format(datetime.now().strftime("%m_%d_%H_%M_%S") )
         experiment_results.write_csv(file_name=result_file)
-
+        print ("saved: {0}".format(result_file))
+        print ("\nTo visualize the result run:\n" +
+              "python Robot_main_backward_by_Astar_ASP_plot.py -r {0}".format(result_file))
     return robot
     
 

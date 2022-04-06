@@ -17,7 +17,7 @@ import argparse
 
 def robot_main( start, goal, map_name, world_name, num_iter, 
                 robot_vision, robot_type, robot_radius, 
-                ranking_function =Ranking_function.angular_similarity):
+                ranking_function =Ranking_function.Angular_similarity):
     
     robot = Robot(start, robot_vision, robot_type, robot_radius)
     ranker = Ranker(alpha=0.9, beta= 0.1, ranking_function=ranking_function)
@@ -151,6 +151,6 @@ if __name__ == '__main__':
     robot_vision = menu_result.r
     robot_type = RobotType.circle
 
-    ranking_function =Ranking_function.consine_similarity
+    ranking_function =Ranking_function.Cosine_similarity
     # run robot
     robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius)

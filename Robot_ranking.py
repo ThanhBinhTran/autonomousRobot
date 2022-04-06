@@ -8,11 +8,11 @@ from Robot_lib import *
 
 from enum import Enum
 class Ranking_function(Enum):
-    angular_similarity = 0
-    consine_similarity = 1
+    Angular_similarity = 0
+    Cosine_similarity = 1
 
 class Ranker:
-    def __init__(self, alpha = 0.9, beta = 0.1, ranking_function =Ranking_function.angular_similarity) :
+    def __init__(self, alpha = 0.9, beta = 0.1, ranking_function =Ranking_function.Angular_similarity) :
         self.alpha = alpha
         self.beta = beta
         self.ranking_function = ranking_function
@@ -47,8 +47,8 @@ class Ranker:
         return score
 
     ''' score function'''
-    def score_function(self, angle=math.pi/2, distance= 1, ranking_function = Ranking_function.angular_similarity):
-        if ranking_function == Ranking_function.consine_similarity:
+    def score_function(self, angle=math.pi/2, distance= 1, ranking_function = Ranking_function.Angular_similarity):
+        if ranking_function == Ranking_function.Cosine_similarity:
             return self.consine_similarity_score(angle=angle, distance=distance)
         else:
             return self.angular_similarity_score(angle=angle, distance=distance)
