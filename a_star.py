@@ -11,8 +11,6 @@ See Wikipedia article (https://en.wikipedia.org/wiki/A*_search_algorithm)
 
 import math
 
-import matplotlib.pyplot as plt
-
 show_animation = False
 
 
@@ -48,7 +46,7 @@ class AStarPlanner:
             return str(self.x) + "," + str(self.y) + "," + str(
                 self.cost) + "," + str(self.parent_index)
 
-    def planning(self, sx, sy, gx, gy):
+    def planning(self, sx, sy, gx, gy, plt):
         """
         A star path search
 
@@ -224,9 +222,7 @@ class AStarPlanner:
         return motion
 
 
-def main(start, goal, ox, oy, robot_radius):
-    print(__file__ + " start!!")
-
+def main(start, goal, ox, oy, robot_radius, plt):
     # start and goal position
     sx, sy = start
     gx, gy = goal  # [m]
@@ -238,14 +234,13 @@ def main(start, goal, ox, oy, robot_radius):
         plt.plot(gx, gy, "xb")
         plt.grid(True)
         plt.axis("equal")
-
+        
     a_star = AStarPlanner(ox, oy, grid_size, robot_radius)
-    rx, ry = a_star.planning(sx, sy, gx, gy)
+    rx, ry = a_star.planning(sx, sy, gx, gy, plt)
 
     if show_animation:  # pragma: no cover
         plt.plot(rx, ry, "-r")
         plt.pause(0.001)
-        plt.show()
     asp_Astar = []
     for x,y in zip (rx,ry):
         asp_Astar.append((x,y))
