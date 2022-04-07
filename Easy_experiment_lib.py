@@ -83,7 +83,7 @@ class Experimental_Result(Result_Log):
                    fontScale=1, color=(255, 0, 0), thickness=2)
 
     ''' put all images of start and goal into some bigger images for comparison '''
-    def compare_imgs(self, start, goal, range_list, experiment_type: Experiment_type, 
+    def compare_imgs(self, map_name, start, goal, range_list, experiment_type: Experiment_type, 
                     robotA_ranking_function, robotB_ranking_function):
 
         # group all images of start and goal into arrays of images
@@ -94,18 +94,18 @@ class Experimental_Result(Result_Log):
         for vision_range in range_list:
             # read images, add text note
             if experiment_type == Experiment_type.COMPARE_RANKING_FUNCTION:
-                image_name_A = set_figure_name(range=vision_range, start=start, goal=goal, fig_type=".png",
-                                            strategy=g_strategy, ranking_function=robotA_ranking_function)
-                image_name_B = set_figure_name(range=vision_range, start=start, goal=goal, fig_type=".png",
-                                            strategy=g_strategy, ranking_function=robotB_ranking_function)
-                img_A = self.image_text(image_name_A, "ranking:linear", start, goal, vision_range)
-                img_B = self.image_text(image_name_B, "ranking:cosin", start, goal, vision_range)
+                image_name_A = set_figure_name(map_name= map_name, range=vision_range, start=start, 
+                    goal=goal, fig_type=".png",strategy=g_strategy, ranking_function=robotA_ranking_function)
+                image_name_B = set_figure_name(map_name= map_name, range=vision_range, start=start, 
+                    goal=goal, fig_type=".png", strategy=g_strategy, ranking_function=robotB_ranking_function)
+                img_A = self.image_text(image_name_A, "rank_linear", start, goal, vision_range)
+                img_B = self.image_text(image_name_B, "rank_cosin", start, goal, vision_range)
             
             else:   # default compare global and local 
-                image_name_A = set_figure_name(range=vision_range, start=start, goal=goal, fig_type=".png",
-                                            strategy=g_strategy, ranking_function=robotA_ranking_function)
-                image_name_B = set_figure_name(range=vision_range, start=start, goal=goal, fig_type=".png",
-                                            strategy=l_strategy, ranking_function=robotB_ranking_function)
+                image_name_A = set_figure_name(map_name= map_name, range=vision_range, start=start, 
+                    goal=goal, fig_type=".png",strategy=g_strategy, ranking_function=robotA_ranking_function)
+                image_name_B = set_figure_name(map_name= map_name, range=vision_range, start=start, 
+                    goal=goal, fig_type=".png", strategy=l_strategy, ranking_function=robotB_ranking_function)
                 img_A = self.image_text(image_name_A, "global", start, goal, vision_range)
                 img_B = self.image_text(image_name_B, "local", start, goal, vision_range)
 
@@ -126,15 +126,13 @@ class Experimental_Result(Result_Log):
 
             imgStack = self.stack_images(scale=1, imgArray=imgs_array)
             # read images, add text note
+            start_goal_name = "start_{0}_{1}_goal_{2}_{3}_part{4}.png".format(start[0], start[1], goal[0],goal[1], i)
             if experiment_type == Experiment_type.COMPARE_LOCAL_GLOBAL:
-                imgStack_name = "compare_local_global_start_{0}_{1}_goal_{2}_{3}_part{4}.png".format(start[0], start[1], 
-                    goal[0],goal[1], i)
+                imgStack_name = "compare_{0}_local_global_".format(map_name) + start_goal_name
             elif experiment_type == Experiment_type.COMPARE_RANKING_FUNCTION:
-                imgStack_name = "compare_ranking_function_{0}_{1}_goal_{2}_{3}_part{4}.png".format(start[0], start[1], 
-                    goal[0],goal[1], i)
+                imgStack_name = "compare_{0}_ranking_function_".format(map_name) + start_goal_name
             else:   # default
-                imgStack_name = "compare_start_{0}_{1}_goal_{2}_{3}_part{4}.png".format(start[0], start[1], 
-                    goal[0],goal[1], i)
+                imgStack_name = "compare_{0}_".format(map_name) + start_goal_name
             cv2.imwrite(imgStack_name, imgStack)
             i += 1
 
@@ -155,7 +153,6 @@ class Experimental_Result(Result_Log):
                     if len(imgArray[x][y].shape) == 2: imgArray[x][y]= cv2.cvtColor( imgArray[x][y], cv2.COLOR_GRAY2BGR)
             imageBlank = np.zeros((height, width, 3), np.uint8)
             hor = [imageBlank]*rows
-            hor_con = [imageBlank]*rows
             for x in range(0, rows):
                 hor[x] = np.hstack(imgArray[x])
             ver = np.vstack(hor)

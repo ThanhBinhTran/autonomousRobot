@@ -60,7 +60,7 @@ if __name__ == '__main__':
     robotB_ranking_function = Ranking_function.Angular_similarity
 
     range_step = 5
-    range_max = 80
+    range_max = 26
     range_begin = 20
 
     print ("\n{0}, RobotA: {1}, RobotB {2}".format(experiment_type, 
@@ -97,23 +97,25 @@ if __name__ == '__main__':
             
             # composite images for easy to analyze
             if save_image:
-                result.compare_imgs(start, goal, range_experiment_list, 
-                    experiment_type, robotA_ranking_function, robotB_ranking_function)
+                result.compare_imgs(map_name= map_name, start=start, goal=goal, 
+                    range_list= range_experiment_list, experiment_type= experiment_type, 
+                    robotA_ranking_function= robotA_ranking_function, 
+                    robotB_ranking_function= robotB_ranking_function)
 
     # write log file
     if experiment_type == Experiment_type.COMPARE_LOCAL_GLOBAL:
         result.set_header(["start","goal", "range",
                 "global_reached_goal","global_cost","local_reached_goal","local_cost"])
-        result_file= "result_local_global_{0}.csv".format(datetime.now().strftime("%m_%d_%H_%M_%S") )
+        result_file= "result_{0}_local_global_{1}.csv".format(map_name, datetime.now().strftime("%m_%d_%H_%M_%S") )
 
     elif experiment_type == Experiment_type.COMPARE_RANKING_FUNCTION:
         result.set_header(["start","goal", "range",
             "reached_goal_ranking_function_1","cost_ranking_function_1",
             "reached_goal_ranking_function_2","cost_ranking_function_2"])
-        result_file= "result_ranking_{0}.csv".format(datetime.now().strftime("%m_%d_%H_%M_%S") )
+        result_file= "result_{0}_ranking_{1}.csv".format(map_name, datetime.now().strftime("%m_%d_%H_%M_%S") )
 
     else:
-        result_file= "result_{0}.csv".format(datetime.now().strftime("%m_%d_%H_%M_%S") )
+        result_file= "result_{0}_{1}.csv".format(map_name, datetime.now().strftime("%m_%d_%H_%M_%S") )
 
     result.write_csv(file_name=result_file)
     
