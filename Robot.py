@@ -18,22 +18,18 @@ class Robot(Robot_base):
         self.local_active_open_pts = []     # local active open point
         self.local_active_open_rank_pts = []     # local active open point and its ranking
         self.global_active_open_rank_pts = []    # global active open points and its ranking
-        self.next_point = []                # next point where robot move to
 
-        self.traversal_sights = []          # hold traversal sights that robot visited
-        self.visited_path = []              # path that robot visited
+        self.traversal_sights = []          # hold traversal sights where robot visited
+        self.visited_path = []              # path where robot visited
         self.visited_path_direction = []    # status of visited subpath, true = forward, false = backward
 
-        # visibility Graph which contains information of visited places
+        # visibility Graph containing information of visited places
         self.visibility_graph = Graph()
     def is_no_way_to_goal(self, noway):
         self.no_way_to_goal = noway
 
     def update_coordinate(self, coords):
         self.coordinate = coords
-
-    def clear_next_point(self):
-        self.next_point = []
 
     def update_coordinate(self, point):
         self.coordinate = point
@@ -44,7 +40,7 @@ class Robot(Robot_base):
     def expand_visited_path(self, path):
         '''
         set direction: true means robot goes forward (len (asp) ==2)
-                       false means robot back to explored area
+                       false means robot back to point in explored area
         '''
         self.visited_path.append(path)
 

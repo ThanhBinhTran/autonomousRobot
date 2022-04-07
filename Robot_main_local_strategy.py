@@ -119,8 +119,8 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         # showing the final result (for save image and display as well)
         plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
-        fig_name = set_figure_name(range=robot.vision_range, start=start, goal=goal, 
-            strategy=l_strategy, ranking_function=ranking_function)
+        fig_name = set_figure_name(map_name=map_name, range=robot.vision_range, start=start, 
+            goal=goal, strategy=l_strategy, ranking_function=ranking_function)
         plotter.save_figure(fig_name, file_extension=".png")
         plotter.save_figure(fig_name, file_extension=".pdf")
         print ("Saved: {0}.pdf".format(fig_name))
