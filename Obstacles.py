@@ -6,8 +6,9 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
 
 import csv
 from Robot_world_lib import World
-from Robot_lib import *
+from Robot_math_lib import *
 
+FAR_POINT = (10000, 10000)
 class Obstacles:
     def __init__(self):
         self.obstacles = []     # list of obstacles
@@ -74,6 +75,19 @@ class Obstacles:
 
             obstacles_line_segments.append(line_segments)
         return obstacles_line_segments
+
+    ''' check collision: return true if the given point is inside obstracles '''
+    def check_point_collision(self, point, obstacles_line_segments):
+        lsA = (point, FAR_POINT)
+        for obstracle_lss in obstacles_line_segments:
+            pt_is_count = 0
+            for ls in obstracle_lss:
+                pt_is = line_across(ls, lsA)
+                if pt_is is not None:
+                    pt_is_count += 1
+            if pt_is_count%2 == 1: # the give point is inside
+                return True
+        return False
 
     ''' translate line segment by a vector '''
     def translate_line_segment(self, line_segment, vector):
