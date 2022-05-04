@@ -16,9 +16,9 @@ in certainly environment
 
 Example: 
 ```
-python Robot_main.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
-python Robot_main.py -n 0 -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
-python Robot_main.py -n 0 -w _world.png -sx 5 -sy 10 -gx 250 -gy 310 -r 40
+python Robot_run.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
+python Robot_run.py -n 0 -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
+python Robot_run.py -n 0 -w _world.png -sx 5 -sy 10 -gx 250 -gy 310 -r 40
 ```
 ##### To run demo for the the assumption of An and Hoai's Theory:
 ``` 
