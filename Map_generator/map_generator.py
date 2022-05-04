@@ -29,7 +29,7 @@ if __name__ == '__main__':
     obstacle_parts = args.n
     MAX_VERTICES = 10000 #Maximun number of vertices of a obstacle
     map_name = args.m
-    from_image = "_world.png"
+    from_image = args.img
     win_size = args.wsize
 
     # variable declaration
