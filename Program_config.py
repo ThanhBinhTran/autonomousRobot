@@ -74,13 +74,12 @@ ls_asp = "-m"  # approximately shortest path
 ls_cspace = "-r"  # configuration space
 
 ''' stype for RRTree'''
-ls_tree_node_active = ".b"         # tree's node
-ls_tree_node_inactive = ".k"
-ls_tree_edge = "-k"         # tree's edge
-ls_goal_path_edge = "-g"    # path to goal edge
-ls_goal_path_node = "1r"    # path to goal node
-ls_node_active = "or"
-
+ls_tree_node_active = ".b"      # tree's node (active)
+ls_tree_node_inactive = ".r"    # tree's node (inactive)
+ls_tree_node_visited = ".g"     # tree's node (visited)
+ls_tree_edge = "-k"             # tree's edge
+ls_goal_path_edge = "-g"        # path to goal edge
+ls_goal_path_node = "or"        # path to goal node
 
 ################################################
 # instead of show plot, saving image
