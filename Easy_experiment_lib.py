@@ -10,7 +10,7 @@ import numpy as np
 import argparse
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction import img_to_graph
-from Robot_lib import set_figure_name
+from Robot_math_lib import set_figure_name
 from Program_config import *
 from Result_log import Result_Log
 
@@ -33,22 +33,16 @@ class Experimental_Result(Result_Log):
         start_unique_values = result_data["start"].unique()
         
         # display all
-        #for s_value in start_unique_values:
-            #data_start = result_data[result_data["start"] == s_value]
-            #for g_value in goal_unique_values:
-            #g_value = goal_unique_values[0]
-            #data = data_start[result_data["goal"] == g_value]
-
-        s_value = start_unique_values[0]
-        g_value = goal_unique_values[0]
-        data_start = result_data[result_data["start"] == s_value]
-        data = data_start[result_data["goal"] == g_value]
-        self.draw_plot(data, s_value, g_value)
+        for s_value in start_unique_values:
+            data_start = result_data[result_data["start"] == s_value]
+            for g_value in goal_unique_values:
+                data = data_start[result_data["goal"] == g_value]
+                self.draw_plot(data, s_value, g_value)
         
-        plt.xlabel("vision range")
-        plt.ylabel("path length")
-        plt.legend(loc='upper left')
-        plt.show()
+                plt.xlabel("vision range")
+                plt.ylabel("path length")
+                plt.legend(loc='upper left')
+                plt.show()
 
     ''' draw plot '''
     def draw_plot(self, data, s_value, g_value):
