@@ -1,9 +1,10 @@
 from Robot_paths_lib import *
-from Robot_lib import *
+from Robot_math_lib import *
 from Robot_sight_lib import inside_local_true_sight, inside_global_true_sight
 from Robot_base import Robot_base, RobotType
 from Program_config import *
 from Graph import Graph
+
 class Robot(Robot_base):
     def __init__(self, start, vision_range=20, robot_type= RobotType.circle, robot_radius= 0.2):
         super().__init__(vision_range, robot_type, robot_radius)
@@ -14,7 +15,7 @@ class Robot(Robot_base):
         self.saw_goal = False               # True if robot saw goal
         self.no_way_to_goal = False         # True if there is no path to goal
         
-        self.local_open_pts = []            # local open point
+        #self.local_open_pts = []            # local open point
         self.local_active_open_pts = []     # local active open point
         self.local_active_open_rank_pts = []     # local active open point and its ranking
         self.global_active_open_rank_pts = []    # global active open points and its ranking
@@ -25,6 +26,7 @@ class Robot(Robot_base):
 
         # visibility Graph containing information of visited places
         self.visibility_graph = Graph()
+        
     def is_no_way_to_goal(self, noway):
         self.no_way_to_goal = noway
 

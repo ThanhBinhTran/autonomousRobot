@@ -4,27 +4,32 @@ This project is to simulate an autonomousRobot that try to find a way to reach a
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.com
 """
 
-from Robot_lib import *
+from Robot_math_lib import *
 from Robot_paths_lib import *
 from Robot_draw_lib import Plot_robot
 from Robot_sight_lib import *
 from Obstacles import *
 from Program_config import *
-from Robot_ranking import Ranker, Ranking_function
-from Robot import Robot
+from Robot_ranking import Ranker
+from Robot_class import Robot
 from Robot_base import RobotType
 import argparse
+from a_star import main as A_star_planner
+from Result_log import Result_Log
+import time
+from datetime import datetime
 
-def robot_main( start, goal, map_name, world_name, num_iter, 
-                robot_vision, robot_type, robot_radius, 
-                ranking_function =Ranking_function.Angular_similarity):
+def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius):
     
     robot = Robot(start, robot_vision, robot_type, robot_radius)
-    ranker = Ranker(alpha=0.9, beta= 0.1, ranking_function=ranking_function)
+    ranker = Ranker(alpha=0.9, beta= 0.1)
 
     # declare potter
     plotter = Plot_robot(title="Path Planning for Autonomous Robot: {0}".format(map_name))
     
+    # result records 
+    experiment_results = Result_Log(header_csv=["asp_time","asp_path_cost","Astar_time","Astar_path_cost"])
+
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
     obstacles.read(world_name, map_name)
@@ -32,10 +37,10 @@ def robot_main( start, goal, map_name, world_name, num_iter,
 
     # for display information
     iter_count = 0
-
     if not easy_experiment: # skip printing if running easy experiment
         print("\nRobot is reaching to goal: {0} from start {1}".format(goal, start))
-
+    # Astar _Paths
+    Astar_paths = []
     while True:
         iter_count += 1
         robot.update_coordinate(robot.next_coordinate)
@@ -82,11 +87,47 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         # record the path and sight
         robot.expand_traversal_sights(closed_sights, open_sights)
 
+        Astar_asp= []
+        # compare a start
+        if len(skeleton_path) > 2:
+            print ("____backward path:")
+            obstacles_Astar = []
+            #robot.visibility_graph.get_all_non_leaf()
+            visited_area = robot.visibility_graph.get_all_non_leaf()
+            for x,y in visited_area:
+                for i in range (int(x- robot_vision -3), int(x + robot_vision +3)):
+                    for j in range (int(y- robot_vision -3),int(y + robot_vision +3)):
+                        pt = (i,j)
+                        if not inside_global_true_sight(pt, robot_vision+1, robot.traversal_sights):
+                            if pt not in obstacles_Astar:
+                                obstacles_Astar.append(pt)
+            #for x,y in range ([center_area[0]-robot_v)
+            obstacles_x_Astar = []
+            obstacles_y_Astar = []
+            for ob in obstacles_Astar:
+                obstacles_x_Astar.append(ob[0])
+                obstacles_y_Astar.append(ob[1])
+            Astar_start_time = time.time()
+            Astar_asp = A_star_planner(start=skeleton_path[0], goal=skeleton_path[-1], ox=obstacles_x_Astar, 
+                oy=obstacles_y_Astar, robot_radius=robot.radius, plt= plotter.plt)
+            Astar_path_cost = path_cost(Astar_asp)
+            #print ("ASTART _PATHCOST= ", path_cost(Astar_asp))
+            Astar_end_time = time.time()
+        asp_start_time = time.time()
         asp, critical_ls = approximately_shortest_path(skeleton_path, robot.traversal_sights, robot.vision_range)
-
+        asp_end_time = time.time()
+        asp_path_cost = path_cost(asp)
+        #print ("Autonomous Robot _PATHCOST= ", path_cost(asp))
+        
+        if len(skeleton_path) == 2:
+            Astar_asp = skeleton_path
+        else:
+            Astar_time = Astar_end_time-Astar_start_time
+            asp_time = asp_end_time-asp_start_time
+            experiment_results.add_result([asp_time,asp_path_cost,Astar_time,Astar_path_cost])
         # mark visited path
         robot.expand_visited_path(asp)
-
+        Astar_paths.append(Astar_asp)
         # make a move from current position
         if not robot.no_way_to_goal:
             robot.next_coordinate = motion(robot.coordinate, next_point)  # simulate robot
@@ -94,16 +135,22 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         if show_animation:
             plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
+            if len(Astar_asp)>0:
+                plotter.path(Astar_asp, "-.b")
         
+        astart_cost = 0.0
+        for astar_path in Astar_paths:
+            astart_cost += path_cost(astar_path)
+        print ("COMPARE: our algorithms [path cost]", robot.calculate_traveled_path_cost())
+        print ("COMPARE: our algorithms (within Astar backward path)[path cost]", astart_cost)
         robot.print_infomation()
-
         # Run n times for debugging
         if  iter_count == num_iter:
             break
         
         if robot.finish():
             break
-    
+        
     if not easy_experiment: # skip printing and showing animation if running easy experiment
         print("Done")
         if show_animation:
@@ -113,12 +160,18 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         # showing the final result (for save image and display as well)
         plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
-        fig_name = set_figure_name(map_name=map_name, range=robot.vision_range, start=start, 
-            goal=goal, strategy=g_strategy, ranking_function=ranking_function)
+        fig_name = set_figure_name(range=robot.vision_range, start=start, goal=goal, strategy=g_strategy)
         plotter.save_figure(fig_name, file_extension=".png")
         plotter.save_figure(fig_name, file_extension=".pdf")
         print ("Saved: {0}.pdf".format(fig_name))
 
+    # log time and past cost
+    if len(experiment_results.results_data) > 0:
+        result_file= "result_Astar_ASP_{0}.csv".format(datetime.now().strftime("%m_%d_%H_%M_%S") )
+        experiment_results.write_csv(file_name=result_file)
+        print ("saved: {0}".format(result_file))
+        print ("\nTo visualize the result run:\n" +
+              "python Robot_main_backward_by_Astar_ASP_plot.py -r {0}".format(result_file))
     return robot
     
 
@@ -151,6 +204,5 @@ if __name__ == '__main__':
     robot_vision = menu_result.r
     robot_type = RobotType.circle
 
-    ranking_function =Ranking_function.Cosine_similarity
     # run robot
     robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius)

@@ -1,5 +1,5 @@
 import numpy as np
-from Robot_lib import *
+from Robot_math_lib import *
 
 def motion(current_position, next_pt):
     '''
@@ -98,9 +98,20 @@ def get_critical_ls(skeleton_path, traversal_sight, robot_vision):
 
         # if there is no local across line, create a fake across ls
         if len(local_ls) == 0:
-            midpt = get_middle_direction(c_pt, robot_vision, (pre_pt, post_pt))
-            midpt = get_disjoint_ls(c_pt, midpt, safe_radius)
-            local_ls.append([0, midpt, c_pt])
+            # if 3 point makes a straight line
+            if belong_line(c_pt, (pre_pt, post_pt)):
+                vector_c_pre = np.subtract(pre_pt,  c_pt )
+                vector_c_post = np.subtract(post_pt, c_pt)
+                ptA = rotate_vector(vector_c_pre, math.pi/2)
+                ptB = rotate_vector(vector_c_post, math.pi/2)
+                ptA = np.add(ptA, c_pt)
+                ptB = np.add(ptB, c_pt)
+                local_ls.append([0, ptA, ptB])
+
+            else:
+                midpt = get_middle_direction(c_pt, robot_vision, (pre_pt, post_pt))
+                midpt = get_disjoint_ls(c_pt, midpt, safe_radius)
+                local_ls.append([0, midpt, c_pt])
 
         critical_ls.extend(local_ls)
         #print("critical_ls ", critical_ls)

@@ -489,7 +489,9 @@ def ray_tracing_method(x,y,poly):
 
 
 ''' prepare name figure '''
-def set_figure_name(map_name = "", range=0, start=0, goal=0, strategy=0, ranking_function=0, fig_type= None):
+def set_figure_name(map_name: str = "", range=0, start=0, goal=0, strategy=0, ranking_function=0, fig_type= None):
+    if map_name.__contains__(".\\"):
+        map_name = map_name[2]
     return_name =   "map{0}".format(map_name) + \
                     "_start_{0}_{1}".format(start[0],start[1]) + \
                     "_goal_{0}_{1}".format(goal[0],goal[1]) + \

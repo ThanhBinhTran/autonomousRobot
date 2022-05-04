@@ -7,14 +7,14 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.
 import numpy as np
 from sklearn.metrics import top_k_accuracy_score
 
-from Robot_lib import *
+from Robot_math_lib import *
 from Robot_paths_lib import *
 from Robot_draw_lib import Plot_robot
 from Robot_sight_lib import *
 from Robot_map_lib import Map
 from Obstacles import *
 from Program_config import *
-from Robot import Robot, RobotType
+from Robot_class import Robot, RobotType
 from Robot_ranking import Ranker
 import argparse
 
@@ -70,14 +70,17 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
             
 
             # add new active open points to graph_insert
-            graph_add_lOpenPts(robot.visibility_graph, robot.coordinate, robot.local_active_open_pts)
+            # add new active open points to graph_insert
+            robot.visibility_graph.add_local_open_points(robot.coordinate, robot.local_active_open_pts)
+            #graph_add_lOpenPts(robot.visibility_graph, robot.coordinate, robot.local_active_open_pts)
 
             # pick next point to make a move
-            next_point, next_pt_idx = robot.pick_next_point(robot.global_active_open_rank_pts)
+            next_point, next_pt_idx = robot.pick_next_point(robot.global_active_open_rank_pts, goal)
 
             if next_point is not None:
                 # find the shortest skeleton path from current position (center) to next point
-                skeleton_path = BFS_skeleton_path(robot.visibility_graph, robot.coordinate, tuple(next_point))
+                skeleton_path = robot.visibility_graph.BFS_skeleton_path(robot.coordinate, tuple(next_point))
+                #skeleton_path = BFS_skeleton_path(robot.visibility_graph, robot.coordinate, tuple(next_point))
 
                 # then remove picked point from active global open point
                 robot.remove_global_active_pts_by_index(next_pt_idx)
@@ -182,21 +185,16 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
             plotter.plt.pause(1)
 
 
+        robot.print_infomation()
+
         # Run n times for debugging
         if  iter_count == num_iter:
             break
-
-        # check reaching goal
-        if robot.reach_goal:
-            print("Goal!!")
-            break
-        if robot.no_way_to_goal:
-            print("No way to goal!!")
+        
+        if robot.finish():
             break
 
-    robot.print_visited_path()
     print("Done")
-
     plotter.show()
 
 

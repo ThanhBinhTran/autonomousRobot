@@ -1,6 +1,6 @@
 from Obstacles import Obstacles
-from Robot import Robot
-from Robot_lib import *
+
+from Robot_math_lib import *
 from Program_config import *
 from matplotlib import patches
 import matplotlib.image as mpimg
@@ -10,7 +10,7 @@ from Plot_base_lib import Plot_base
 from Graph import Graph
 
 class Plot_robot(Plot_base):
-    def __init__(self, size=(6,6), title="Path Planning Problem for an Autonomous Robot"):
+    def __init__(self, size=(7,7), title="Path Planning Problem for an Autonomous Robot"):
         super().__init__(size, title)
 
     def sight(self, center, pair, cl="g", alpha=transparent, linestyle=":"):
@@ -84,7 +84,7 @@ class Plot_robot(Plot_base):
             local_open_sights = local[2]  # open sight at local
             self.vision(local_center, vision_range, local_closed_sights, local_open_sights)
 
-    def show_animation(self, Robot: Robot, world_name, iter_count, obstacles:Obstacles , goal, 
+    def show_animation(self, Robot, world_name, iter_count, obstacles:Obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point):
 
         # clear plot
@@ -147,5 +147,52 @@ class Plot_robot(Plot_base):
         self.set_equal()
         self.show_grid()
         if not easy_experiment:         # skip pause if run easy_experiment
-            self.plt.pause(0.001)
-        
+            self.plt.pause(0.01)
+
+    ''' plot connection between 2 nodes'''
+    def connection(self, nodeA, nodeB, ls="-b"):
+        self.line_segment( (nodeA.coords, nodeB.coords), ls=ls)
+    
+    ''' plot edges from node to its children '''
+    def tree_edges(self, node, ls=ls_tree_edge):
+        for node_children in node.children:
+            self.line_segment( (node.coords, node_children.coords), ls)
+    
+    ''' plot a tree's node '''
+    def tree_node(self, node, ls_active=ls_tree_node_active, ls_inactive= ls_tree_node_inactive,\
+            ls_visited = ls_tree_node_visited):
+
+        if node.visited:
+            self.point(node.coords, ls=ls_visited)
+        elif node.active:
+            self.point(node.coords, ls=ls_active)
+        else:
+            self.point(node.coords, ls=ls_inactive)
+
+    ''' plot tree (all edges and vertices) from given node as tree's root '''
+    def tree(self, tree):
+        for node in tree.all_nodes():   # get all nodes
+            self.tree_edges(node)      # plot all edges between node and its children
+            self.tree_node(node)   # plot nodes
+
+    ''' plot all trees'node (ertices) from given node as tree's root '''
+    def tree_all_nodes(self, tree):
+        for node in tree.all_nodes():   # get all nodes
+            self.tree_node(node)   # plot nodes
+            self.text(node.coords, "{0:.2f}".format(node.rhs))
+
+    ''' plot all info ( number of iteration, cost, path, tree) '''
+    def animation(self, num_iter, cost, path, Tree, obstacles,  start_coords, goal_coords):
+        # prepare title
+        reach_goal = (cost > 0 and cost != float("inf") )
+        status_title = self.prepare_title(num_iter,cost)
+
+        # clear old one
+        self.clear()
+
+        # plot new one
+        self.show_map(world_name=None, obstacles=obstacles, plot_title=status_title)
+        self.tree(Tree)
+        self.goal(goal_coords, reach_goal, None)
+        self.start(start_coords)
+        self.pause(0.1)

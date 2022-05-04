@@ -1,19 +1,44 @@
-from Robot_lib import point_dist
+from tracemalloc import start
+from Robot_math_lib import point_dist
 import numpy as np
 
 ''' Node class '''
 class Node:
-    def __init__(self, coords=None):
+    def __init__(self, coords=None, cost=float('inf')):
         self.coords   = tuple(coords)
         self.children = []
         self.parent  = None
         self.active = True  # if inactive, it is eliminated from tree. 
-        self.cost = 0.0
+        self.rhs = 0.0      # rhs is a measurement which estimated from node to goal
+        self.cost = cost    # cost is a real cost from node to goal
+        self.visited = False
+        self.name = ""      # for debug
+    ''' set rhs '''
+    def set_rhs(self, x):
+        self.rhs = x
 
     ''' set cost '''
     def set_cost(self, x):
-        self.cost = x
-    
+        self.cost = x   
+
+    ''' set node name '''
+    def set_node_name(self, name):
+        self.name = name 
+
+    ''' update self rhs and all its children rhs (for rewiring) '''
+    def update_rhss(self):
+        self.rhs = self.parent.rhs + point_dist(self.parent.coords, self.coords)
+        [children_node.update_rhss() for children_node in self.children]
+
+    ''' update self cost and all its children costs (for rewiring) '''
+    def update_costs(self):
+        self.cost = self.parent.cost + point_dist(self.parent.coords, self.coords)
+        [children_node.update_costs() for children_node in self.children]
+
+    ''' set visited node '''
+    def set_visited(self):
+        self.visited = True
+
     ''' set inactive node, delete its parent and children as well '''
     def set_inactive(self):
         self.active = False
@@ -27,12 +52,7 @@ class Node:
             child_node.parent = None
         
         self.children.clear()
-
-
-    ''' update self cost and all its children costs (for rewiring) '''
-    def update_costs(self):
-        self.cost = self.parent.cost + point_dist(self.parent.coords, self.coords)
-        [children_node.update_costs() for children_node in self.children]
+        self.set_cost(float('inf'))
 
     def all_children(self):
         allChildren = []
@@ -52,7 +72,10 @@ class Node:
         self.parent = parents
     def remove_parents(self):
         self.parent = None
-
+    def print (self):
+        print ("Node coordinate:", self.coords)
+        print ("_Nodes' parents:", self.parent)
+        print ("_Nodes' children: ", self.children)
 ''' Tree class '''
 class Tree:
     """ Tree class for generating final path """
@@ -62,8 +85,8 @@ class Tree:
 
     def add_edge(self, parent_node, new_node):
         # calculate and set cost for new nodes.
-        cost = parent_node.cost + point_dist(parent_node.coords, new_node.coords)
-        new_node.set_cost(cost)
+        cost = parent_node.rhs + point_dist(parent_node.coords, new_node.coords)
+        new_node.set_rhs(cost)
 
         # link to parent and declare node in dicitonary
         new_node.parent = parent_node
@@ -89,16 +112,18 @@ class Tree:
         return all_Nodes_Coordinate
     
     ''' calculate cost from node to root'''
-    def cost(self, node):
-        return node.cost
+    def rhs(self, node):
+        return node.rhs
 
-    ''' calculate costs from nodes to tree's root '''
-    def costs(self, nodes):
-        return [node.cost for node in nodes]
+    ''' calculate rhs(s) from nodes to tree's root '''
+    def rhss(self, nodes):
+        return [node.rhs for node in nodes]
 
+    ''' update rhs node '''
+    ''' xxxxxxxxxxxx '''
     ''' calculate all costs from all tree's nodes to root'''
     def all_nodes_cost(self):
-        return [self.cost(node) for node in self.all_nodes()]
+        return [self.rhs(node) for node in self.all_nodes()]
     
     ''' calcualte distances among node and given tree's nodes '''
     def distances(self, node_coords, tree_nodes):
@@ -121,7 +146,7 @@ class Tree:
             return None
             
         # calculate all cost from random's neighbours tree's node to tree's root
-        n_costs = np.array(self.costs(neighbour_nodes))
+        n_costs = np.array(self.rhss(neighbour_nodes))
         # get distances from random node to all its neighbours
         n_dist = np.array(self.distances(node_coordinate, neighbour_nodes))
         # pick the closest neighbour
@@ -165,11 +190,21 @@ class Tree:
             node = node.parent
         return node
 
+    # return the root of subtree from node
+    def find_next(self, start_node: Node, nodes: np.array(Node) ):
+        node = start_node
+        path = []
+        path.append(node)
+        while (node.parent in nodes):
+            node = node.parent
+            path.append(node)
+        return node, path
+
     def rewire(self, new_node, neighbour_nodes):
         if new_node is None:
             return None
-        new_node_cost = self.cost(new_node)
-        old_costs = self.costs(neighbour_nodes)
+        new_node_cost = self.rhs(new_node)
+        old_costs = self.rhss(neighbour_nodes)
         neighbour_costs = self.distances(new_node.coords, neighbour_nodes)
         new_cost = np.array([new_node_cost]* len(neighbour_nodes)) + neighbour_costs
 
@@ -181,7 +216,7 @@ class Tree:
         for node in neighbour_nodes[is_rewire]:
             self.remove_edge(node.parent, node) # remove old parent, ALWAYS COME FIRST
             self.add_edge(new_node, node)   # connect to new parent
-            node.update_costs()
+            node.update_rhss()
             
         for node in neighbour_nodes[is_rewire]:
             self.remove_edge(node.parent, node) # remove old parent, ALWAYS COME FIRST

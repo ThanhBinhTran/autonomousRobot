@@ -4,7 +4,7 @@ import numpy as np
 from Tree import Node
 from RRTree import RRTree
 from RRT_draw_lib import Plot_RRT
-from Robot_lib import *
+from Robot_math_lib import *
 
 from RRT_user_input import menu_RRT
 from Program_config import *
@@ -15,6 +15,14 @@ class RRTree_x(RRTree):
     """ RRTree class from Tree class """
     def __init__(self, root:Node, step_size = 5, radius=5, random_area=(0, 100), sample_size = 100):
         super().__init__(root, step_size, radius, random_area, sample_size)
+
+    ''' get active nodes in neighnour area '''
+    def neighbour_active_nodes(self, node_coordinate, radius):
+        neighbour_active_nodes = []
+        neighbour_nodes = super().neighbour_nodes(node_coordinate, radius)
+        if not neighbour_nodes.inactive:
+            neighbour_active_nodes.append(neighbour_nodes)
+        return neighbour_active_nodes
 
     def build(self,  goal_node = None, plotter: Plot_RRT=None, obstacle=None):
         first_saw_goal = False
@@ -43,8 +51,7 @@ class RRTree_x(RRTree):
 
             if reach_goal:
                 cost, path_to_goal = self.path_to_root(goal_node)
-
-            ''' for display '''
+            show_animation = False
             if show_animation:
                 plotter.animation(i, cost, path_to_goal, self, obstacle, self.root.coords, goal_node.coords)
 
@@ -66,7 +73,7 @@ if __name__ == '__main__':
 
     ''' Running '''
     # set same window size to capture pictures
-    plotter = Plot_RRT(title="Rapidly-exploring Random Tree Star (RRT*)")
+    plotter = Plot_RRT(title="Rapidly-exploring Random Tree Star_X (RRT*_X)")
     plotter.set_equal()
 
     start_node = Node(start_cooridinate)
@@ -75,23 +82,42 @@ if __name__ == '__main__':
     obstacles = Obstacles()
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles.read(world_name, map_name)
-
+    obstacles_line_segments = obstacles.line_segments()
     RRTx = RRTree_x(root=goal_node, step_size=step_size, radius=radius, 
                     random_area=random_area, sample_size=sample_size)
-    #start_node, step_size, radius, random_area, sample_size)
     RRTx.build(goal_node=start_node,plotter=plotter,obstacle=obstacles)
+    RRTx.printTree(goal_node)
+    current_coorinate = start_cooridinate
+    visited_paths = []
 
-    fixed_point = 40,40
-    neighbour_nodes = RRTx.neighbour_nodes(node_coordinate=fixed_point, radius=radius)
-    if neighbour_nodes is not None:
-        [n_node.set_inactive() for n_node in neighbour_nodes]
-    plotter.clear()
-    plotter.tree(RRTx)
-    plotter.point_text(goal_coordinate, "*r", "goal")
-    plotter.point_text(start_cooridinate, "Hr", "start")
-    curent_robot_node = RRTx.find_root(start_node)
-    plotter.point_text(curent_robot_node.coords, "Hg", "im here")
+    for i in range (4):
+        neighbour_nodes = RRTx.neighbour_nodes(node_coordinate=current_coorinate, radius=radius)
+        if neighbour_nodes is not None:
+            for n_node in neighbour_nodes:
+                conllision = obstacles.check_point_collision(point=n_node.coords,\
+                                obstacles_line_segments=obstacles_line_segments)
+                #print (n_node.coords)
+                if conllision:
+                    n_node.set_inactive()
+                else:
+                    n_node.set_visited()
+                
+
+        plotter.clear()
+        plotter.tree(RRTx)
+        plotter.point_text(goal_coordinate, "*r", "goal")
+        plotter.point_text(start_cooridinate, "Hr", "start")
+        #curent_robot_node = RRTx.find_root(start_node)
+        curent_robot_node, path = RRTx.find_next(start_node, neighbour_nodes)
+        if len(path) > 1:
+            visited_paths.append(path)
+
+        plotter.point_text(curent_robot_node.coords, "Hc", "im here")
+        plotter.show_map(obstacles=obstacles)
+        plotter.paths(paths=visited_paths)
+        plotter.vision_area(current_coorinate, radius)
+        current_coorinate = curent_robot_node.coords
+        plotter.pause(3)
     
-    #plotter.show_map(obstacles=obstacles)
-    plotter.vision_area(fixed_point, radius)
     plotter.show()
+    

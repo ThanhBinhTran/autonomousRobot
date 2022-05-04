@@ -1,5 +1,6 @@
 from Plot_base_lib import Plot_base
 from Program_config import *
+from Tree import Node
 
 class Plot_RRT(Plot_base):
     def __init__(self, size=(7,7), title="Robotic Plotter"):
@@ -15,8 +16,12 @@ class Plot_RRT(Plot_base):
             self.line_segment( (node.coords, node_children.coords), ls)
     
     ''' plot a tree's node '''
-    def tree_node(self, node, ls_active=ls_tree_node_active, ls_inactive= ls_tree_node_inactive):
-        if node.active:
+    def tree_node(self, node:Node, ls_active=ls_tree_node_active, ls_inactive= ls_tree_node_inactive,\
+            ls_visited = ls_tree_node_visited):
+
+        if node.visited:
+            self.point(node.coords, ls=ls_visited)
+        elif node.active:
             self.point(node.coords, ls=ls_active)
         else:
             self.point(node.coords, ls=ls_inactive)
@@ -34,11 +39,11 @@ class Plot_RRT(Plot_base):
             nodeB = path[i+1]
             self.tree_node(nodeA, ls_node)
             self.connection(nodeA, nodeB, ls_edge)
-    
-    def nodes(self, nodes, ls=ls_node_active):
-        if nodes is not None:
-            for node in nodes:
-                self.tree_node(node, ls=ls)
+
+    ''' plot paths which contains many paths'''
+    def paths(self, paths, ls_node = ls_goal_path_node, ls_edge=ls_goal_path_edge):
+        for path in paths:
+            self.path(path, ls_node = ls_node, ls_edge=ls_edge)
 
     ''' plot all info ( number of iteration, cost, path, tree) '''
     def animation(self, num_iter, cost, path, Tree, obstacles,  start_coords, goal_coords):

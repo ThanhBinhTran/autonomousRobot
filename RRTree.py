@@ -2,7 +2,7 @@ import numpy as np
 
 from Tree import Tree, Node
 from RRT_draw_lib import Plot_RRT
-from Robot_lib import *
+from Robot_math_lib import *
 
 from RRT_user_input import menu_RRT
 from Program_config import *
@@ -90,8 +90,8 @@ class RRTree(Tree):
         return goal_node in self
         
 
-    def path_to_root(self, node):
-        cost = self.cost(node)
+    def path_to_root(self, node:Node):
+        cost = self.rhs(node)
         path = []
         path.append(node)
         while (node.parent): # loop whenever parent existed

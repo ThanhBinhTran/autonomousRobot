@@ -4,14 +4,14 @@ This project is to simulate an autonomousRobot that try to find a way to reach a
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.com
 """
 
-from Robot_lib import *
+from Robot_math_lib import *
 from Robot_paths_lib import *
 from Robot_draw_lib import Plot_robot
 from Robot_sight_lib import *
 from Obstacles import *
 from Program_config import *
 from Robot_ranking import Ranker, Ranking_function
-from Robot import Robot
+from Robot_class import Robot
 from Robot_base import RobotType
 import argparse
 
@@ -33,15 +33,13 @@ def robot_main( start, goal, map_name, world_name, num_iter,
     # for display information
     iter_count = 0
 
-    if not easy_experiment: # skip printing if running easy experiment
-        print("\nRobot is reaching to goal: {0} from start {1}".format(goal, start))
+    print("\nRobot is reaching to goal: {0} from start {1}".format(goal, start))
 
     while True:
         iter_count += 1
         robot.update_coordinate(robot.next_coordinate)
     
-        if not easy_experiment: # skip printing if running easy experiment
-            print("\n_number of iteration: {0}, current robot coordinate {1}".format(iter_count, robot.coordinate))
+        print("\n_number of iteration: {0}, current robot coordinate {1}".format(iter_count, robot.coordinate))
 
         # clean old data
         next_point = []
@@ -54,7 +52,6 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         robot.check_goal(goal, closed_sights)
         
         #robot.show_status()
-        len_global_ranking = len (robot.global_active_open_rank_pts)
         if not robot.saw_goal and not robot.reach_goal:
             # get local active point and its ranking
             robot.get_local_active_open_ranking_points(open_sights, ranker, goal)
@@ -66,13 +63,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             robot.visibility_graph.add_local_open_points(robot.coordinate, robot.local_active_open_pts)
         
         # pick next point to make a move
-        if len(robot.local_active_open_rank_pts) > 0:   # pick local first 
-            # pick next point to make a move
-            next_point, next_pt_idx = robot.pick_next_point(robot.local_active_open_rank_pts, goal)                
-        else:   # if no local point detected, consider global set.
-            len_global_ranking = 0
-            # pick next point to make a move
-            next_point, next_pt_idx = robot.pick_next_point(robot.global_active_open_rank_pts, goal)
+        next_point, next_pt_idx = robot.pick_next_point(robot.global_active_open_rank_pts, goal)
 
         if next_point is not None:
             # find the shortest skeleton path from current position (center) to next point
@@ -82,8 +73,9 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 skeleton_path = robot.visibility_graph.BFS_skeleton_path(robot.coordinate, tuple(next_point))
 
                 # then remove picked point from active global open point
-                robot.remove_global_active_pts_by_index(len_global_ranking + next_pt_idx)
+                robot.remove_global_active_pts_by_index(next_pt_idx)
         else:
+            skeleton_path = []
             robot.is_no_way_to_goal(True)
 
         # record the path and sight
@@ -103,6 +95,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
         
         robot.print_infomation()
+
         # Run n times for debugging
         if  iter_count == num_iter:
             break
@@ -120,7 +113,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
         fig_name = set_figure_name(map_name=map_name, range=robot.vision_range, start=start, 
-            goal=goal, strategy=l_strategy, ranking_function=ranking_function)
+            goal=goal, strategy=g_strategy, ranking_function=ranking_function)
         plotter.save_figure(fig_name, file_extension=".png")
         plotter.save_figure(fig_name, file_extension=".pdf")
         print ("Saved: {0}.pdf".format(fig_name))
@@ -157,5 +150,6 @@ if __name__ == '__main__':
     robot_vision = menu_result.r
     robot_type = RobotType.circle
 
+    ranking_function =Ranking_function.Cosine_similarity
     # run robot
     robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius)

@@ -16,8 +16,8 @@ class Plot_base:
         #self.plt.figure(title)
         self.fig.canvas.manager.set_window_title(title)
         #self.fig.canvas.set_window_title(title)
-        self.plt.xlim(0, 100)
-        self.plt.ylim(0, 100)
+        #self.plt.xlim(0, 100)
+        #self.plt.ylim(0, 100)
 
     show = lambda self: self.plt.show()
     pause = lambda self, x: self.plt.pause(x)

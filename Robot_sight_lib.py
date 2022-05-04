@@ -1,4 +1,4 @@
-from Robot_lib import *
+from Robot_math_lib import *
 from Robot_draw_lib import *
 from Program_config import *
 from Obstacles import Obstacles
