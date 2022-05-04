@@ -9,8 +9,8 @@ from datetime import datetime
 from Robot_base import RobotType
 from Robot_ranking import Ranking_function
 
-from Robot_main import robot_main as robot_global_ranking_first
-from Robot_main_local_strategy import robot_main as robot_local_ranking_first
+from Robot_run import robot_main as robot_global_ranking_first
+from Robot_run_local_strategy import robot_main as robot_local_ranking_first
 
 from Program_config import save_image
 from Easy_experiment_lib import Experimental_Result, Experiment_type
@@ -36,13 +36,15 @@ if __name__ == '__main__':
 
     # get start point and goal point
     start_list = []
-    start_list.append ((0,0))
 
     goal_list = []
+    # much more fun map
+    start_list.append ((0,0))
+    #start_list.append ((20,62))
+
     goal_list.append ((50,50))
-    #goal_list.append ((100,100))
-
-
+    goal_list.append ((45,65))
+    goal_list.append ((100,100))
 
     # run robot
     
@@ -52,15 +54,15 @@ if __name__ == '__main__':
 
     result = Experimental_Result()
     
-    experiment_type= Experiment_type.COMPARE_LOCAL_GLOBAL
-    #experiment_type= Experiment_type.COMPARE_RANKING_FUNCTION
+    #experiment_type= Experiment_type.COMPARE_LOCAL_GLOBAL
+    experiment_type= Experiment_type.COMPARE_RANKING_FUNCTION
 
     robotA_ranking_function = Ranking_function.Angular_similarity
     robotB_ranking_function = Ranking_function.Cosine_similarity
-    robotB_ranking_function = Ranking_function.Angular_similarity
+    #robotB_ranking_function = Ranking_function.Angular_similarity
 
     range_step = 5
-    range_max = 26
+    range_max = 80
     range_begin = 20
 
     print ("\n{0}, RobotA: {1}, RobotB {2}".format(experiment_type, 
