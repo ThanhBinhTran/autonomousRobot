@@ -15,6 +15,8 @@ class Obstacles:
         self.config_space = []  # configuration space 
         self.obstacles_line_segments = [] # a list of line segnment of abstacles
         self.enable_config_space = False    # set True for using configuration space
+        self.x_lim = [0, 100]
+        self.y_lim = [0, 100]
     ''' 
     write vertices of obstacles into csv file in form of (x,y)
     x,y is casted to integer for easy debug/observe 
@@ -48,8 +50,7 @@ class Obstacles:
         self.obstacles = []  # list of obstacles
         
         obstacle = []   # list of vertices
-        
-
+        first_x_y = True
         with open(mapname, newline='') as f:
             reader = csv.reader(f, delimiter=',', quoting=csv.QUOTE_NONE)
             for row in reader:
@@ -60,6 +61,18 @@ class Obstacles:
                     obstacle = []                       # clear and prepare for next obstacle
                     continue
                 else:
+                    x = float(row[0])
+                    y = float(row[1])
+                    if first_x_y:
+                        self.x_lim = [x, x]
+                        self.y_lim = [y, y]
+                        first_x_y = False
+
+                    if x < self.x_lim[0]: self.x_lim[0] = x
+                    if x > self.x_lim[1]: self.x_lim[1] = x
+                    if y < self.y_lim[0]: self.y_lim[0] = y
+                    if y > self.y_lim[1]: self.y_lim[1] = y
+
                     obstacle.append( tuple( (float(row[0]), float(row[1])) ) ) # get point data
             if len(obstacle) > 1:   # append the last one
                 obstacle.append(obstacle[0])
