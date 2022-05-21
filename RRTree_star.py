@@ -101,7 +101,5 @@ if __name__ == '__main__':
     start_node = Node(start_cooridinate, cost=0)            # initial root node, cost to root = 0
     RRT_star = RRTree_star(root=start_node, step_size=step_size, radius=radius, 
                     random_area=random_area, sample_size=sample_size)
-    RRT_star.build(goal_coordinate=goal_coordinate, plotter=plotter, obstacles=obstacles)
-    
-    plotter.tree_color(RRT_star)
+    RRT_star.build(goal_coordinate=goal_coordinate, plotter=plotter, obstacles=obstacles, show_animation=True)
     plotter.show()
