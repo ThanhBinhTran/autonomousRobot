@@ -37,8 +37,13 @@ def robot_main( start, goal, map_name, world_name, num_iter,
 
     # RRT start for ranking scores
     step_size = robot.vision_range
-    sample_size = 500
-    random_area = (0-robot.vision_range, 100 + robot.vision_range)
+    sample_size = 1000
+    # find working space boundary
+    x_min = min(obstacles.x_lim[0], obstacles.y_lim[0], start[0], goal[0])
+    x_max = max(obstacles.x_lim[1], obstacles.y_lim[1], start[1], goal[1])
+    y_min = min(obstacles.x_lim[0], obstacles.y_lim[0], start[0], goal[0])
+    y_max = max(obstacles.x_lim[1], obstacles.y_lim[1], start[1], goal[1])
+    random_area = ([x_min, y_min], [x_max, y_max])
     
     start_node = Node(goal, cost=0)            # initial root node, cost to root = 0
     RRT_star = RRTree_star(root=start_node, step_size=step_size, radius=robot.vision_range, 
@@ -138,7 +143,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
             #plotter.tree_all_nodes(RRTx)
-            plotter.tree(RRT_star)
+            plotter.tree(RRT_star,color_mode=TreeColor.by_cost)
 
         
         robot.print_infomation()

@@ -170,10 +170,33 @@ class Plot_robot(Plot_base):
             self.point(node.coords, ls=ls_inactive)
 
     ''' plot tree (all edges and vertices) from given node as tree's root '''
-    def tree(self, tree):
+    def tree(self, tree, node_en=True, edge_en=True, color_mode=TreeColor.no):
+        nodes_coords  = []
+        nodes_lmc = []
+        nodes_cost = []
         for node in tree.all_nodes():   # get all nodes
-            self.tree_edges(node)      # plot all edges between node and its children
-            self.tree_node(node)   # plot nodes
+            nodes_coords.append(node.coords)
+            if node.lmc == float("inf"):
+                nodes_lmc.append(MAX_RANGE)    
+            else:
+                nodes_lmc.append(node.lmc)
+            if node.cost == float("inf"):
+                nodes_cost.append(MAX_RANGE)   
+            else:
+                nodes_cost.append(node.cost)
+
+            # draw edge
+            if edge_en:
+                self.tree_edges(node)      # plot all edges between node and its children            
+            if node_en and color_mode==TreeColor.no:
+                self.tree_node(node)   # plot nodes
+
+        nodes_coords = np.array(nodes_coords)
+        if node_en:
+            if color_mode == TreeColor.by_lmc:
+                self.point_colors(nodes_coords, nodes_lmc, colormap="Dark2")
+            elif color_mode == TreeColor.by_cost:
+                self.point_colors(nodes_coords, nodes_cost, colormap="Dark2")
 
     ''' plot all trees'node (ertices) from given node as tree's root '''
     def tree_all_nodes(self, tree):
