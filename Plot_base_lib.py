@@ -34,7 +34,7 @@ class Plot_base:
     visit https://www.w3schools.com/python/matplotlib_scatter.asp to see more color map
     '''
     def point_colors(self, points, colors, colormap = 'winter_r', marker='.'):
-        max_range = int(max(colors)) + 1
+        #max_range = int(max(colors)) + 1
         self.plt.scatter(points[:, 0], points[:, 1], c=colors, cmap=colormap, marker=marker)
         #self.plt.colorbar().remove() # remove old one
         #self.plt.colorbar()          # update new one
@@ -50,7 +50,8 @@ class Plot_base:
         self.text(point, text)
 
     ''' plot line segment connecting 2 points'''
-    line_segment = lambda self, line, ls="-.k": self.plt.plot((line[0][0], line[1][0]), (line[0][1], line[1][1]), ls)
+    line_segment = lambda self, line, ls="-.k", lw=1: self.plt.plot((line[0][0], line[1][0]), (line[0][1], line[1][1]),\
+         ls,linewidth=lw)
     
     ''' plot path containing list of points '''
     def path(self, points, ls="-xr"):
