@@ -18,6 +18,7 @@ from enum import Enum
 class Experiment_type(Enum):
     COMPARE_LOCAL_GLOBAL = 0
     COMPARE_RANKING_FUNCTION = 1
+    COMPARE_RRT_RANKING_FUNCTION = 2
 
 class Experimental_Result(Result_Log):
     def __init__(self, header_csv = ["start","goal", "range","global_reached_goal","global_cost","local_reached_goal","local_cost"]):
@@ -95,14 +96,20 @@ class Experimental_Result(Result_Log):
                 img_A = self.image_text(image_name_A, "rank_linear", start, goal, vision_range)
                 img_B = self.image_text(image_name_B, "rank_cosin", start, goal, vision_range)
             
-            else:   # default compare global and local 
+            elif experiment_type == Experiment_type.COMPARE_LOCAL_GLOBAL:
                 image_name_A = set_figure_name(map_name= map_name, range=vision_range, start=start, 
                     goal=goal, fig_type=".png",strategy=g_strategy, ranking_function=robotA_ranking_function)
                 image_name_B = set_figure_name(map_name= map_name, range=vision_range, start=start, 
                     goal=goal, fig_type=".png", strategy=l_strategy, ranking_function=robotB_ranking_function)
                 img_A = self.image_text(image_name_A, "global", start, goal, vision_range)
                 img_B = self.image_text(image_name_B, "local", start, goal, vision_range)
-
+            elif experiment_type == Experiment_type.COMPARE_RRT_RANKING_FUNCTION:
+                image_name_A = set_figure_name(map_name= map_name, range=vision_range, start=start, 
+                    goal=goal, fig_type=".png",strategy=g_strategy, ranking_function=robotA_ranking_function)
+                image_name_B = set_figure_name(map_name= map_name, range=vision_range, start=start, 
+                    goal=goal, fig_type=".png", strategy=g_strategy, ranking_function=robotB_ranking_function)
+                img_A = self.image_text(image_name_A, "distance ranking", start, goal, vision_range)
+                img_B = self.image_text(image_name_B, "RRT ranking", start, goal, vision_range)
             imgs_array.append([img_A, img_B])
             if ((i+1) %row_lim == 0) or (i == len(range_list)-1): # each big_image contains 2*10 imgs
 
@@ -125,6 +132,8 @@ class Experimental_Result(Result_Log):
                 imgStack_name = "compare_{0}_local_global_".format(map_name) + start_goal_name
             elif experiment_type == Experiment_type.COMPARE_RANKING_FUNCTION:
                 imgStack_name = "compare_{0}_ranking_function_".format(map_name) + start_goal_name
+            elif experiment_type == Experiment_type.COMPARE_RRT_RANKING_FUNCTION:
+                imgStack_name = "compare_{0}_ranking_RRTree_score_".format(map_name) + start_goal_name
             else:   # default
                 imgStack_name = "compare_{0}_".format(map_name) + start_goal_name
             cv2.imwrite(imgStack_name, imgStack)

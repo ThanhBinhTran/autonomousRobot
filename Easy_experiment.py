@@ -11,6 +11,7 @@ from Robot_ranking import Ranking_function
 
 from Robot_run import robot_main as robot_global_ranking_first
 from Robot_run_local_strategy import robot_main as robot_local_ranking_first
+from Robot_run_RRTstar_ranking import robot_main as robot_RRTstar_ranking
 
 from Program_config import save_image
 from Easy_experiment_lib import Experimental_Result, Experiment_type
@@ -19,7 +20,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Code for Autonomous Robot.')
     parser.add_argument('-n', metavar="number of iteration", type=int, help='number of iteration', default=100)
-    parser.add_argument('-m', metavar="data_map", help='map data', default='_MuchMoreFun.csv')
+    parser.add_argument('-m', metavar="data_map", help='map data', default='_map.csv')
     parser.add_argument('-w', metavar="world_image", help='world model')
     parser.add_argument('-r', metavar="vision_range", type=float, help='vision range', default=5.0)
     parser.add_argument('-radius', metavar="robot radius", type=float, help='robot radius', default=0.5)
@@ -42,12 +43,17 @@ if __name__ == '__main__':
     start_list.append ((0,0))
     #start_list.append ((20,62))
 
-    goal_list.append ((50,50))
-    goal_list.append ((45,65))
-    goal_list.append ((100,100))
-
+    # for much_more_fun.csv
+    #goal_list.append ((50,50))
+    #goal_list.append ((45,65))
+    #goal_list.append ((100,100))
+    # for map.csv
     # run robot
-    
+    goal_list.append ((60, 90))
+    goal_list.append ((20, 60))
+    goal_list.append ((60, 70))
+    goal_list.append ((70, 40))
+    goal_list.append ((30, 50))
     ''' 
     NOTE: set show_animation = False and easy_experiment = True in prog_config file to save your time :)) 
     '''
@@ -55,12 +61,17 @@ if __name__ == '__main__':
     result = Experimental_Result()
     
     #experiment_type= Experiment_type.COMPARE_LOCAL_GLOBAL
-    experiment_type= Experiment_type.COMPARE_RANKING_FUNCTION
+    #experiment_type= Experiment_type.COMPARE_RANKING_FUNCTION
+    experiment_type= Experiment_type.COMPARE_RRT_RANKING_FUNCTION
 
     robotA_ranking_function = Ranking_function.Angular_similarity
-    robotB_ranking_function = Ranking_function.Cosine_similarity
+    #robotA_ranking_function = Ranking_function.Angular_similarity
+    #robotA_ranking_function = Ranking_function.RHS_RRT_base
+    
+    #robotB_ranking_function = Ranking_function.Cosine_similarity
     #robotB_ranking_function = Ranking_function.Angular_similarity
-
+    robotB_ranking_function = Ranking_function.RHS_RRT_base
+    
     range_step = 5
     range_max = 80
     range_begin = 20
@@ -86,10 +97,16 @@ if __name__ == '__main__':
                     robotB = robot_global_ranking_first(start, goal, map_name, world_name, 
                             num_iter, vision_range, robot_type, robot_radius, robotB_ranking_function)
                 
-                else:   # compare local vs global pick strategy is default
+                elif experiment_type == Experiment_type.COMPARE_LOCAL_GLOBAL:   # compare local vs global pick strategy is default
                     robotA = robot_global_ranking_first(start, goal, map_name, world_name, 
                             num_iter, vision_range, robot_type, robot_radius, robotA_ranking_function)
                     robotB = robot_local_ranking_first(start, goal, map_name, world_name, 
+                            num_iter, vision_range, robot_type, robot_radius, robotB_ranking_function)
+
+                elif experiment_type == Experiment_type.COMPARE_RRT_RANKING_FUNCTION:   # compare local vs global pick strategy is default
+                    robotA = robot_global_ranking_first(start, goal, map_name, world_name, 
+                            num_iter, vision_range, robot_type, robot_radius, robotA_ranking_function)
+                    robotB = robot_RRTstar_ranking(start, goal, map_name, world_name, 
                             num_iter, vision_range, robot_type, robot_radius, robotB_ranking_function)
 
                 # Log the result, careful with the data order (start, goal, vision....)
@@ -115,7 +132,11 @@ if __name__ == '__main__':
             "reached_goal_ranking_function_1","cost_ranking_function_1",
             "reached_goal_ranking_function_2","cost_ranking_function_2"])
         result_file= "result_{0}_ranking_{1}.csv".format(map_name, datetime.now().strftime("%m_%d_%H_%M_%S") )
-
+    elif experiment_type == Experiment_type.COMPARE_RRT_RANKING_FUNCTION:
+        result.set_header(["start","goal", "range",
+            "reached_goal_ranking_function_1","cost_ranking_function_1",
+            "reached_goal_ranking_function_RRT","cost_ranking_function_RRT"])
+        result_file= "result_{0}_ranking_RRT_{1}.csv".format(map_name, datetime.now().strftime("%m_%d_%H_%M_%S") )
     else:
         result_file= "result_{0}_{1}.csv".format(map_name, datetime.now().strftime("%m_%d_%H_%M_%S") )
 
