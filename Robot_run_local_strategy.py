@@ -19,7 +19,8 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 robot_vision, robot_type, robot_radius, 
                 ranking_function =Ranking_function.Angular_similarity):
     
-    robot = Robot(start, robot_vision, robot_type, robot_radius)
+    robot = Robot(start=start, goal=goal, vision_range= robot_vision, \
+        robot_type=robot_type, robot_radius=robot_radius)
     ranker = Ranker(alpha=0.9, beta= 0.1, ranking_function=ranking_function)
 
     # declare potter
@@ -158,4 +159,5 @@ if __name__ == '__main__':
     robot_type = RobotType.circle
 
     # run robot
-    robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius)
+    robot_main(start=start, goal=goal, map_name=map_name, world_name=world_name,\
+        num_iter=num_iter, robot_vision=robot_vision, robot_type=robot_type, robot_radius=robot_radius)

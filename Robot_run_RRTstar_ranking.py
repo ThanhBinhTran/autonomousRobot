@@ -16,14 +16,15 @@ from Robot_base import RobotType
 import argparse
 
 from Tree import Node
-from RRTree_X import RRTree_x
+from RRTree_star import RRTree_star
 from RRT_draw_lib import Plot_RRT
 
 def robot_main( start, goal, map_name, world_name, num_iter, 
                 robot_vision, robot_type, robot_radius, 
                 ranking_function =Ranking_function.Angular_similarity):
     
-    robot = Robot(start, robot_vision, robot_type, robot_radius)
+    robot = Robot(start=start, goal=goal, vision_range= robot_vision, \
+        robot_type=robot_type, robot_radius=robot_radius)
     ranker = Ranker(alpha=0.9, beta= 0.1, ranking_function=ranking_function)
 
     # declare potter
@@ -35,31 +36,24 @@ def robot_main( start, goal, map_name, world_name, num_iter,
     #obstacles.find_configuration_space(robot.radius)
 
     # RRT start for ranking scores
-    start_node = Node(start)
-    goal_node = Node(goal)
-    step_size = 5.0
-    sample_size = 400
-    random_area = (0-robot.vision_range,100 + robot_vision)
+    step_size = robot.vision_range
+    sample_size = 500
+    random_area = (0-robot.vision_range, 100 + robot.vision_range)
     
-    # set same window size to capture pictures
-    #plotter_RRT = Plot_RRT(title="Rapidly-exploring Random Tree Star_X (RRT*_X)")
-
-    RRTx = RRTree_x(root=goal_node, step_size=step_size, radius=robot_vision, 
+    start_node = Node(goal, cost=0)            # initial root node, cost to root = 0
+    RRT_star = RRTree_star(root=start_node, step_size=step_size, radius=robot.vision_range, 
                     random_area=random_area, sample_size=sample_size)
-    RRTx.build(goal_node=start_node, plotter=plotter, obstacle=obstacles)
-    #RRTx.printTree(RRTx.root)
-    # for display information
+    RRT_star.build(goal_coordinate=start, plotter=plotter, obstacles=obstacles)
+
     iter_count = 0
 
-    if not easy_experiment: # skip printing if running easy experiment
-        print("\nRobot is reaching to goal: {0} from start {1}".format(goal, start))
+    print("\nRobot is reaching to goal: {0} from start {1}".format(goal, start))
 
     while True:
         iter_count += 1
         robot.update_coordinate(robot.next_coordinate)
     
-        if not easy_experiment: # skip printing if running easy experiment
-            print("\n_number of iteration: {0}, current robot coordinate {1}".format(iter_count, robot.coordinate))
+        print("\n_number of iteration: {0}, current robot coordinate {1}".format(iter_count, robot.coordinate))
 
         # clean old data
         next_point = []
@@ -73,8 +67,12 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         
         #robot.show_status()
         if not robot.saw_goal and not robot.reach_goal:
+            # disable old open points
+            for open_sight in open_sights:
+                open_sight[2] = robot.coordinate
+
             # get all neighbour nodes in radius area
-            neighbour_nodes = RRTx.neighbour_nodes(node_coordinate=robot.coordinate, radius=robot.vision_range)
+            neighbour_nodes = RRT_star.neighbour_nodes(node_coordinate=robot.coordinate, radius=robot.vision_range)
             RRT_ranking = list([0]*len(open_sights))
             if neighbour_nodes is not None:
 
@@ -85,42 +83,29 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                     for n_node in neighbour_nodes:
                         inside, _ = inside_angle_area(n_node.coords, robot.coordinate, open_sight)
                         if inside:
-                            n_node.set_node_name("o{0},{1}".format(open_sight_ID, count_n_nodes))
                             count_n_nodes += 1
-                            dist_c_n = point_dist(robot.coordinate, n_node.coords)
-                            if dist_c_n > 0:
-                                print ("abc at{0}, score{1} ".format(open_sight_ID, 1/n_node.rhs))
-                                open_sight[2] = n_node.coords
-                                RRT_ranking[open_sight_ID] = 1/n_node.rhs
-                                #RRT_ranking[open_sight_ID] = 10
-                        #print (n_node.coords)
-                        n_node.set_visited()
+                            if not robot.inside_explored_area(n_node.coords):
+                                dist_c_n = point_dist(robot.coordinate, n_node.coords)
+                                if dist_c_n > 0:
+                                    open_sight[2] = n_node.coords
+                                    RRT_ranking[open_sight_ID] = 1/n_node.cost
+                                n_node.set_visited()
                         
                         
                     open_sight_ID += 1
-            print ("RRT_ranking")
-            print (RRT_ranking)
-            #neighbour_nodes_coordinate = neighbour_nodes.coords
-            
-            #for node in neighbour_nodes.coords:
-            #    neighbour_nodes_coordinate.append(node.coords)  
+
             # get local active point and its ranking
             robot.get_local_active_open_ranking_points(open_sights, ranker, goal)
-            print (open_sights)
             i = 0
             for open_rank_pt in robot.local_active_open_rank_pts:
                 open_rank_pt[2] = RRT_ranking[i]
                 i += 1
-            print ("robot.local_active_open_rank_pts")
-            print (robot.local_active_open_rank_pts)
             # stack local active open point to global set
             robot.expand_global_open_ranking_points(robot.local_active_open_rank_pts)
             
             # add new active open points to graph_insert
             robot.visibility_graph.add_local_open_points(robot.coordinate, robot.local_active_open_pts)
         
-        print ("robot.global_active_open_rank_pts")
-        print (robot.global_active_open_rank_pts)
         # pick next point to make a move
         next_point, next_pt_idx = robot.pick_next_point(robot.global_active_open_rank_pts, goal)
 
@@ -153,7 +138,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
             #plotter.tree_all_nodes(RRTx)
-            #plotter.tree(RRTx)
+            plotter.tree(RRT_star)
 
         
         robot.print_infomation()
@@ -181,9 +166,6 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         print ("Saved: {0}.pdf".format(fig_name))
 
     return robot
-    
-
-
 
 if __name__ == '__main__':
     
@@ -214,4 +196,5 @@ if __name__ == '__main__':
 
     ranking_function =Ranking_function.RHS_RRT_base
     # run robot
-    robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius)
+    robot_main(start=start, goal=goal, map_name=map_name, world_name=world_name,\
+        num_iter=num_iter, robot_vision=robot_vision, robot_type=robot_type, robot_radius=robot_radius)

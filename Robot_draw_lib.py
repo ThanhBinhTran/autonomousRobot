@@ -95,7 +95,7 @@ class Plot_robot(Plot_base):
             'key_release_event',
             lambda event: [exit(0) if event.key == 'escape' else None])
                   
-        '''draw map obstacles/world '''            
+        ''' draw map obstacles/world '''            
         # prepare title
         cost = Robot.calculate_traveled_path_cost()
         status_title = self.prepare_title(iter_count, cost)
@@ -129,10 +129,10 @@ class Plot_robot(Plot_base):
             #self.paths(Robot.visited_path, ls_vp, ls_goingp)
             self.paths_color(Robot.visited_path, Robot.visited_path_direction)
         
-        if show_sketelonPath:
+        if show_sketelonPath and len(skeleton_path) > 0:
             self.path(skeleton_path, ls_sp)
         
-        if show_approximately_shortest_path:
+        if show_approximately_shortest_path and len(asp)>0:
             self.path(asp, ls_asp)
         
         if show_critical_line_segments:
@@ -140,14 +140,14 @@ class Plot_robot(Plot_base):
         
             # display next point if existing
         if show_next_point:
-            if len(next_point) > 0:
+            if next_point is not None:
                 self.point(next_point, ls_nextpt)
         
         # to set equal make sure x y axises are same resolution 
         self.set_equal()
         self.show_grid()
         if not easy_experiment:         # skip pause if run easy_experiment
-            self.plt.pause(0.01)
+            self.plt.pause(1)
 
     ''' plot connection between 2 nodes'''
     def connection(self, nodeA, nodeB, ls="-b"):
@@ -179,7 +179,7 @@ class Plot_robot(Plot_base):
     def tree_all_nodes(self, tree):
         for node in tree.all_nodes():   # get all nodes
             self.tree_node(node)   # plot nodes
-            self.text(node.coords, "{0:.2f}".format(node.rhs))
+            #self.text(node.coords, "{0:.2f}".format(node.rhs))
 
     ''' plot all info ( number of iteration, cost, path, tree) '''
     def animation(self, num_iter, cost, path, Tree, obstacles,  start_coords, goal_coords):

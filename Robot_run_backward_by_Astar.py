@@ -10,7 +10,7 @@ from Robot_draw_lib import Plot_robot
 from Robot_sight_lib import *
 from Obstacles import *
 from Program_config import *
-from Robot_ranking import Ranker
+from Robot_ranking import Ranker, Ranking_function
 from Robot_class import Robot
 from Robot_base import RobotType
 import argparse
@@ -19,10 +19,14 @@ from Result_log import Result_Log
 import time
 from datetime import datetime
 
-def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius):
+def robot_main( start, goal, map_name, world_name, num_iter, 
+                robot_vision, robot_type, robot_radius, 
+                ranking_function =Ranking_function.Angular_similarity):
     
-    robot = Robot(start, robot_vision, robot_type, robot_radius)
-    ranker = Ranker(alpha=0.9, beta= 0.1)
+    robot = Robot(start=start, goal=goal, vision_range= robot_vision, \
+        robot_type=robot_type, robot_radius=robot_radius)
+    ranker = Ranker(alpha=0.9, beta= 0.1, ranking_function=ranking_function)
+
 
     # declare potter
     plotter = Plot_robot(title="Path Planning for Autonomous Robot: {0}".format(map_name))
@@ -205,4 +209,5 @@ if __name__ == '__main__':
     robot_type = RobotType.circle
 
     # run robot
-    robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius)
+    robot_main(start=start, goal=goal, map_name=map_name, world_name=world_name,\
+        num_iter=num_iter, robot_vision=robot_vision, robot_type=robot_type, robot_radius=robot_radius)

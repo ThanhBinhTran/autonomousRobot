@@ -6,15 +6,19 @@ from Program_config import *
 from Graph import Graph
 
 class Robot(Robot_base):
-    def __init__(self, start, vision_range=20, robot_type= RobotType.circle, robot_radius= 0.2):
-        super().__init__(vision_range, robot_type, robot_radius)
+    def __init__(self, start, goal, vision_range=20, robot_type= RobotType.circle, robot_radius= 0.2):
 
+        super().__init__(vision_range=vision_range, robot_type=robot_type, robot_radius=robot_radius)
+
+        self.start = start                  # start point
+        self.goal = goal                    # goal point
         self.coordinate = tuple(start)      # hold current coordinate of robot
         self.next_coordinate = tuple(start) # hold next coordinate where robot moves to
         self.reach_goal = False             # True if robot reach goal
         self.saw_goal = False               # True if robot saw goal
         self.no_way_to_goal = False         # True if there is no path to goal
-        
+        self.path_look_ahead_to_goal = []   # path look a head to goal (estimate)
+
         #self.local_open_pts = []            # local open point
         self.local_active_open_pts = []     # local active open point
         self.local_active_open_rank_pts = []     # local active open point and its ranking
@@ -26,7 +30,7 @@ class Robot(Robot_base):
 
         # visibility Graph containing information of visited places
         self.visibility_graph = Graph()
-        
+
     def is_no_way_to_goal(self, noway):
         self.no_way_to_goal = noway
 
@@ -44,10 +48,11 @@ class Robot(Robot_base):
         set direction: true means robot goes forward (len (asp) ==2)
                        false means robot back to point in explored area
         '''
-        self.visited_path.append(path)
+        if len(path)> 0:
+            self.visited_path.append(path)
 
-        direction = len(path) == 2
-        self.visited_path_direction.append(direction)
+            direction = len(path) == 2
+            self.visited_path_direction.append(direction)
 
     ''' Check if robot saw goal '''
     def is_saw_goal(self, goal, true_sight):
@@ -113,6 +118,12 @@ class Robot(Robot_base):
                 self.local_active_open_pts = self.local_active_open_pts[np.logical_not(local_open_pts_status)]
         
 
+    ''' check if a point is inside explored area '''
+    def inside_explored_area(self, pt):
+        if len(self.traversal_sights) > 0:
+            return inside_global_true_sight(pt, self.vision_range, self.traversal_sights)
+        return False
+
     def ranking_active_open_point(self, ranker, goal):
         ranks_new = []
         self.local_active_open_rank_pts = []
@@ -166,3 +177,7 @@ class Robot(Robot_base):
                 self.global_active_open_rank_pts = np.array(local_active_open_pts)
             else:
                 self.global_active_open_rank_pts = np.concatenate((self.global_active_open_rank_pts, local_active_open_pts), axis=0)
+
+    ''' record look ahead path '''
+    def set_look_ahead_to_goal(self, path):
+        self.path_look_ahead_to_goal = path
