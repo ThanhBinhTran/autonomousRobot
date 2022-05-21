@@ -21,7 +21,7 @@ from Robot_class import Robot
 class RRTree_x(RRTree):
 
     ''' RRTree class from Tree class '''
-    def __init__(self, root:Node, step_size = 5, radius=5, random_area=(0, 100), sample_size = 100):
+    def __init__(self, root:Node, step_size = 5, radius=5, random_area=([0, 100],[0,100]), sample_size = 100):
         super().__init__(root, step_size, radius, random_area, sample_size)
 
     ''' add node to RRTreeX , return new_node and its neighbour_node(s), update rhs, weight'''
@@ -48,7 +48,7 @@ class RRTree_x(RRTree):
         for i in range(1, self.sampling_size):
 
             # generate random coordinate in sampling area = [min, max]
-            rand_coordinate = np.random.random(2)*self.sampling_area[1] + self.sampling_area[0]
+            rand_coordinate = self.random_coordinate()
             
             # orient to goal sometime :))
             if i %100 == 0 and not self.reach_goal: # bias to goal sometime
@@ -163,9 +163,9 @@ if __name__ == '__main__':
     step_size = menu_result.step_size
     radius = menu_result.radius
     sample_size = menu_result.ss
-    random_area = (menu_result.rx, menu_result.ry)
     map_name = menu_result.m
-    world_name = None
+    num_iter = menu_result.n
+    world_name = menu_result.w
 
     ''' variable declaration '''
     robot = Robot(start=start_cooridinate, goal=goal_coordinate, vision_range=radius)
@@ -180,6 +180,13 @@ if __name__ == '__main__':
     obstacles.line_segments()
     rrt_queue = Priority_queue()
 
+    # find working space boundary
+    x_min = min(obstacles.x_lim[0], obstacles.y_lim[0], start_cooridinate[0], goal_coordinate[0])
+    x_max = max(obstacles.x_lim[1], obstacles.y_lim[1], start_cooridinate[1], goal_coordinate[1])
+    y_min = min(obstacles.x_lim[0], obstacles.y_lim[0], start_cooridinate[0], goal_coordinate[0])
+    y_max = max(obstacles.x_lim[1], obstacles.y_lim[1], start_cooridinate[1], goal_coordinate[1])
+    random_area = ([x_min, y_min], [x_max, y_max])
+
     ''' build tree '''
     goal_node = Node(goal_coordinate, lmc=0, cost=0)    # initial goal node, rsh to goal =0, cost to goal = 0
     RRTx = RRTree_x(root=goal_node, step_size=step_size, radius=radius, 
@@ -190,12 +197,13 @@ if __name__ == '__main__':
     # initial variables
     #############################################################
     obstacle_nodes = None
-
+    iter_count = 0
     if RRTx.reach_goal:     # generated tree reached to start from goal
         start_node = RRTx.dict[start_cooridinate]
         curr_node = start_node
         
         while curr_node is not goal_node:
+            iter_count += 1
             # update new coordinate for robot
             robot.coordinate = curr_node.coords
             neighbour_nodes = curr_node.neighbours
@@ -215,10 +223,13 @@ if __name__ == '__main__':
             
             if show_animation:
                 plotter.RRT_animation(Tree=RRTx, obstacles=obstacles, robot=robot)
-            
+
+            # Run n times for debugging
+            if  iter_count == num_iter:
+                break
     else: # need rerun the tree
         print ("No path from goal to start belongs to generated tree")
-        plotter.tree_color(RRTx)
+        plotter.tree(RRTx, color_mode=TreeColor.by_lmc)
 
     plotter.show()
     print ("Done!")

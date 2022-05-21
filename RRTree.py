@@ -11,7 +11,7 @@ from Obstacles import Obstacles
 class RRTree(Tree):
 
     """ RRTree class from Tree class """
-    def __init__(self, root: Node, step_size = 5, radius=5, random_area=(0, 100), sample_size = 100):
+    def __init__(self, root: Node, step_size = 5, radius=5, random_area=([0, 100],[0,100]), sample_size = 100):
         super().__init__(root)
         self.step_size = step_size
         self.radius = radius
@@ -23,6 +23,10 @@ class RRTree(Tree):
 
     def set_step_size(self, x): self.step_size = x
     def set_radius(self, x): self.radius = x
+
+    ''' random node coords '''
+    def random_coordinate(self):
+        return np.random.random(2)*np.subtract(self.sampling_area[1],self.sampling_area[0]) + self.sampling_area[0]
 
     ''' add node to RRTree , return new_node and its neighbour_node(s)'''
     def add_node_RRT(self, picked_coordinate):
@@ -43,7 +47,7 @@ class RRTree(Tree):
         for i in range(1, self.sampling_size):
 
             # generate random coordinate in sampling area = [min, max]
-            rand_coordinate = np.random.random(2)*self.sampling_area[1] + self.sampling_area[0]
+            rand_coordinate = self.random_coordinate()
 
             # orient to goal sometime :))
             if i %100 == 0 and not self.reach_goal: # bias to goal sometime
@@ -108,7 +112,6 @@ if __name__ == '__main__':
     step_size = menu_result.step_size
     radius = menu_result.radius
     sample_size = menu_result.ss
-    random_area = (menu_result.rx, menu_result.ry)
     map_name = menu_result.m
     world_name = None
 
@@ -120,7 +123,14 @@ if __name__ == '__main__':
     obstacles = Obstacles()
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles.read(world_name, map_name)
-  
+
+    # find working space boundary
+    x_min = min(obstacles.x_lim[0], obstacles.y_lim[0], start_cooridinate[0], goal_coordinate[0])
+    x_max = max(obstacles.x_lim[1], obstacles.y_lim[1], start_cooridinate[1], goal_coordinate[1])
+    y_min = min(obstacles.x_lim[0], obstacles.y_lim[0], start_cooridinate[0], goal_coordinate[0])
+    y_max = max(obstacles.x_lim[1], obstacles.y_lim[1], start_cooridinate[1], goal_coordinate[1])
+    random_area = ([x_min, y_min], [x_max, y_max])
+
     ''' build tree '''
     start_node = Node(start_cooridinate, cost=0)            # initial root node, cost to root = 0
     RRT = RRTree(root=start_node, step_size=step_size, radius=radius, 
