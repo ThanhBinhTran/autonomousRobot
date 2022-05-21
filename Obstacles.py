@@ -11,8 +11,9 @@ from Robot_math_lib import *
 FAR_POINT = (10000, 10000)
 class Obstacles:
     def __init__(self):
-        self.obstacles = []     # list of obstacles
+        self.obstacles = []     # list of obstacles (in poins format)
         self.config_space = []  # configuration space 
+        self.obstacles_line_segments = [] # a list of line segnment of abstacles
         self.enable_config_space = False    # set True for using configuration space
     ''' 
     write vertices of obstacles into csv file in form of (x,y)
@@ -47,6 +48,7 @@ class Obstacles:
         self.obstacles = []  # list of obstacles
         
         obstacle = []   # list of vertices
+        
 
         with open(mapname, newline='') as f:
             reader = csv.reader(f, delimiter=',', quoting=csv.QUOTE_NONE)
@@ -67,14 +69,14 @@ class Obstacles:
     
     ''' serialize obstacle in to list of linesegments'''
     def line_segments(self):
-        obstacles_line_segments = []
+        self.obstacles_line_segments = []
         for obstacle in self.obstacles:
             line_segments = []
             for i in range (len(obstacle) -1):
                 line_segments.append( [obstacle[i], obstacle[i+1]] ) 
 
-            obstacles_line_segments.append(line_segments)
-        return obstacles_line_segments
+            self.obstacles_line_segments.append(line_segments)
+        return self.obstacles_line_segments
 
     ''' check collision: return true if the given point is inside obstracles '''
     def check_point_collision(self, point, obstacles_line_segments):
