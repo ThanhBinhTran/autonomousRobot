@@ -14,13 +14,48 @@ in certainly environment
 * sx, sy: start point of (x,y), type = float, default = 0.0, 0.0
 * gx, gy: goal point of (x,y), type = float, default = 50.0, 50.0
 
-Example: 
+###### Example to run by strategy: pick global_set
+
 ```
 python Robot_run.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
 python Robot_run.py -n 0 -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
 python Robot_run.py -n 0 -w _world.png -sx 5 -sy 10 -gx 250 -gy 310 -r 40
 ```
-##### To run demo for the the assumption of An and Hoai's Theory:
+
+###### Example to run by strategy: pick local_set first then global
+
+```
+python Robot_run_local_strategy.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
+python Robot_run_local_strategy.py -n 0 -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
+python Robot_run_local_strategy.py -n 0 -w _world.png -sx 5 -sy 10 -gx 250 -gy 310 -r 40
+```
+
+###### Example of ranking by RRTstart (picking strategy: global_set)
+
+```
+python Robot_run_RRTstar_ranking.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
+python Robot_run_RRTstar_ranking.py -n 0 -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
+python Robot_run_RRTstar_ranking.py -n 0 -w _world.png -sx 5 -sy 10 -gx 250 -gy 310 -r 40
+
+```
+##### To run demo for RRTx algorithm:
+
+```
+python RRTree_X.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
+python RRTree_X.py -n 0 -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
+python RRTree_X.py -n 0 -w _world.png -sx 5 -sy 10 -gx 250 -gy 310 -r 40
+```
+
+##### To see animaiton of RRT and RRTstart algorithm (without obstacle(s) ):
+*   ss: sample size
+
+```
+python RRTree.py -ss 500
+python RRTree_star.py -ss 500
+```
+For obstacle(s), i will update later if i have time
+
+##### To run demo for the assumption of An and Hoai's Theory:
 ``` 
 python Robot_theory.py -n 0 -r 100 -m _forest.csv -gx 500 -gy 500
 python Robot_theory.py -n 0 -r  90 -m _forest.csv -gx 500 -gy 500
