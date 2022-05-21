@@ -17,88 +17,85 @@ class RRTree(Tree):
         self.radius = radius
         self.sampling_area = random_area
         self.sampling_size = sample_size
+        self.reach_goal = False
+        self.path_to_goal = []
+        self.total_goal_cost = float('inf')
 
     def set_step_size(self, x): self.step_size = x
     def set_radius(self, x): self.radius = x
 
     ''' add node to RRTree , return new_node and its neighbour_node(s)'''
-    def add_node(self, rand_coordinate, i):
-        # get array of all RRTree's nodes
-        all_nodes = self.all_nodes()
-
+    def add_node_RRT(self, picked_coordinate):
         # find the neareset node (in distance) to random coordinate
-        nearest_dist, nearest_idx = self.nearest(rand_coordinate)
-        # get nearest node
-        nearest_node = all_nodes[nearest_idx]
-
-        # bring random coordinate closer to nearest node
-        picked_coordinate = nearest_node.bring_closer(rand_coordinate, nearest_dist, self.step_size)
+        _, nearest_node = self.nearest(picked_coordinate)
 
         # find all neighbours of node_coordinate
         neighbour_nodes = self.neighbour_nodes(picked_coordinate, self.radius)
-        # pick nearest neighbour as new_node's parent
-        nearest_neighbour_node = self.nearest_in_list_neighbour(picked_coordinate, neighbour_nodes)
 
-        if nearest_neighbour_node is not None: # found a neighbour to link to 
-            # allocate new node then link to RRTree
-            rand_node = Node(picked_coordinate)
-            self.add_edge(nearest_neighbour_node, rand_node)
-            return rand_node, neighbour_nodes
-        return None, None
+        new_node = Node(picked_coordinate)
+        self.add_node(new_node=new_node)
+        self.add_edge(parent_node=nearest_node, node=new_node)
+        return new_node, neighbour_nodes, nearest_node
 
-    def build(self,  goal_node, plotter, obstacles):
+    def build(self,  goal_coordinate, plotter: Plot_RRT=None, obstacles=None):
         first_saw_goal = False
-        reach_goal = False
-        path_to_goal = []
-        cost = float('inf')
 
-        for i in range(self.sampling_size):
+        for i in range(1, self.sampling_size):
+
             # generate random coordinate in sampling area = [min, max]
             rand_coordinate = np.random.random(2)*self.sampling_area[1] + self.sampling_area[0]
-            if i %100 == 0 and not reach_goal:
-                rand_coordinate = np.array(goal_node.coords)
 
-            self.add_node(rand_coordinate, i)
+            # orient to goal sometime :))
+            if i %100 == 0 and not self.reach_goal: # bias to goal sometime
+                rand_coordinate = np.array(goal_coordinate)
+
+            # bring closer random coordinate to tree 
+            accepted_coordinate = self.bring_closer(rand_coordinate=rand_coordinate)
+
+            # if tree first saw given goal , instead of adding new random , add goal
+            if not first_saw_goal:
+                nn_goal = self.saw_goal(goal_coordinate)    # return nearst neighbour node of goal
+                if nn_goal is not None: # existing a node nearby goal
+                    first_saw_goal = True
+                    self.reach_goal = True
+                    accepted_coordinate = goal_coordinate
+
+            # add and link node to tree
+            new_node, neighbour_nodes, nearest_neighbour_node  = self.add_node_RRT(accepted_coordinate)
 
                 
-            if not first_saw_goal:
-                nn_goal = self.saw_goal(goal_node)    # return nearst neighbour node of goal
-                if nn_goal is not None: # existing a node nearby goal
-                    self.add_edge(nn_goal, goal_node)
-                    first_saw_goal = True
-                    reach_goal = True
-            #reach_goal = self.reach_goal(goal_node)
-
-            if reach_goal:
-                cost, path_to_goal = self.path_to_root(goal_node)
+            if self.reach_goal:
+                goal_node = self.at_node(goal_coordinate)
+                self.path_to_goal = self.path_to_root(goal_node)
+                self.total_goal_cost = goal_node.cost
             
             ''' for display '''
             if show_animation:
-                plotter.animation(i, cost, path_to_goal, self, obstacles, self.root.coords, goal_node.coords)
+                plotter.build_tree_animation(num_iter= i, Tree= self, obstacles=None,  goal_coords=goal_coordinate, \
+                    start_coords=self.root.coords, rand_coordinate= rand_coordinate, rand_node=new_node, 
+                    neighbour_nodes=neighbour_nodes, nearest_neighbour_node=nearest_neighbour_node)
 
     ''' 
         check if the RRT contain nodes that are inside goal radius
         return None if do not see
         return nearest Node if existing a node (nearest) in goal radius 
     ''' 
-    def saw_goal(self, goal_node):
+    def saw_goal(self, goal_coords):
         # find nearest neighbours tree's nodes where are in circle of radius
-        return self.nearest_neighbour(goal_node.coords, self.radius)
+        return self.nearest_neighbour(goal_coords, self.radius)
 
     '''check if the tree contains goal node'''
-    def reach_goal(self, goal_node):
-        return goal_node in self
-        
+    #def is_reach_goal(self, goal_node):
+    #    return goal_node in self      
 
     def path_to_root(self, node:Node):
-        cost = self.rhs(node)
         path = []
         path.append(node)
         while (node.parent): # loop whenever parent existed
             point_dist(node.coords, node.parent.coords)
             node = node.parent
             path.append(node)
-        return cost, path
+        return path
 
 if __name__ == '__main__':
     ''' initial parameters '''
@@ -120,24 +117,14 @@ if __name__ == '__main__':
     plotter = Plot_RRT(title="Rapidly-exploring Random Tree (RRT)")
     plotter.set_equal()
 
-    start_node = Node(start_cooridinate)
-    goal_node = Node(goal_coordinate)
-    
     obstacles = Obstacles()
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles.read(world_name, map_name)
-
-    RRT = RRTree(start_node, step_size, radius, random_area, sample_size)
-    RRT.build(goal_node, plotter, obstacles)
+  
+    ''' build tree '''
+    start_node = Node(start_cooridinate, cost=0)            # initial root node, cost to root = 0
+    RRT = RRTree(root=start_node, step_size=step_size, radius=radius, 
+                    random_area=random_area, sample_size=sample_size)
+    RRT.build(goal_coordinate=goal_coordinate, plotter=plotter, obstacles=obstacles)
     
-    fixed_point = 40,40
-    neighbour_nodes = RRT.neighbour_nodes(node_coordinate=fixed_point, radius=radius)
-    if neighbour_nodes is not None:
-        [n_node.set_inactive() for n_node in neighbour_nodes]
-    plotter.clear()
-    plotter.tree(RRT)
-    plotter.show_map(obstacles=obstacles)
-    plotter.vision_area(fixed_point, radius)
-    print (RRT.dict)
-    RRT.printTree(RRT.root)
     plotter.show()
