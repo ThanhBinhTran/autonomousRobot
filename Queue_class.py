@@ -6,6 +6,10 @@ class Priority_queue:
     def get_all_values(self):
         return list (self.dict.values())
 
+    ''' get all keys in the queue'''
+    def get_all_keys(self):
+        return list (self.dict.keys())
+
     ''' return size of the queue'''
     def size(self):
         return len(self.dict)
