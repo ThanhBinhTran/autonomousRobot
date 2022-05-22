@@ -35,8 +35,8 @@ class RRTree(Tree):
 
         # find all neighbours of node_coordinate
         neighbour_nodes = self.neighbour_nodes(picked_coordinate, self.radius)
-
         new_node = Node(picked_coordinate)
+        new_node.add_neighbours(neighbours=neighbour_nodes)
         self.add_node(new_node=new_node)
         self.add_edge(parent_node=nearest_node, node=new_node)
         return new_node, neighbour_nodes, nearest_node

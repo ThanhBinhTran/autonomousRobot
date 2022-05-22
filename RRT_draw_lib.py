@@ -1,6 +1,7 @@
 from Obstacles import Obstacles
 from Plot_base_lib import Plot_base
 from Program_config import *
+from Queue_class import Priority_queue
 from Robot_class import Robot
 from Tree import Node, Tree
 import numpy as np
@@ -35,6 +36,7 @@ class Plot_RRT(Plot_base):
         nodes_coords  = []
         nodes_lmc = []
         nodes_cost = []
+        MAX_RANGE = max(tree.sampling_area[0][1],tree.sampling_area[1][1])*1.5
         for node in tree.all_nodes():   # get all nodes
             nodes_coords.append(node.coords)
             if node.lmc == float("inf"):
@@ -60,6 +62,19 @@ class Plot_RRT(Plot_base):
                 self.point_colors(nodes_coords, nodes_cost, colormap="Dark2")
             
 
+    ''' plot path_coords that is sequence of nodes coordinate'''
+    def path_coords(self, path, ls_node = ls_goal_path_node, ls_edge=ls_goal_path_edge, lw=1):
+        for i in range(len(path)-1):
+            nodeA = path[i]
+            nodeB = path[i+1]
+            self.point(nodeA, ls_node)
+            self.line_segment( (nodeA, nodeB), ls_edge, lw=lw)
+
+    ''' plot paths which contains many paths_coords'''
+    def paths_coords(self, paths, ls_node = ls_goal_path_node, ls_edge=ls_goal_path_edge, lw=1):
+        for path in paths:
+            self.path_coords(path, ls_node = ls_node, ls_edge=ls_edge, lw=lw)
+
     ''' plot path that is sequence of nodes'''
     def path(self, path, ls_node = ls_goal_path_node, ls_edge=ls_goal_path_edge, lw=1):
         for i in range(len(path)-1):
@@ -67,6 +82,11 @@ class Plot_RRT(Plot_base):
             nodeB = path[i+1]
             self.tree_node(nodeA, ls_node)
             self.connection(nodeA, nodeB, ls_edge, lw=lw)
+
+    ''' plot paths which contains many paths'''
+    def paths(self, paths, ls_node = ls_goal_path_node, ls_edge=ls_goal_path_edge, lw=1):
+        for path in paths:
+            self.path(path, ls_node = ls_node, ls_edge=ls_edge, lw=lw)
 
     ''' plot path that is sequence of nodes'''
     def path_cost(self, path, ls_node = ls_goal_path_node, ls_edge=ls_goal_path_edge, lw=1):
@@ -78,10 +98,7 @@ class Plot_RRT(Plot_base):
             self.text(nodeA.coords, "{0:.2f}".format(nodeA.cost))   # cost
             self.text((nodeA.coords[0],nodeA.coords[1]-1), "{0:.2f}".format(nodeA.lmc))   # cost
 
-    ''' plot paths which contains many paths'''
-    def paths(self, paths, ls_node = ls_goal_path_node, ls_edge=ls_goal_path_edge, lw=1):
-        for path in paths:
-            self.path(path, ls_node = ls_node, ls_edge=ls_edge, lw=lw)
+
 
     def paths_cost(self, paths, ls_node = ls_goal_path_node, ls_edge=ls_goal_path_edge, lw=1):
         for path in paths:
@@ -131,7 +148,9 @@ class Plot_RRT(Plot_base):
         self.path(Tree.path_to_goal, ls_edge=ls_ahead_path, ls_node=ls_path_node, lw=lw_path)
         self.pause(0.001)
     
-    def RRT_animation(self, Tree=Tree, obstacles=Obstacles, robot=Robot):
+    def RRTX_animation(self, Tree=Tree, obstacles=Obstacles, robot=Robot, obstacle_nodes=[],\
+                    discovered_obstacle_nodes = [], all_children= [], rrt_queue=Priority_queue,\
+                    sql_nodes= []):
         
         # clear plot
         self.clear()
@@ -139,7 +158,7 @@ class Plot_RRT(Plot_base):
         ''' draw map obstacles/world '''            
         # prepare title
         #status_title = self.prepare_title(num_iter, Tree.total_goal_cost)
-        status_title = "update later"
+        status_title = "range {0}, path cost {1}".format(robot.vision_range, robot.cost)
 
         # plot map
         if show_map:
@@ -158,21 +177,28 @@ class Plot_RRT(Plot_base):
         self.point_text(robot.coordinate, "1r", "bot")
 
         self.path(path=robot.path_look_ahead_to_goal, ls_edge=ls_ahead_path, ls_node=ls_path_node, lw=lw_path)
-        self.paths(paths=robot.visited_path,ls_edge=ls_visited_path, ls_node=ls_path_node, lw=lw_path)
+        self.paths_coords(paths=robot.visited_paths,ls_edge=ls_visited_path, ls_node=ls_path_node, lw=lw_path)
         
         # debug 
-        obstacle_nodes = None
-        if obstacle_nodes is not None and False:
+        debug = False
+        if debug:
             for pt in obstacle_nodes:
-                self.point_text(pt.coords, "ok", "o")
+                self.point(pt.coords, "ok")
+                #self.point_text(pt.coords, "ok", "o")
             for pt in discovered_obstacle_nodes:
-                self.point_text(pt.coords, "og", '_')
+                self.point(pt.coords, "og")
+                #self.point_text(pt.coords, "og", '_')
             for pt in all_children:
-                self.point_text(pt.coords, "xb", 'c')
+                self.point(pt.coords, ".b")
+                #self.point_text(pt.coords, "^b", 'c')
+
+            for pt in sql_nodes:
+                #self.point(pt.coords, "^b")
+                self.point_text(pt.coords, ".m", '_')
+            
             queue_node = rrt_queue.get_all_values()
             for pt in queue_node:
-                self.point_text(pt.coords, "+r", 'q')
-            print ("from: {0} to {1}".format(before_coords, curr_node.coords))
-            #curr_node.print_neighbours()
+                #self.point(pt.coords, "Pr")
+                self.point_text(pt.coords, "1r", 'q')
         self.pause(1)
 
