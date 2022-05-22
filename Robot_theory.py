@@ -163,7 +163,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
                 plotter.visibility_graph(robot.visibility_graph, ls_vg)
             
             if show_visitedPath:
-                plotter.paths(robot.visited_path, ls_vp, ls_goingp)
+                plotter.paths(robot.visited_paths, ls_vp, ls_goingp)
             
             if show_sketelonPath:
                 plotter.path(skeleton_path, ls_sp)

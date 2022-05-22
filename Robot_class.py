@@ -12,6 +12,7 @@ class Robot(Robot_base):
 
         self.start = start                  # start point
         self.goal = goal                    # goal point
+        self.cost = 0                       # cost of visited path
         self.coordinate = tuple(start)      # hold current coordinate of robot
         self.next_coordinate = tuple(start) # hold next coordinate where robot moves to
         self.reach_goal = False             # True if robot reach goal
@@ -25,8 +26,8 @@ class Robot(Robot_base):
         self.global_active_open_rank_pts = []    # global active open points and its ranking
 
         self.traversal_sights = []          # hold traversal sights where robot visited
-        self.visited_path = []              # path where robot visited
-        self.visited_path_direction = []    # status of visited subpath, true = forward, false = backward
+        self.visited_paths = []              # path where robot visited
+        self.visited_path_directions = []    # status of visited subpath, true = forward, false = backward
 
         # visibility Graph containing information of visited places
         self.visibility_graph = Graph()
@@ -43,16 +44,19 @@ class Robot(Robot_base):
     def expand_traversal_sights(self, closed_sights, open_sights):
         self.traversal_sights.append([self.coordinate, closed_sights, open_sights])
    
+    ''' expand visited path and its cost also '''
     def expand_visited_path(self, path):
         '''
         set direction: true means robot goes forward (len (asp) ==2)
                        false means robot back to point in explored area
+        
         '''
         if len(path)> 0:
-            self.visited_path.append(path)
+            self.visited_paths.append(path)
 
             direction = len(path) == 2
-            self.visited_path_direction.append(direction)
+            self.visited_path_directions.append(direction)
+            self.cost += path_cost(path)
 
     ''' Check if robot saw goal '''
     def is_saw_goal(self, goal, true_sight):
@@ -82,7 +86,7 @@ class Robot(Robot_base):
             print("traversal_sights:", self.traversal_sights)
 
         if print_visited_path:
-            print("visited path:", self.visited_path)
+            print("visited path:", self.visited_paths)
 
     def finish(self):
         return self.no_way_to_goal or self.reach_goal
@@ -164,12 +168,12 @@ class Robot(Robot_base):
         self.global_active_open_rank_pts = np.delete(self.global_active_open_rank_pts, point_idx, axis=0)
 
     ''' calcualte traveled path length '''
-    def calculate_traveled_path_cost(self):
+    def calculate_traveled_path_cost_______________________________(self):
         cost = 0.0
-        for path in self.visited_path:
+        for path in self.visited_paths:
             cost += path_cost(path)
         return cost
-    
+
     ''' add local active and its ranking to global active points set '''
     def expand_global_open_ranking_points(self, local_active_open_pts):
         if len(local_active_open_pts) > 0:

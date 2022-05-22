@@ -97,8 +97,7 @@ class Plot_robot(Plot_base):
                   
         ''' draw map obstacles/world '''            
         # prepare title
-        cost = Robot.calculate_traveled_path_cost()
-        status_title = self.prepare_title(iter_count, cost)
+        status_title = self.prepare_title(iter_count, Robot.cost)
         self.show_map(world_name=world_name, obstacles=obstacles, plot_title=status_title)
         if obstacles.enable_config_space:
             self.show_configuration_space(obstacles.config_space)
@@ -113,6 +112,7 @@ class Plot_robot(Plot_base):
             self.goal(goal, Robot.reach_goal, Robot.saw_goal)
         
         # plot robot's vision at local (center)
+        print ("----------------------", Robot.vision_range)
         self.vision(Robot.coordinate, Robot.vision_range, closed_sights, open_sights)
         
         if show_local_openpt and len(Robot.local_open_pts) > 0:
@@ -127,7 +127,7 @@ class Plot_robot(Plot_base):
         
         if show_visitedPath:
             #self.paths(Robot.visited_path, ls_vp, ls_goingp)
-            self.paths_color(Robot.visited_path, Robot.visited_path_direction)
+            self.paths_color(Robot.visited_paths, Robot.visited_path_directions)
         
         if show_sketelonPath and len(skeleton_path) > 0:
             self.path(skeleton_path, ls_sp)
@@ -176,14 +176,8 @@ class Plot_robot(Plot_base):
         nodes_cost = []
         for node in tree.all_nodes():   # get all nodes
             nodes_coords.append(node.coords)
-            if node.lmc == float("inf"):
-                nodes_lmc.append(MAX_RANGE)    
-            else:
-                nodes_lmc.append(node.lmc)
-            if node.cost == float("inf"):
-                nodes_cost.append(MAX_RANGE)   
-            else:
-                nodes_cost.append(node.cost)
+            nodes_lmc.append(node.lmc)
+            nodes_cost.append(node.cost)
 
             # draw edge
             if edge_en:
