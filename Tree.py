@@ -5,20 +5,21 @@ https://pdfs.semanticscholar.org/0cac/84962d0f1176c43b3319d379a6bf478d50fd.pdf
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.com
 '''
 
+from platform import node
 from Robot_math_lib import point_dist
 import numpy as np
 from Queue_class import Priority_queue
 delta_consistency = 0
 ''' Node class '''
 class Node:
-    def __init__(self, coords=None, cost=float('inf'), lmc=float('inf'), weight = 0):
+    def __init__(self, coords=None, cost=float('inf'), lmc=float('inf')):
         self.coords   = tuple(coords)   # coordinates of a node
         self.children = []
         self.parent  = None
         self.active = True          # if active = false (inactive), its belong to obstacle space
         self.lmc = lmc              # lmc is a measurement which look-ahead estimate of cost-to-goal
         self.cost = cost            # cost-to-goal
-        self.weight = weight        # weight from node to parent
+        #self.weight = weight        # weight from node to parent
         self.neighbours = []        # node's neighbours (for RTTx)
         self.neighbours_weight = [] # node's neighbours weight (for RRTx)
         self.visited = False        # status of visitting
@@ -31,10 +32,6 @@ class Node:
     def set_cost(self, x):
         self.cost = x   
 
-    ''' set weight '''
-    def set_weight(self, x):
-        self.weight = x
-
     ''' update self lmc and all its children lmc (for rewiring) '''
     def update_lmcs(self):
         self.lmc = self.parent.lmc + self.weight
@@ -42,7 +39,7 @@ class Node:
 
     ''' update self cost and all its children costs (for rewiring) '''
     def update_costs(self):
-        self.cost = self.parent.cost + self.weight
+        self.cost = self.parent.cost + self.get_neighbour_weight(self.parent)
         [children_node.update_costs() for children_node in self.children]
 
     ''' set visited node '''
@@ -83,6 +80,21 @@ class Node:
         for neighbour in neighbours:
             self.add_neighbour(neighbour)
     
+    ''' set neighbour weight '''
+    def set_neighbour_weight(self, node, weight):
+        if node in self.neighbours:
+            idx = self.neighbours.index(node)
+            self.neighbours_weight[idx] = weight
+            return True
+        return False
+    
+    ''' get neighbour weight '''
+    def get_neighbour_weight(self, node):
+        if node in self.neighbours:
+            idx = self.neighbours.index(node)
+            return self.neighbours_weight[idx]
+        return None
+
     ''' get all children '''
     def all_children(self):
         return self.children
@@ -107,7 +119,6 @@ class Node:
         print ("_children: ", child_coords)
         print ("_cost: ", str(self.cost))
         print ("_lmc: ", self.lmc)
-        print ("_weight: ", self.weight)
         #self.print_neighbours()
         #print ("_neighbour: ", neighbours_coords)
         #print ("_neighbour weight: ", self.neighbours_weight)
@@ -130,11 +141,8 @@ class Tree:
     ''' make an edge to tree via parent node; cost and weight also added'''
     def add_edge(self, parent_node: Node, node: Node):
         # calculate cost for new node
-        weight = point_dist(parent_node.coords, node.coords)
-        cost = parent_node.cost + weight
-        
+        cost = parent_node.cost + parent_node.get_neighbour_weight(node)
         node.set_cost(cost)
-        node.set_weight(weight)
         
         # link to parent
         self.node_link(parent_node=parent_node, node=node)
@@ -142,10 +150,8 @@ class Tree:
     ''' FOR RRTX: make an edge to tree via parent node; lmc and weight also added'''
     def add_edge_RRTx(self, parent_node: Node, node: Node):
         # calculate lmc for new node
-        weight = point_dist(parent_node.coords, node.coords)
-        lmc = parent_node.lmc + weight
+        lmc = parent_node.lmc + parent_node.get_neighbour_weight(node)
         node.set_lmc(lmc)       # lmc for RRTree_x
-        node.set_weight(weight)
 
         # link to parent
         self.node_link(parent_node=parent_node, node=node)
@@ -234,7 +240,8 @@ class Tree:
         return picked_coordinate
 
     ''' update lmc of given node '''
-    def update_LMC(self, node: Node, neighbour_nodes):
+    def update_LMC(self, node: Node):
+        neighbour_nodes = node.neighbours
         active_neighbour_nodes = []
 
         for n_node in neighbour_nodes:
@@ -312,6 +319,11 @@ class Tree:
             return None
         return all_nodes[n_node_indices]   
     
+    ''' set edge weight between 2 nodes '''
+    def set_edge_weight(self, nodeA:Node, nodeB:Node, weight=float("inf")):
+        nodeA.set_neighbour_weight(node=nodeB, weight=float("inf"))
+        nodeB.set_neighbour_weight(node=nodeA, weight=float("inf"))
+
     ''' print tree information '''
     def printTree(self, node, depth=0):
         if node is None: return
@@ -326,6 +338,12 @@ class Tree:
             node = node.parent
         return node
 
+    ''' pick next '''
+    def pick_next(self, current_node:Node):
+        if current_node.parent is not None:
+            return current_node.parent
+        return None
+        
     ''' find next point in given nodes, start from give start_node '''
     def find_next(self, start_node: Node, nodes ):
         node = start_node
@@ -355,26 +373,24 @@ class Tree:
         return num != num
 
     ''' rewiring for RRT start '''
-    def rewire_RRTx(self, node:Node, neighbour_nodes, rrt_queue:Priority_queue):
+    def rewire_RRTx(self, node:Node, rrt_queue:Priority_queue):
         
         if node is None:
             return None
         node_lmc = self.node_lmc(node)
         node_cost = self.node_cost(node)
-        neighbour_nodes = np.array(neighbour_nodes)
         if node_cost - node_lmc > delta_consistency:
-            #checking for rewiring
+            neighbour_nodes = np.array(node.neighbours)
+            neighbour_weight = node.neighbours_weight
             neighbour_lmces = self.node_lmcs(neighbour_nodes)
-            to_neighbour_weight = self.distances(node.coords, neighbour_nodes)
-            new_lmces = np.array([node_lmc]* len(neighbour_nodes)) + to_neighbour_weight
+            new_lmces = np.array([node_lmc]* len(neighbour_nodes)) + neighbour_weight
             is_rewire = new_lmces < neighbour_lmces
 
-            for n_node, lmc in zip(neighbour_nodes[is_rewire], new_lmces[is_rewire]):
+            for n_node in neighbour_nodes[is_rewire]:
                 # do rewire
                 if n_node.parent is not None:
                     self.remove_edge(parent_node=n_node.parent, node=n_node) # remove old parent, ALWAYS COME FIRST
                 self.add_edge_RRTx(parent_node=node, node=n_node)   # connect to new parent
-                n_node.set_lmc(lmc)
 
             for n_node in neighbour_nodes[is_rewire]:
                 # add to queue for doing consistent (see algorithm paper)
@@ -386,9 +402,8 @@ class Tree:
         while rrt_queue.size() > 0: 
             top_node = rrt_queue.pop()
             if top_node.cost - top_node.lmc > delta_consistency:
-                neighbour_nodes = top_node.neighbours
-                self.update_LMC(node=top_node, neighbour_nodes=neighbour_nodes)
-                self.rewire_RRTx(node=top_node, neighbour_nodes=neighbour_nodes, rrt_queue=rrt_queue); 
+                self.update_LMC(node=top_node)
+                self.rewire_RRTx(node=top_node, rrt_queue=rrt_queue); 
             top_node.cost = top_node.lmc
 
     ''' reduce inconsisitency (see algorithm paper) '''
@@ -397,7 +412,6 @@ class Tree:
                 currnode.cost == float("inf") or currnode.lmc != currnode.cost : 
             top_node = rrt_queue.pop()
             if top_node.cost - top_node.lmc > delta_consistency:
-                neighbour_nodes = top_node.neighbours
-                self.update_LMC(node=top_node, neighbour_nodes=neighbour_nodes)
-                self.rewire_RRTx(node=top_node, neighbour_nodes=neighbour_nodes, rrt_queue=rrt_queue); 
+                self.update_LMC(node=top_node)
+                self.rewire_RRTx(node=top_node, rrt_queue=rrt_queue); 
             top_node.cost = top_node.lmc
