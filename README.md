@@ -34,6 +34,9 @@ python Robot_run_RRTstar_ranking.py -n 0 -w _world.png -sx 5 -sy 10 -gx 250 -gy 
 ```
 ##### To run demo for RRTx algorithm:
 ```
+python RRTree_X.py -m _map_blocks_1.csv
+python RRTree_X.py -m _map_blocks_2.csv
+python RRTree_X.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
 python RRTree_X.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
 python RRTree_X.py -n 0 -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
 python RRTree_X.py -n 0 -w _world.png -sx 5 -sy 10 -gx 250 -gy 310 -r 40
