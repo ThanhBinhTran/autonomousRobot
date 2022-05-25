@@ -112,7 +112,6 @@ class Plot_robot(Plot_base):
             self.goal(goal, Robot.reach_goal, Robot.saw_goal)
         
         # plot robot's vision at local (center)
-        print ("----------------------", Robot.vision_range)
         self.vision(Robot.coordinate, Robot.vision_range, closed_sights, open_sights)
         
         if show_local_openpt and len(Robot.local_open_pts) > 0:
@@ -146,7 +145,7 @@ class Plot_robot(Plot_base):
         # to set equal make sure x y axises are same resolution 
         self.set_equal()
         self.show_grid()
-        if not easy_experiment:         # skip pause if run easy_experiment
+        if not easy_experiment:
             self.plt.pause(1)
 
     ''' plot connection between 2 nodes'''

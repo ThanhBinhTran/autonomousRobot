@@ -91,7 +91,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         if not robot.no_way_to_goal:
             robot.next_coordinate = motion(robot.coordinate, next_point)  # simulate robot
 
-        if show_animation:
+        if show_animation and not easy_experiment:
             plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
         
