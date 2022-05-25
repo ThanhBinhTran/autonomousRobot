@@ -247,7 +247,6 @@ class Tree:
         for n_node in neighbour_nodes:
             if n_node.active:
                 active_neighbour_nodes.append(n_node)
-
         neighours_smallest_lmc = self.neighbours_smallest_lmc(node.coords, active_neighbour_nodes)
         if neighours_smallest_lmc is not None:
             if node.parent is not None:
@@ -283,17 +282,15 @@ class Tree:
     '''  find nearest (in term of lmc) neighbour node from list of nodes'''
     def neighbours_smallest_lmc(self, node_coordinate, neighbour_nodes):
         # check if there is neighbour nearby
-        if neighbour_nodes is None:
-            return None
-            
-        # calculate all cost from random's neighbours tree's node to tree's root
-        n_lmces = np.array(self.node_lmcs(neighbour_nodes))
-        # get distances from random node to all its neighbours
-        n_dist = np.array(self.distances(node_coordinate, neighbour_nodes))
-        # pick the closest neighbour
-        n_idx = np.argmin(n_lmces +  n_dist)
-        nearest_neighbour_node = neighbour_nodes[n_idx]
-
+        nearest_neighbour_node = None
+        if len(neighbour_nodes)> 0:
+            # calculate all cost from random's neighbours tree's node to tree's root
+            n_lmces = np.array(self.node_lmcs(neighbour_nodes))
+            # get distances from random node to all its neighbours
+            n_dist = np.array(self.distances(node_coordinate, neighbour_nodes))
+            # pick the closest neighbour
+            n_idx = np.argmin(n_lmces +  n_dist)
+            nearest_neighbour_node = neighbour_nodes[n_idx]
         return nearest_neighbour_node
 
     '''  find nearest neighbour node to node_coordinate in circle of radius '''
@@ -407,11 +404,11 @@ class Tree:
             top_node.cost = top_node.lmc
 
     ''' reduce inconsisitency (see algorithm paper) '''
-    def reduce_inconsistency_v2(self, rrt_queue: Priority_queue, currnode:Node):
-        while (rrt_queue.size() > 0 and rrt_queue.key_less(current_node=currnode) ) or \
+    def reduce_inconsistency_v2(self, rrtx_queue: Priority_queue, currnode:Node):
+        while (rrtx_queue.size() > 0 and rrtx_queue.key_less(current_node=currnode) ) or \
                 currnode.cost == float("inf") or currnode.lmc != currnode.cost : 
-            top_node = rrt_queue.pop()
+            top_node = rrtx_queue.pop()
             if top_node.cost - top_node.lmc > delta_consistency:
                 self.update_LMC(node=top_node)
-                self.rewire_RRTx(node=top_node, rrt_queue=rrt_queue); 
+                self.rewire_RRTx(node=top_node, rrt_queue=rrtx_queue); 
             top_node.cost = top_node.lmc
