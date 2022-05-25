@@ -12,7 +12,8 @@ from Robot_ranking import Ranking_function
 from Robot_run import robot_main as robot_global_ranking_first
 from Robot_run_local_strategy import robot_main as robot_local_ranking_first
 from Robot_run_RRTstar_ranking import robot_main as robot_RRTstar_ranking
-
+from RRTree_X import robot_main as robot_RRTX
+from RRT_user_input import *
 from Program_config import save_image
 from Easy_experiment_lib import Experimental_Result, Experiment_type
 
@@ -49,11 +50,14 @@ if __name__ == '__main__':
     #goal_list.append ((100,100))
     # for map.csv
     # run robot
-    goal_list.append ((60, 90))
-    goal_list.append ((20, 60))
-    goal_list.append ((60, 70))
-    goal_list.append ((70, 40))
-    goal_list.append ((30, 50))
+    #goal_list.append ((60, 90))
+    #goal_list.append ((20, 60))
+    #goal_list.append ((60, 70))
+    #goal_list.append ((70, 40))
+    #goal_list.append ((30, 50))
+
+    # for map block_1.csv
+    goal_list.append ((99, 99))
     ''' 
     NOTE: set show_animation = False and easy_experiment = True in prog_config file to save your time :)) 
     '''
@@ -62,7 +66,8 @@ if __name__ == '__main__':
     
     #experiment_type= Experiment_type.COMPARE_LOCAL_GLOBAL
     #experiment_type= Experiment_type.COMPARE_RANKING_FUNCTION
-    experiment_type= Experiment_type.COMPARE_RRT_RANKING_FUNCTION
+    #experiment_type= Experiment_type.COMPARE_RRT_RANKING_FUNCTION
+    experiment_type= Experiment_type.COMPARE_OUR_VS_RRTX_ALGORITHM
 
     robotA_ranking_function = Ranking_function.Angular_similarity
     #robotA_ranking_function = Ranking_function.Angular_similarity
@@ -109,10 +114,23 @@ if __name__ == '__main__':
                     robotB = robot_RRTstar_ranking(start, goal, map_name, world_name, 
                             num_iter, vision_range, robot_type, robot_radius, robotB_ranking_function)
 
+                elif experiment_type == Experiment_type.COMPARE_OUR_VS_RRTX_ALGORITHM:   # compare our vs RRtree X
+                    # get user input
+                    menu_result = menu_RRT()
+                    # get start_cooridinate and goal_coordinate
+                    step_size = menu_result.step_size
+                    radius = menu_result.radius
+                    sample_size = menu_result.ss
+
+                    robotA = robot_global_ranking_first(start, goal, map_name, world_name, 
+                            num_iter, vision_range, robot_type, robot_radius, robotA_ranking_function)
+                    robotB = robot_RRTX(start, goal, map_name, world_name,\
+                            num_iter, vision_range, robot_type, robot_radius, robotB_ranking_function, radius, \
+                                step_size, sample_size)
                 # Log the result, careful with the data order (start, goal, vision....)
                 result.add_result([start, goal, vision_range, 
-                        robotA.reach_goal, robotA.calculate_traveled_path_cost(), 
-                        robotB.reach_goal, robotB.calculate_traveled_path_cost() ])
+                        robotA.reach_goal, robotA.cost, 
+                        robotB.reach_goal, robotB.cost ])
             
             # composite images for easy to analyze
             if save_image:
@@ -137,6 +155,11 @@ if __name__ == '__main__':
             "reached_goal_ranking_function_1","cost_ranking_function_1",
             "reached_goal_ranking_function_RRT","cost_ranking_function_RRT"])
         result_file= "result_{0}_ranking_RRT_{1}.csv".format(map_name, datetime.now().strftime("%m_%d_%H_%M_%S") )
+    elif experiment_type == Experiment_type.COMPARE_OUR_VS_RRTX_ALGORITHM:
+        result.set_header(["start","goal", "range",
+            "our_reached","our_cost",
+            "rrtreeX_reached","rrtreeX__cost",])
+        result_file= "result_{0}_our_RRTx_{1}.csv".format(map_name, datetime.now().strftime("%m_%d_%H_%M_%S") )
     else:
         result_file= "result_{0}_{1}.csv".format(map_name, datetime.now().strftime("%m_%d_%H_%M_%S") )
 

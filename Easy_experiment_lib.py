@@ -19,6 +19,7 @@ class Experiment_type(Enum):
     COMPARE_LOCAL_GLOBAL = 0
     COMPARE_RANKING_FUNCTION = 1
     COMPARE_RRT_RANKING_FUNCTION = 2
+    COMPARE_OUR_VS_RRTX_ALGORITHM = 3
 
 class Experimental_Result(Result_Log):
     def __init__(self, header_csv = ["start","goal", "range","global_reached_goal","global_cost","local_reached_goal","local_cost"]):
@@ -110,6 +111,15 @@ class Experimental_Result(Result_Log):
                     goal=goal, fig_type=".png", strategy=g_strategy, ranking_function=robotB_ranking_function)
                 img_A = self.image_text(image_name_A, "distance ranking", start, goal, vision_range)
                 img_B = self.image_text(image_name_B, "RRT ranking", start, goal, vision_range)
+
+            elif experiment_type == Experiment_type.COMPARE_OUR_VS_RRTX_ALGORITHM:
+                image_name_A = set_figure_name(map_name= map_name, range=vision_range, start=start, 
+                    goal=goal, fig_type=".png",strategy=g_strategy, ranking_function=robotA_ranking_function)
+                image_name_B = set_figure_name(map_name= map_name, range=vision_range, start=start, 
+                    goal=goal, fig_type=".png", strategy=g_strategy, ranking_function=robotB_ranking_function, RRTx=True)
+                img_A = self.image_text(image_name_A, "our_algorithm", start, goal, vision_range)
+                img_B = self.image_text(image_name_B, "RRTreeX_algorithm", start, goal, vision_range)
+
             imgs_array.append([img_A, img_B])
             if ((i+1) %row_lim == 0) or (i == len(range_list)-1): # each big_image contains 2*10 imgs
 
