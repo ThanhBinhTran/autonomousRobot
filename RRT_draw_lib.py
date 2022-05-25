@@ -18,7 +18,20 @@ class Plot_RRT(Plot_base):
     def tree_edges(self, node, ls=ls_tree_edge):
         for node_children in node.children:
             self.line_segment( (node.coords, node_children.coords), ls, lw=0.2)
-    
+
+    ''' plot edges from node to its children '''
+    def tree_neighbour_edges(self, node, ls=ls_tree_edge):
+        children_node = node.children
+        neighbour_nodes = node.neighbours
+        for n_node in neighbour_nodes:
+            if n_node in children_node:
+                lw = 0.7
+                ls = "-b"
+            else:
+                lw = 0.2
+                ls = ":"
+            self.line_segment( (node.coords, n_node.coords), ls=ls, lw=lw)
+
     ''' plot a tree's node '''
     def tree_node(self, node:Node, ls_active=ls_tree_node_active, ls_inactive= ls_tree_node_inactive,\
             ls_visited = ls_tree_node_visited):
@@ -32,7 +45,7 @@ class Plot_RRT(Plot_base):
 
     ''' plot tree (all edges and vertices) from given node as tree's root '''
 
-    def tree(self, tree, node_en=True, edge_en=True, color_mode=TreeColor.no):
+    def tree(self, tree, node_en=True, edge_en=True, neighbour_en = False, color_mode=TreeColor.no):
         nodes_coords  = []
         nodes_lmc = []
         nodes_cost = []
@@ -49,8 +62,11 @@ class Plot_RRT(Plot_base):
                 nodes_cost.append(node.cost)
 
             # draw edge
-            if edge_en:
-                self.tree_edges(node)      # plot all edges between node and its children            
+            if neighbour_en: # plot all edges between nodes and their neighbours
+                self.tree_neighbour_edges(node)
+            elif edge_en:
+                self.tree_edges(node)      # plot all edges between nodes and their children            
+
             if node_en and color_mode==TreeColor.no:
                 self.tree_node(node)   # plot nodes
 
@@ -123,7 +139,7 @@ class Plot_RRT(Plot_base):
             self.show_map(world_name=None, obstacles=obstacles, plot_title=status_title)
         
         # draw current tree
-        self.tree(Tree, color_mode=color_tree)
+        self.tree(Tree, color_mode=color_tree, neighbour_en=True)
 
         # draw goal
         self.goal(goal_coords, Tree.reach_goal, None)
@@ -158,8 +174,9 @@ class Plot_RRT(Plot_base):
         ''' draw map obstacles/world '''            
         # prepare title
         #status_title = self.prepare_title(num_iter, Tree.total_goal_cost)
-        status_title = "range {0}, path cost {1}".format(robot.vision_range, robot.cost)
-
+        status_title = "range {0}, path cost {1:0.2f}".format(robot.vision_range, robot.cost)
+        if robot.reach_goal:
+            status_title += ", reached goal."
         # plot map
         if show_map:
             self.show_map(world_name=None, obstacles=obstacles, plot_title=status_title)
@@ -200,5 +217,6 @@ class Plot_RRT(Plot_base):
             for pt in queue_node:
                 #self.point(pt.coords, "Pr")
                 self.point_text(pt.coords, "1r", 'q')
-        self.pause(1)
+        if not easy_experiment:
+            self.pause(1)
 
