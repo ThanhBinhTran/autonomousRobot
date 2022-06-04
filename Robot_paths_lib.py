@@ -5,7 +5,8 @@ def motion(current_position, next_pt):
     '''
     motion model
     '''
-    current_position = (approximately_num(next_pt[0]), approximately_num(next_pt[1]))
+    #current_position = (approximately_num(next_pt[0]), approximately_num(next_pt[1]))
+    current_position = next_pt[0], next_pt[1]
     return current_position
 
 def all_remaining_point_same_side(a, b, c, obstacle_list):

@@ -1,10 +1,11 @@
+from types import new_class
 from Robot_paths_lib import *
 from Robot_math_lib import *
 from Robot_sight_lib import inside_local_true_sight, inside_global_true_sight
-from Robot_base import Robot_base, RobotType
+from Robot_base import Picking_strategy, Ranking_type, Robot_base, RobotType
 from Program_config import *
 from Graph import Graph
-
+#from RRTree_star import RRTree_star
 class Robot(Robot_base):
     def __init__(self, start, goal, vision_range=20, robot_type= RobotType.circle, robot_radius= 0.2):
 
@@ -31,6 +32,15 @@ class Robot(Robot_base):
 
         # visibility Graph containing information of visited places
         self.visibility_graph = Graph()
+
+    ''' find working space boundaries'''
+    def find_working_space_boundaries(self, obstacles):
+        # find working space boundary
+        x_min = min(obstacles.x_lim[0], obstacles.y_lim[0], self.start[0], self.goal[0]) - self.vision_range
+        x_max = max(obstacles.x_lim[1], obstacles.y_lim[1], self.start[1], self.goal[1]) + self.vision_range
+        y_min = min(obstacles.x_lim[0], obstacles.y_lim[0], self.start[0], self.goal[0]) - self.vision_range
+        y_max = max(obstacles.x_lim[1], obstacles.y_lim[1], self.start[1], self.goal[1]) + self.vision_range
+        return ([x_min, y_min], [x_max, y_max])
 
     def is_no_way_to_goal(self, noway):
         self.no_way_to_goal = noway
@@ -87,6 +97,13 @@ class Robot(Robot_base):
 
         if print_visited_path:
             print("visited path:", self.visited_paths)
+    ''' print global open points and its ranking '''
+    def print_global_set(self):
+        print ("Global open points and its ranking", self.global_active_open_rank_pts)
+
+    ''' print gobal open points and its ranking '''
+    def print_lobal_set(self):
+        print ("Llobal open points and its ranking", self.local_active_open_rank_pts)
 
     def finish(self):
         return self.no_way_to_goal or self.reach_goal
@@ -98,7 +115,7 @@ class Robot(Robot_base):
         self.local_active_open_rank_pts = []
         
     ''' get local open points '''
-    def get_local_open_points(self, open_sights):
+    def get_local_open_points_and_rank_by_RRTree_start(self, open_sights, nodes):
         self.local_open_pts = []
         if len(open_sights) > 0:
             open_sights = np.array(open_sights)
@@ -107,6 +124,17 @@ class Robot(Robot_base):
                 self.local_open_pts[i][0] = approximately_num(self.local_open_pts[i][0])
                 self.local_open_pts[i][1] = approximately_num(self.local_open_pts[i][1])
         return self.local_open_pts
+
+    ''' get local open points '''
+    def get_local_open_points(self, open_sights):
+        # open_sights is a list:
+
+        self.local_open_pts = []
+        if len(open_sights) > 0:
+            for open_sight in open_sights:
+                o_pt = approximately_num(open_sight[2][0]), approximately_num(open_sight[2][1])
+                self.local_open_pts.append(o_pt)
+        return self.local_open_pts
     
     ''' check whether local open_points are active '''
     def get_local_active_open_points(self):
@@ -114,7 +142,7 @@ class Robot(Robot_base):
         # get local active point for local points
         self.local_active_open_pts = []
         if len(self.local_open_pts):  # new local found
-            self.local_active_open_pts = self.local_open_pts
+            self.local_active_open_pts = np.array(self.local_open_pts)
 
             # remove local_point which is inside explored area
             if len(self.traversal_sights) > 0:
@@ -138,41 +166,106 @@ class Robot(Robot_base):
             # store local open points and its ranking 
             self.local_active_open_rank_pts = np.concatenate((self.local_active_open_pts, ranks_new), axis=1)
 
+    #def ranking_by_RRTree(self, open_sights, ranker, goal, RRT_star:RRTree_star):
+    def ranking_by_RRTree(self, open_sights, ranker, goal, RRT_star):
+        
+        # clear old data
+        self.local_active_open_pts  = []
+        self.rank_score = []
+        self.local_active_open_rank_pts = []
+
+        # get all neighbour nodes in radius area
+        neighbour_nodes = RRT_star.neighbour_nodes(node_coordinate=self.coordinate, radius=self.vision_range)
+        if len(neighbour_nodes):
+            current_node = RRT_star.get_node_by_coords(self.coordinate)
+
+            ancentor, _ = RRT_star.find_next(start_node=current_node, nodes = neighbour_nodes)
+
+            active_open_nodes = np.array(neighbour_nodes)
+            # remove local_point which is inside explored area
+            if len(self.traversal_sights) > 0:
+                inside_status = [inside_global_true_sight(node.coords, self.vision_range, self.traversal_sights) for node in neighbour_nodes]
+                active_open_nodes = active_open_nodes[np.logical_not(inside_status)]
+
+
+            for open_sight in open_sights:
+                inside_status = [inside_angle_area(ao_node.coords, self.coordinate, open_sight)[0] for ao_node in active_open_nodes]
+                active_arc_nodes = active_open_nodes[inside_status]
+                if len (active_arc_nodes) > 0:
+                    if ancentor in active_arc_nodes:
+                        self.local_active_open_pts.append(ancentor.coords)
+                        self.rank_score.append(float('inf'))
+                    else:   # select active arc_nodes
+                        dist_c_n = [point_dist(self.coordinate, n_node.coords) for n_node in active_arc_nodes]
+                        node_idx = np.argmax(dist_c_n)
+                        self.local_active_open_pts.append(active_arc_nodes[node_idx].coords)
+                        self.rank_score.append(1/active_arc_nodes[node_idx].cost)
+            self.local_active_open_pts = np.array(self.local_active_open_pts)
+            self.rank_score = np.reshape(self.rank_score, newshape=(len(self.rank_score), 1))
+            if len(self.local_active_open_pts):
+                self.local_active_open_rank_pts = np.concatenate((self.local_active_open_pts, self.rank_score), axis=1)
+
     ''' check whether local open_points are active '''
-    def get_local_active_open_ranking_points(self, open_sights, ranker, goal):
-        # get all local points from open sights
-        self.get_local_open_points(open_sights)
+    def get_local_active_open_ranking_points(self, open_sights, ranker, goal, RRT_star=None, ranking_type= Ranking_type.Distance_Angle):
+        if ranking_type == Ranking_type.Distance_Angle:
+            # get all local points from open sights
+            self.get_local_open_points(open_sights)
 
-        # get only active open point
-        self.get_local_active_open_points()
+            # get only active open point
+            self.get_local_active_open_points()
 
-        # ranking and store it to local active open ranking points
-        self.ranking_active_open_point(ranker=ranker, goal=goal)
+            # ranking and store it to local active open ranking points
+            self.ranking_active_open_point(ranker=ranker, goal=goal)
+        elif ranking_type == Ranking_type.RRTstar:
+            self.ranking_by_RRTree(open_sights, ranker, goal, RRT_star)
+
+    ''' the active_open_rank_pts has to not empty '''
+    def pick_max_ranking(self, active_open_rank_pts):
+        ranks = active_open_rank_pts[:, 2]
+        next_pt_idx = np.argmax(ranks)
+        next_point = active_open_rank_pts[next_pt_idx, 0:2]        
+        return next_point, next_pt_idx
 
     ''' pick next point, where its ranking is heighest, in given list '''
-    def pick_next_point(self, open_points_list, goal):
-        next_point = None
-        next_pt_idx = -1
+    def pick_next_point(self, goal, picking_strategy = Picking_strategy.global_first):
+        next_point, next_pt_idx = None, -1  # default (none, idx = -1)
 
+        global_len = len(self.global_active_open_rank_pts)  # Note: global set already get current local
+        local_len = len(self.local_active_open_rank_pts)
+
+        # if already saw/reach goal, next point is goal
         if self.saw_goal or self.reach_goal:
             next_point = goal
-        elif len(open_points_list) > 0:
-            ranks = open_points_list[:, 2]
-            next_pt_idx = np.argmax(ranks)
-            next_point = open_points_list[next_pt_idx, 0:2]
+            
+        else:   # pick next one in waiting set.
+            # pop the next point in global set first
+            if picking_strategy == Picking_strategy.global_first:     # picking global first
+                if global_len > 0:
+                    next_point, next_pt_idx = self.pick_max_ranking(self.global_active_open_rank_pts)
+            
+            # pop the next point in local set first, if the next local point is not exist then pick
+            # in global set.
+            elif picking_strategy == Picking_strategy.local_first:     # picking local first
+                if local_len > 0:
+                    next_point, next_pt_idx = self.pick_max_ranking(self.local_active_open_rank_pts)
+                    # global index 
+                    next_pt_idx = global_len - local_len + next_pt_idx
+                elif global_len > 0:
+                    next_point, next_pt_idx = self.pick_max_ranking(self.global_active_open_rank_pts)
 
-        return next_point, next_pt_idx
+            # then remove picked point from active global open point
+            if global_len > 0:
+                self.remove_global_active_pts_by_index(next_pt_idx)
+
+        return next_point
 
     ''' remove active point form active list '''
     def remove_global_active_pts_by_index(self, point_idx):
         self.global_active_open_rank_pts = np.delete(self.global_active_open_rank_pts, point_idx, axis=0)
 
-    ''' calcualte traveled path length '''
-    def calculate_traveled_path_cost_______________________________(self):
-        cost = 0.0
-        for path in self.visited_paths:
-            cost += path_cost(path)
-        return cost
+    ''' remove active point form active list '''
+    def remove_local_active_pts_by_index(self, point_idx):
+        self.local_active_open_rank_pts = np.delete(self.local_active_open_rank_pts, point_idx, axis=0)
 
     ''' add local active and its ranking to global active points set '''
     def expand_global_open_ranking_points(self, local_active_open_pts):

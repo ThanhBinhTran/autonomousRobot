@@ -12,29 +12,67 @@ from Obstacles import *
 from Program_config import *
 from Robot_ranking import Ranker, Ranking_function
 from Robot_class import Robot
-from Robot_base import RobotType
-import argparse
+from Robot_base import Picking_strategy, Ranking_type, RobotType
+from logging_ranking import Logging_ranking
+from Tree import Node
+from RRTree_star import RRTree_star
+from Robot_user_input import menu_Robot
 
 def robot_main( start, goal, map_name, world_name, num_iter, 
                 robot_vision, robot_type, robot_radius, 
-                ranking_function =Ranking_function.Angular_similarity):
+                ranking_type = Ranking_type.Distance_Angle,
+                ranking_function =Ranking_function.Angular_similarity,
+                picking_strategy= Picking_strategy.local_first):
     
     robot = Robot(start=start, goal=goal, vision_range= robot_vision, \
-        robot_type=robot_type, robot_radius=robot_radius)
+                    robot_type=robot_type, robot_radius=robot_radius)
+    
+    # set alpha and beta only for distance and angle formula
+    if ranking_type == Ranking_type.Distance_Angle and ranking_function == Ranking_function.RHS_RRT_base:
+        ranking_function = Ranking_function.Angular_similarity
     ranker = Ranker(alpha=0.9, beta= 0.1, ranking_function=ranking_function)
 
-    # declare potter
+    # declare plotter
+    title = "Autonomous Robot Path-Planning: {0}".format(map_name)
     plotter = Plot_robot(title="Path Planning for Autonomous Robot: {0}".format(map_name))
     
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
     obstacles.read(world_name, map_name)
     #obstacles.find_configuration_space(robot.radius)
+ 
+    ''' generate a RRTree_star if ranking type is RRTree_Star_ranking '''
+    if ranking_type == Ranking_type.RRTstar:
+            # RRT start for ranking scores
+        step_size = robot.vision_range
+        sample_size = 2000
+        # logging ranking
+        rank_logger = Logging_ranking()
+        r_logger_filename = rank_logger.set_logging_name(map_name=map_name, goal=goal,
+            radius=robot_vision, step_size=step_size, sample_size=sample_size)
 
-    # for display information
+        # find working space boundary
+        boundary_area = robot.find_working_space_boundaries(obstacles=obstacles)
+        start_node = Node(goal, cost=0)            # initial root node, cost to root = 0
+        if rank_logger.is_existed_log_file(r_logger_filename):
+            print ("load existed-RRTreeStart_rank: ", r_logger_filename)
+            RRT_star = rank_logger.load(r_logger_filename)
+        else:
+            print ("Generating new RRTree star then save to: ", r_logger_filename)
+            RRT_star = RRTree_star(root=start_node, step_size=step_size, radius=robot.vision_range, 
+                            random_area=boundary_area, sample_size=sample_size)
+            RRT_star.build(goal_coordinate=start, plotter=plotter, obstacles=obstacles)
+
+            # save ranking tree
+            rank_logger.save_tree(RRTree_star=RRT_star, file_name=r_logger_filename)
+    else:
+        RRT_star = None
+
+
     iter_count = 0
 
     print("\nRobot is reaching to goal: {0} from start {1}".format(goal, start))
+    print("Ranking type: {0}, picking strategy: {1}".format(ranking_type, picking_strategy))
 
     while True:
         iter_count += 1
@@ -55,26 +93,21 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         #robot.show_status()
         if not robot.saw_goal and not robot.reach_goal:
             # get local active point and its ranking
-            robot.get_local_active_open_ranking_points(open_sights, ranker, goal)
-
+            robot.get_local_active_open_ranking_points(open_sights=open_sights, ranker=ranker, goal=goal,\
+                                                        RRT_star=RRT_star, ranking_type=ranking_type)
             # stack local active open point to global set
             robot.expand_global_open_ranking_points(robot.local_active_open_rank_pts)
             
             # add new active open points to graph_insert
             robot.visibility_graph.add_local_open_points(robot.coordinate, robot.local_active_open_pts)
-        
         # pick next point to make a move
-        next_point, next_pt_idx = robot.pick_next_point(robot.global_active_open_rank_pts, goal)
-
+        next_point = robot.pick_next_point(goal, picking_strategy=picking_strategy)
         if next_point is not None:
             # find the shortest skeleton path from current position (center) to next point
             if tuple(next_point) == tuple(goal):
                 skeleton_path = [robot.coordinate, goal]
             else:
                 skeleton_path = robot.visibility_graph.BFS_skeleton_path(robot.coordinate, tuple(next_point))
-
-                # then remove picked point from active global open point
-                robot.remove_global_active_pts_by_index(next_pt_idx)
         else:
             skeleton_path = []
             robot.is_no_way_to_goal(True)
@@ -89,11 +122,16 @@ def robot_main( start, goal, map_name, world_name, num_iter,
 
         # make a move from current position
         if not robot.no_way_to_goal:
-            robot.next_coordinate = motion(robot.coordinate, next_point)  # simulate robot
+            #robot.next_coordinate = motion(robot.coordinate, next_point)  # simulate robot
+            robot.next_coordinate = tuple(next_point)# motion(robot.coordinate, next_point)  # simulate robot
 
-        if show_animation and not easy_experiment:
+        if show_animation:
             plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
+            #plotter.tree_all_nodes(RRTx)
+            if ranking_type == Ranking_type.RRTstar:
+                plotter.tree(RRT_star,color_mode=TreeColor.by_cost)
+
         
         robot.print_infomation()
 
@@ -114,43 +152,41 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
                     closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
         fig_name = set_figure_name(map_name=map_name, range=robot.vision_range, start=start, 
-            goal=goal, strategy=g_strategy, ranking_function=ranking_function)
+            goal=goal, picking_strategy=picking_strategy, ranking_function=ranking_function)
         plotter.save_figure(fig_name, file_extension=".png")
-        plotter.save_figure(fig_name, file_extension=".pdf")
+        #plotter.save_figure(fig_name, file_extension=".pdf")
         print ("Saved: {0}.pdf".format(fig_name))
 
     return robot
-    
-
-
 
 if __name__ == '__main__':
     
-    parser = argparse.ArgumentParser(description='Code for Autonomous Robot.')
-    parser.add_argument('-n', metavar="number of iteration", type=int, help='number of iteration', default=1)
-    parser.add_argument('-m', metavar="data_map", help='map data', default='_map.csv')
-    parser.add_argument('-w', metavar="world_image", help='world model')
-    parser.add_argument('-r', metavar="vision_range", type=float, help='vision range', default=20.0)
-    parser.add_argument('-radius', metavar="robot radius", type=float, help='robot radius', default=0.5)
-    parser.add_argument('-sx', metavar="start_x", type=float, help='start point x', default=0.0)
-    parser.add_argument('-sy', metavar="start_y", type=float, help='start point y', default=0.0)
-    parser.add_argument('-gx', metavar="goal_x", type=float, help='goal point x', default=50.0)
-    parser.add_argument('-gy', metavar="goal_y", type=float, help='goal point y', default=50.0)
-    menu_result = parser.parse_args()
-
     # get user input
+    menu_result = menu_Robot()
     num_iter = menu_result.n
     map_name = menu_result.m
-    #map_name = r"Map_generator\_map_temp.csv"
     world_name = menu_result.w
-
-    # get start point and goal point
     start = menu_result.sx, menu_result.sy
     goal = menu_result.gx, menu_result.gy
     robot_radius = menu_result.radius
     robot_vision = menu_result.r
+    
+    ranking_type = menu_result.rank_type
+    if 'da' in ranking_type:
+        ranking_type = Ranking_type.Distance_Angle
+    elif 'r' in ranking_type:
+        ranking_type = Ranking_type.RRTstar
+
+    picking_strategy = menu_result.p
+    if 'g' in picking_strategy:
+        picking_strategy = Picking_strategy.global_first
+    elif 'l' in picking_strategy:
+        picking_strategy = Picking_strategy.local_first
+
     robot_type = RobotType.circle
-    ranking_function =Ranking_function.Cosine_similarity
+
+    ranking_function =Ranking_function.RHS_RRT_base
     # run robot
-    robot_main(start=start, goal=goal, map_name=map_name, world_name=world_name,\
-        num_iter=num_iter, robot_vision=robot_vision, robot_type=robot_type, robot_radius=robot_radius)
+    robot_main( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
+                robot_vision=robot_vision, robot_type=robot_type, robot_radius=robot_radius, 
+                ranking_type = ranking_type, ranking_function =ranking_function, picking_strategy= picking_strategy)

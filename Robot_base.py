@@ -5,6 +5,15 @@ class RobotType(Enum):
     circle = 0
     rectangle = 1
 
+class Picking_strategy(Enum):
+    global_first = 0
+    local_first = 1
+
+class Ranking_type(Enum):
+    Distance_Angle = 0
+    RRTstar = 1
+
+
 class Robot_base:
     def __init__(self, vision_range=20, robot_type=RobotType.circle, robot_radius=0.2):
         self.max_speed = 100.0                              # [m/s]
