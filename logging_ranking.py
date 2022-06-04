@@ -77,35 +77,5 @@ class Logging_ranking:
                         parent_node = RRtree_star.get_node_by_coords((parent_coordinate))
                         RRtree_star.add_node(new_node)
                         RRtree_star.node_link(parent_node=parent_node, node=new_node)
-        if False:
-            print ("Loading tree from :", file_name)
-            f = open(file_name, "r")
-            lines = f.readlines()
-            new_node = None
-            RRtree_star = None
-            first = True
-            
-            for line in lines:
-                line_split = line.split(':')    # colon and space
-                #print ("line: ", line)
-                if self.coord_key in line_split[0]:
-                    coord_txt = line_split[1].split(' ')
-                    coord = float(coord_txt[0]), float(coord_txt[1])
-                    new_node = Node(coords=coord)
-                elif self.lmc_key in line_split[0]:
-                    new_node.set_lmc(float(line_split[1]))
-                elif self.cost_key in line_split[0]:
-                    new_node.set_cost(float(line_split[1]))
-                elif self.parent_key in line_split[0]:
-                    if first:
-                        RRtree_star = RRTree_star(new_node)
-                        first = False
-                    else:
-                        parent_coords_text = line_split[1].split(' ')
-                        parent_coords = float(parent_coords_text[0]), float(parent_coords_text[1])
-                        parent_node = RRtree_star.get_node_by_coords(tuple(parent_coords))
-                        RRtree_star.add_node(new_node)
-                        RRtree_star.node_link(parent_node=parent_node, node=new_node)
-                    #new_node.print()
         return RRtree_star
     
