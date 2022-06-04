@@ -2,7 +2,7 @@
 This project simulates our path-planning for an autonomous robot that tries to find a way to reach a goal (target)
 in certainly environment 
 ### Usage:
-``` python Robot_main.py -n <number of run times> -m <map name> -w <worldname> -r vision_range -sx <x> -sy <y> -gx <x> -gy <y> ```
+``` python Robot_run.py -n <number of run times> -m <map name> -w <worldname> -r vision_range -sx <x> -sy <y> -gx <x> -gy <y> ```
 
 * n: number of run times
     - < 0 or 0: run until meet the given goal
@@ -21,23 +21,24 @@ in certainly environment
     - r: ranking by  RRTreeStar
     - da: ranking by distance_and_angle
     - default: r
-#### To run picking_global_set_first strategy:
+### Examples:
+##### Ranking by distance and angle for formula, picking_global_set_first strategy:
 ```
-python Robot_run.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
-python Robot_run.py -n 0 -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
-python Robot_run.py -n 0 -w _world.png -sx 5 -sy 10 -gx 250 -gy 310 -r 40
+python Robot_run.py -n 5 -p g -rank_type da -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0 -p
+python Robot_run.py -n 0 -p g -rank_type da  -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
+python Robot_run.py -n 0 -p g -rank_type da  -w _world.png -sx 5 -sy 10 -gx 250 -gy 310 -r 40
 ```
-#### To run picking_local_set_first strategy
+##### Ranking by distance and angle for formula, picking_local_set_first strategy
 ```
-python Robot_run_local_strategy.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
-python Robot_run_local_strategy.py -n 0 -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
-python Robot_run_local_strategy.py -n 0 -w _world.png -sx 5 -sy 10 -gx 250 -gy 310 -r 40
+python Robot_run.py -n 5 -p l -rank_type da -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
+python Robot_run.py -n 0 -p l -rank_type da -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
+python Robot_run.py -n 0 -p l -rank_type da -w _world.png -sx 5 -sy 10 -gx 250 -gy 310 -r 40
 ```
-##### Example of ranking by RRTstart (picking strategy: global_set)
+##### Ranking by RRTreeStar, picking_local_set_first strategy
 ```
-python Robot_run_RRTstar_ranking.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
-python Robot_run_RRTstar_ranking.py -n 0 -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
-python Robot_run_RRTstar_ranking.py -n 0 -w _world.png -sx 5 -sy 10 -gx 250 -gy 310 -r 40
+python Robot_run.py -n 5 -p l -rank_type r -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
+python Robot_run.py -n 0 -p l -rank_type r -m _map.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
+python Robot_run.py -n 0 -p l -rank_type r -w _world.png -sx 5 -sy 10 -gx 250 -gy 310 -r 40
 ```
 ##### To run demo for RRTx algorithm:
 ```
