@@ -13,7 +13,14 @@ in certainly environment
 * r: robot's vision range.
 * sx, sy: start point of (x,y), type = float, default = 0.0, 0.0
 * gx, gy: goal point of (x,y), type = float, default = 50.0, 50.0
-
+* p: picking strategy
+    - g: picking global first
+    - l for picking local first, 
+    - default: l (picking local first)
+* rank_type: ranking type: ranking based on RRTtreeStar for or distance_and_angle formula
+    - r: ranking by  RRTreeStar
+    - da: ranking by distance_and_angle
+    - default: r
 #### To run picking_global_set_first strategy:
 ```
 python Robot_run.py -n 5 -m _MuchMoreFun.csv -sx 5 -sy 5 -gx 35.0 -gy 50.0
