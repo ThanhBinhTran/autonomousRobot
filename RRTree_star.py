@@ -63,7 +63,7 @@ class RRTree_star(RRTree):
             self.rewire(node=new_node, neighbour_nodes=neighbour_nodes)
 
             if self.reach_goal:
-                goal_node = self.at_node(goal_coordinate)
+                goal_node = self.get_node_by_coords(goal_coordinate)
                 self.path_to_goal = self.path_to_root(goal_node)
                 self.total_goal_cost = goal_node.cost
 

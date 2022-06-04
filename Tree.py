@@ -6,7 +6,7 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.
 '''
 
 from platform import node
-from Robot_math_lib import point_dist
+from Robot_math_lib import approximately_num, point_dist
 import numpy as np
 from Queue_class import Priority_queue
 delta_consistency = 0
@@ -53,7 +53,9 @@ class Node:
     ''' bring random coordinate closer to nearest node '''
     def bring_closer_coordinate(self, random_node_coords, nearest_dist, step_size):
         min_dist = min(nearest_dist, step_size); # If the node is closer than epsilon, we have the same distance
-        closer_coordinate = self.coords + (random_node_coords - self.coords)*min_dist/nearest_dist; 
+        closer_coordinate = self.coords + (random_node_coords - self.coords)*min_dist/nearest_dist
+        # to avoid error cause by the percise of floating point
+        closer_coordinate = approximately_num(closer_coordinate[0]), approximately_num(closer_coordinate[1])
         return closer_coordinate
 
     add_child   = lambda self, x: self.children.append(x)
@@ -131,7 +133,7 @@ class Tree:
         self.dict   = {root.coords: self.root}
 
     ''' return node at give coords'''
-    def at_node(self, coordinate):
+    def get_node_by_coords(self, coordinate): # at_node
         return self.dict[coordinate]
 
     ''' add node to tree'''

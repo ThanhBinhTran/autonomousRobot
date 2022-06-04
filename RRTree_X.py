@@ -90,7 +90,7 @@ class RRTree_x(RRTree):
             self.reduce_inconsistency(rrt_queue=rrt_queue)
 
             if self.reach_goal:
-                goal_node = self.at_node(goal_coordinate)
+                goal_node = self.get_node_by_coords(goal_coordinate)
                 self.path_to_goal = self.path_to_root(goal_node)
                 self.total_goal_cost = goal_node.cost
                
@@ -270,10 +270,10 @@ def robot_main( start_cooridinate, goal_coordinate, map_name, world_name, num_it
         # showing the final result (for save image and display as well)
         plotter.RRTX_animation(Tree=RRTx, obstacles=obstacles, robot=robot)
         fig_name = set_figure_name(map_name=map_name, range=robot.vision_range, start=start_cooridinate, 
-            goal=goal_coordinate, strategy=g_strategy, ranking_function=ranking_function, RRTx=True)
+            goal=goal_coordinate, picking_strategy=g_strategy, ranking_function=ranking_function, RRTx=True)
         
         plotter.save_figure(fig_name, file_extension=".png")
-        plotter.save_figure(fig_name, file_extension=".pdf")
+        #plotter.save_figure(fig_name, file_extension=".pdf")
         print ("Saved: {0}.pdf".format(fig_name))
 
     return robot
