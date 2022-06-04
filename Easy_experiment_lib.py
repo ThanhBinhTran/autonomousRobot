@@ -39,8 +39,8 @@ class Experimental_Result(Result_Log):
             data_start = result_data[result_data["start"] == s_value]
             for g_value in goal_unique_values:
                 data = data_start[result_data["goal"] == g_value]
-                self.draw_plot(data, s_value, g_value)
-        
+                #self.draw_plot(data, s_value, g_value)
+                self.draw_plot_RRTX_OUR(data, s_value=s_value, g_value=g_value)
                 plt.xlabel("vision range")
                 plt.ylabel("path length")
                 plt.legend(loc='upper left')
@@ -67,7 +67,51 @@ class Experimental_Result(Result_Log):
         for key, group in grouped:
             group.plot(ax=ax, kind='scatter', x='range', y='global_cost', label=legend_reached[key], color=colors_marker[key])
             group.plot(ax=ax, kind='scatter', x='range', y='local_cost', color=colors_marker[key])
-    
+
+    ''' draw plot '''
+    def draw_plot_RRTX_OUR(self, data, s_value, g_value):
+        fig, ax = plt.subplots()
+
+        range = data["range"]
+        txt_global_cost = "our_global_cost"
+        txt_lobal_cost = "our_lobal_cost"
+        txt_rrtx_cost = "rrtreeX__cost"
+        
+        ls_global = '-7'
+        ls_lobal = '-8'
+        ls_rrtx = '-9'
+        maker_global = "cut_star"
+        txt_global_reached = "our_global_reached"
+        txt_lobal_reached = "our_lobal_reached"
+        txt_rrtx_reached = "rrtreeX_reached"
+
+        g_cost = data[txt_global_cost]
+        l_cost = data[txt_lobal_cost]
+        rrtx_cost = data[txt_rrtx_cost]
+
+        colors_marker = {True:'green', False:'red'}
+        legend_reached = {True:'Reached goal', False:'Not reached goal'}
+        legend_global = 'global: start{0}, goal{1}'.format(s_value, g_value)
+        legend_local = 'local: start{0}, goal{1}'.format(s_value, g_value)
+        legend_RRTx = 'RRTx: start{0}, goal{1}'.format(s_value, g_value)
+
+
+        plt.plot(range, g_cost, label=legend_global)
+        plt.plot(range, l_cost, label=legend_local)
+        plt.plot(range, rrtx_cost, label=legend_RRTx)
+
+        grouped = data.groupby(txt_global_reached)
+        for key, group in grouped:
+            group.plot(ax=ax, kind='scatter', x='range', y=txt_global_cost, label=legend_reached[key], color=colors_marker[key])
+
+        grouped = data.groupby(txt_lobal_reached)
+        for key, group in grouped:
+            group.plot(ax=ax, kind='scatter', x='range', y=txt_lobal_cost, color=colors_marker[key])
+        
+        grouped = data.groupby(txt_rrtx_reached)
+        for key, group in grouped:
+            group.plot(ax=ax, kind='scatter', x='range', y=txt_rrtx_cost, color=colors_marker[key])
+
     ''' read image then note onto it '''
     def image_text(self, img_name, title, start, goal, vision_range):
         # image read
@@ -80,7 +124,8 @@ class Experimental_Result(Result_Log):
 
     ''' put all images of start and goal into some bigger images for comparison '''
     def compare_imgs(self, map_name, start, goal, range_list, experiment_type: Experiment_type, 
-                    robotA_ranking_function, robotB_ranking_function):
+                    robotA_ranking_function, robotB_ranking_function, 
+                    pickingA_strategy, pickingB_strategy, pickingC_strategy):
 
         # group all images of start and goal into arrays of images
         row_lim = 10        # image row limmited by 10
@@ -88,47 +133,54 @@ class Experimental_Result(Result_Log):
         imgs_array = []
         i = 0
         for vision_range in range_list:
+            image_name_A = None
+            image_name_B = None
+            image_name_C = None
             # read images, add text note
             if experiment_type == Experiment_type.COMPARE_RANKING_FUNCTION:
                 image_name_A = set_figure_name(map_name= map_name, range=vision_range, start=start, 
-                    goal=goal, fig_type=".png",strategy=g_strategy, ranking_function=robotA_ranking_function)
+                    goal=goal, fig_type=".png",picking_strategy=pickingA_strategy, ranking_function=robotA_ranking_function)
                 image_name_B = set_figure_name(map_name= map_name, range=vision_range, start=start, 
-                    goal=goal, fig_type=".png", strategy=g_strategy, ranking_function=robotB_ranking_function)
+                    goal=goal, fig_type=".png", picking_strategy=pickingB_strategy, ranking_function=robotB_ranking_function)
                 img_A = self.image_text(image_name_A, "rank_linear", start, goal, vision_range)
                 img_B = self.image_text(image_name_B, "rank_cosin", start, goal, vision_range)
             
             elif experiment_type == Experiment_type.COMPARE_LOCAL_GLOBAL:
                 image_name_A = set_figure_name(map_name= map_name, range=vision_range, start=start, 
-                    goal=goal, fig_type=".png",strategy=g_strategy, ranking_function=robotA_ranking_function)
+                    goal=goal, fig_type=".png",picking_strategy=pickingA_strategy, ranking_function=robotA_ranking_function)
                 image_name_B = set_figure_name(map_name= map_name, range=vision_range, start=start, 
-                    goal=goal, fig_type=".png", strategy=l_strategy, ranking_function=robotB_ranking_function)
+                    goal=goal, fig_type=".png", picking_strategy=pickingB_strategy, ranking_function=robotB_ranking_function)
                 img_A = self.image_text(image_name_A, "global", start, goal, vision_range)
                 img_B = self.image_text(image_name_B, "local", start, goal, vision_range)
             elif experiment_type == Experiment_type.COMPARE_RRT_RANKING_FUNCTION:
                 image_name_A = set_figure_name(map_name= map_name, range=vision_range, start=start, 
-                    goal=goal, fig_type=".png",strategy=g_strategy, ranking_function=robotA_ranking_function)
+                    goal=goal, fig_type=".png",picking_strategy=pickingA_strategy, ranking_function=robotA_ranking_function)
                 image_name_B = set_figure_name(map_name= map_name, range=vision_range, start=start, 
-                    goal=goal, fig_type=".png", strategy=g_strategy, ranking_function=robotB_ranking_function)
+                    goal=goal, fig_type=".png", picking_strategy=pickingB_strategy, ranking_function=robotB_ranking_function)
                 img_A = self.image_text(image_name_A, "distance ranking", start, goal, vision_range)
                 img_B = self.image_text(image_name_B, "RRT ranking", start, goal, vision_range)
 
             elif experiment_type == Experiment_type.COMPARE_OUR_VS_RRTX_ALGORITHM:
                 image_name_A = set_figure_name(map_name= map_name, range=vision_range, start=start, 
-                    goal=goal, fig_type=".png",strategy=g_strategy, ranking_function=robotA_ranking_function)
+                    goal=goal, fig_type=".png",picking_strategy=pickingA_strategy, ranking_function=robotA_ranking_function)
                 image_name_B = set_figure_name(map_name= map_name, range=vision_range, start=start, 
-                    goal=goal, fig_type=".png", strategy=g_strategy, ranking_function=robotB_ranking_function, RRTx=True)
-                img_A = self.image_text(image_name_A, "our_algorithm", start, goal, vision_range)
-                img_B = self.image_text(image_name_B, "RRTreeX_algorithm", start, goal, vision_range)
+                    goal=goal, fig_type=".png",picking_strategy=pickingB_strategy, ranking_function=robotA_ranking_function)
+                image_name_C = set_figure_name(map_name= map_name, range=vision_range, start=start, 
+                    goal=goal, fig_type=".png", picking_strategy=pickingC_strategy, ranking_function=robotB_ranking_function, RRTx=True)
+                img_A = self.image_text(image_name_A, "our global", start, goal, vision_range)
+                img_B = self.image_text(image_name_B, "our local", start, goal, vision_range)
+                img_C = self.image_text(image_name_C, "RRTreeX", start, goal, vision_range)
 
-            imgs_array.append([img_A, img_B])
+            imgs_array.append([img_A, img_B,img_C])
             if ((i+1) %row_lim == 0) or (i == len(range_list)-1): # each big_image contains 2*10 imgs
 
                 images_array.append(imgs_array)
                 imgs_array = []
             
             # clean up dispace space
-            os.remove(image_name_A) 
-            os.remove(image_name_B)
+            if image_name_A is not  None: os.remove(image_name_A) 
+            if image_name_B is not None: os.remove(image_name_B) 
+            if image_name_C is not None: os.remove(image_name_C) 
             i = i + 1
         
         # compositing image arrays into bigger ones

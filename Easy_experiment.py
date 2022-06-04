@@ -6,11 +6,10 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.
 import argparse
 from datetime import datetime
 
-from Robot_base import RobotType
+from Robot_base import Picking_strategy, Ranking_type, RobotType
 from Robot_ranking import Ranking_function
 
-from Robot_run import robot_main as robot_global_ranking_first
-from Robot_run_local_strategy import robot_main as robot_local_ranking_first
+from Robot_run import robot_main
 from Robot_run_RRTstar_ranking import robot_main as robot_RRTstar_ranking
 from RRTree_X import robot_main as robot_RRTX
 from RRT_user_input import *
@@ -48,6 +47,7 @@ if __name__ == '__main__':
     #goal_list.append ((50,50))
     #goal_list.append ((45,65))
     #goal_list.append ((100,100))
+
     # for map.csv
     # run robot
     #goal_list.append ((60, 90))
@@ -58,6 +58,9 @@ if __name__ == '__main__':
 
     # for map block_1.csv
     goal_list.append ((99, 99))
+
+    # for map block_1.csv
+    #goal_list.append ((250, 320))
     ''' 
     NOTE: set show_animation = False and easy_experiment = True in prog_config file to save your time :)) 
     '''
@@ -77,9 +80,14 @@ if __name__ == '__main__':
     #robotB_ranking_function = Ranking_function.Angular_similarity
     robotB_ranking_function = Ranking_function.RHS_RRT_base
     
+    # picking strategies
+    pickingA_strategy = Picking_strategy.global_first
+    pickingB_strategy = Picking_strategy.local_first
+    pickingC_strategy = Picking_strategy.local_first
+
     range_step = 5
-    range_max = 80
-    range_begin = 20
+    range_max = 81
+    range_begin = 10
 
     print ("\n{0}, RobotA: {1}, RobotB {2}".format(experiment_type, 
                     robotA_ranking_function, robotB_ranking_function ))
@@ -97,21 +105,23 @@ if __name__ == '__main__':
                 print("\nStart: {0} --> goal: {1}, range: {2}".format(start, goal, vision_range))
                 # compare ranking function
                 if experiment_type == Experiment_type.COMPARE_RANKING_FUNCTION:
-                    robotA = robot_global_ranking_first(start, goal, map_name, world_name, 
-                            num_iter, vision_range, robot_type, robot_radius, robotA_ranking_function)
-                    robotB = robot_global_ranking_first(start, goal, map_name, world_name, 
-                            num_iter, vision_range, robot_type, robot_radius, robotB_ranking_function)
+                    robotA = robot_main(start, goal, map_name, world_name, num_iter, vision_range,
+                        robot_type, robot_radius, robotA_ranking_function, picking_strategy=pickingA_strategy)
+                    robotB = robot_main(start, goal, map_name, world_name, num_iter, vision_range, 
+                        robot_type, robot_radius, robotB_ranking_function, picking_strategy=pickingA_strategy)
                 
                 elif experiment_type == Experiment_type.COMPARE_LOCAL_GLOBAL:   # compare local vs global pick strategy is default
-                    robotA = robot_global_ranking_first(start, goal, map_name, world_name, 
-                            num_iter, vision_range, robot_type, robot_radius, robotA_ranking_function)
-                    robotB = robot_local_ranking_first(start, goal, map_name, world_name, 
-                            num_iter, vision_range, robot_type, robot_radius, robotB_ranking_function)
+                    robotA = robot_main(start, goal, map_name, world_name, num_iter, vision_range,
+                        robot_type, robot_radius, robotA_ranking_function, picking_strategy=pickingA_strategy)
+                    robotB = robot_main(start, goal, map_name, world_name, num_iter, vision_range, 
+                        robot_type, robot_radius, robotB_ranking_function, picking_strategy=pickingB_strategy)
 
                 elif experiment_type == Experiment_type.COMPARE_RRT_RANKING_FUNCTION:   # compare local vs global pick strategy is default
-                    robotA = robot_global_ranking_first(start, goal, map_name, world_name, 
+                    robotA = robot_main(start, goal, map_name, world_name, 
                             num_iter, vision_range, robot_type, robot_radius, robotA_ranking_function)
-                    robotB = robot_RRTstar_ranking(start, goal, map_name, world_name, 
+                    robotB = robot_main(start, goal, map_name, world_name, 
+                            num_iter, vision_range, robot_type, robot_radius, robotA_ranking_function)
+                    robotC = robot_RRTstar_ranking(start, goal, map_name, world_name, 
                             num_iter, vision_range, robot_type, robot_radius, robotB_ranking_function)
 
                 elif experiment_type == Experiment_type.COMPARE_OUR_VS_RRTX_ALGORITHM:   # compare our vs RRtree X
@@ -122,22 +132,32 @@ if __name__ == '__main__':
                     radius = menu_result.radius
                     sample_size = menu_result.ss
 
-                    robotA = robot_global_ranking_first(start, goal, map_name, world_name, 
-                            num_iter, vision_range, robot_type, robot_radius, robotA_ranking_function)
-                    robotB = robot_RRTX(start, goal, map_name, world_name,\
+                    robotA = robot_RRTstar_ranking( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
+                                        robot_vision=vision_range, robot_type=robot_type, robot_radius=robot_radius, 
+                                        ranking_type = Ranking_type.RRTstar, ranking_function =robotA_ranking_function,
+                                        picking_strategy= Picking_strategy.global_first)
+                    robotB = robot_RRTstar_ranking( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
+                                        robot_vision=vision_range, robot_type=robot_type, robot_radius=robot_radius, 
+                                        ranking_type = Ranking_type.RRTstar, ranking_function =robotA_ranking_function,
+                                        picking_strategy= Picking_strategy.local_first)
+                    robotC = robot_RRTX(start, goal, map_name, world_name,\
                             num_iter, vision_range, robot_type, robot_radius, robotB_ranking_function, radius, \
                                 step_size, sample_size)
                 # Log the result, careful with the data order (start, goal, vision....)
                 result.add_result([start, goal, vision_range, 
                         robotA.reach_goal, robotA.cost, 
-                        robotB.reach_goal, robotB.cost ])
+                        robotB.reach_goal, robotB.cost, 
+                        robotC.reach_goal, robotC.cost ])
             
             # composite images for easy to analyze
             if save_image:
                 result.compare_imgs(map_name= map_name, start=start, goal=goal, 
                     range_list= range_experiment_list, experiment_type= experiment_type, 
                     robotA_ranking_function= robotA_ranking_function, 
-                    robotB_ranking_function= robotB_ranking_function)
+                    robotB_ranking_function= robotB_ranking_function,
+                    pickingA_strategy= pickingA_strategy,
+                    pickingB_strategy= pickingB_strategy,
+                    pickingC_strategy= pickingC_strategy)
 
     # write log file
     if experiment_type == Experiment_type.COMPARE_LOCAL_GLOBAL:
@@ -155,9 +175,11 @@ if __name__ == '__main__':
             "reached_goal_ranking_function_1","cost_ranking_function_1",
             "reached_goal_ranking_function_RRT","cost_ranking_function_RRT"])
         result_file= "result_{0}_ranking_RRT_{1}.csv".format(map_name, datetime.now().strftime("%m_%d_%H_%M_%S") )
+
     elif experiment_type == Experiment_type.COMPARE_OUR_VS_RRTX_ALGORITHM:
         result.set_header(["start","goal", "range",
-            "our_reached","our_cost",
+            "our_global_reached","our_global_cost",
+            "our_lobal_reached","our_lobal_cost",
             "rrtreeX_reached","rrtreeX__cost",])
         result_file= "result_{0}_our_RRTx_{1}.csv".format(map_name, datetime.now().strftime("%m_%d_%H_%M_%S") )
     else:
