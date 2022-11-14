@@ -14,8 +14,20 @@ try:
     from Robot_paths_lib import *
     from Robot_draw_lib import *
     from Robot_sight_lib import *
-    from Robot import Robot
+    from Robot_class import Robot
     from Obstacles import Obstacles
+    from Robot_ranking import Ranking_function
+    from Robot_base import Picking_strategy, Ranking_type
+    from Robot_paths_lib import *
+    from Robot_draw_lib import *
+    from Robot_sight_lib import *
+    from Robot_class import Robot
+    from Obstacles import Obstacles
+    from Robot_ranking import Ranker
+    from Robot_map_lib import Map
+    from Tree import *
+    from Result_log import *
+    from logging_ranking import *
 except ImportError:
     raise
 
@@ -30,10 +42,10 @@ def main():
     center_points.append([4,2.2])
     # read map 
     
-    obstacles_data = Obstacles()
+    obstacles = Obstacles()
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
-    obstacles_data.read(None, "_paper_map.csv")
-    obstacles = np.array(obstacles_data.data())
+    obstacles.read(None, "_paper_map.csv")
+    #obstacles = np.array(obstacles_data.obstacles)
     
     start_line = np.array([
                     [0.5, 1.5],
@@ -66,7 +78,7 @@ def main():
 
     csights = []
     osights = []
-    robot = Robot(start=start, vision_range=robot_vision)
+    robot = Robot(start=start, vision_range=robot_vision, goal=(100,100))
 
     for center_point in center_points:
         robot.coordinate = center_point
@@ -76,40 +88,55 @@ def main():
     
     # draw circle range
     # image__1
-    draw_critical_edge_temp = 0
-    draw_circle_range_temp = 1
-    skeleton_path_temp = 1
-    strange_line_temp = 0
-    collision_free_area_temp = 0
-    final_approximate_shortest_path_temp = 0
-    crosspoint_temp = 0
+    image_scenerio = 1
+    draw_safe_circle_area = False
+  
 
-    # image__2
-    draw_critical_edge_temp = 1
-    draw_circle_range_temp = 1
-    skeleton_path_temp = 1
-    strange_line_temp = 0
-    collision_free_area_temp = 1
-    final_approximate_shortest_path_temp = 1
-    crosspoint_temp = 0
+    if image_scenerio == 0:
+        draw_critical_edge_temp = 0
+        draw_circle_range_temp = 1
+        skeleton_path_temp = 1
+        strange_line_temp = 0
+        collision_free_area_temp = 0
+        final_approximate_shortest_path_temp = 0
+        crosspoint_temp = 0
+        capture_file_name = "4_ASP_complicate_path"
+    elif image_scenerio == 1:
+        draw_critical_edge_temp = 1
+        draw_circle_range_temp = 1
+        skeleton_path_temp = 1
+        strange_line_temp = 0
+        collision_free_area_temp = 1
+        final_approximate_shortest_path_temp = 1
+        crosspoint_temp = 0
+        capture_file_name = "4_ASP_complicate_path_step"
+    elif image_scenerio == 2:
+        draw_critical_edge_temp = 1
+        draw_circle_range_temp = 1
+        skeleton_path_temp = 1
+        strange_line_temp = 0
+        collision_free_area_temp = 1
+        final_approximate_shortest_path_temp = 1
+        crosspoint_temp = 1
+        draw_safe_circle_area = True
+        capture_file_name = "4_ASP_complicate_path_result"
 
-    # image__3
-    # draw_critical_edge_temp = 1
-    # draw_circle_range_temp = 1
-    # skeleton_path_temp = 1
-    # strange_line_temp = 0
-    # collision_free_area_temp = 1
-    # final_approximate_shortest_path_temp = 1
-    # crosspoint_temp = 1
-
+        
     if draw_circle_range_temp:
         for center_point in center_points:
             plotter.vision_area(center_point, robot_vision)
-            #plotter.vision_area(center_point, robot_vision/2)
+            if draw_safe_circle_area:
+                plotter.vision_area(center_point, robot_vision/2)
   
-    for ob_part in obstacles:
-        plt.fill(ob_part[:,0], ob_part[:,1], color = 'k', alpha = 0.4, hatch='//')
-    
+    #for ob_part in obstacles.obstacles:
+    for obstacle in obstacles.obstacles:
+        x = [point[0] for point in obstacle]
+        y = [point[1] for point in obstacle]
+        x.append(obstacle[0][0])
+        y.append(obstacle[0][1])
+        plt.fill(x, y, color='k', alpha=0.4, hatch="//")
+    #plt.fill(ob_part[:,0], ob_part[:,1], color = 'k', alpha = 0.4, hatch='//')
+    #Map().display(plt=plt, title="", obstacles=obstacles.obstacles)
     # text points
     plotter.point(start, ".b")
     plotter.point(end, ".b")
@@ -217,7 +244,9 @@ def main():
         plotter.line_segment(  (crosspoint,end), ls=":k")
     plt.axis("equal")
     plt.grid(True)
-    plt.show()
+    #plt.show()
 
+    plotter.save_figure(fig_name=capture_file_name,file_extension='.pgf')
+    plotter.save_figure(fig_name=capture_file_name,file_extension='.png')
 if __name__ == '__main__':
     main()

@@ -46,7 +46,7 @@ class Obstacles:
         read map_csv (in form the list of vertix of obstacles)
     '''
 
-    def read_csv(self, mapname):
+    def read_csv(self, mapname, scale=1):
         self.obstacles = []  # list of obstacles
         
         obstacle = []   # list of vertices
@@ -61,8 +61,8 @@ class Obstacles:
                     obstacle = []                       # clear and prepare for next obstacle
                     continue
                 else:
-                    x = float(row[0])
-                    y = float(row[1])
+                    x = float(row[0])*scale
+                    y = float(row[1])*scale
                     if first_x_y:
                         self.x_lim = [x, x]
                         self.y_lim = [y, y]
@@ -73,7 +73,7 @@ class Obstacles:
                     if y < self.y_lim[0]: self.y_lim[0] = y
                     if y > self.y_lim[1]: self.y_lim[1] = y
 
-                    obstacle.append( tuple( (float(row[0]), float(row[1])) ) ) # get point data
+                    obstacle.append( tuple( (x, y)) )  # get point data
             if len(obstacle) > 1:   # append the last one
                 obstacle.append(obstacle[0])
                 self.obstacles.append(obstacle)

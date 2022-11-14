@@ -24,7 +24,8 @@ class Plot_base:
     clear = lambda self: self.plt.cla()
     set_equal = lambda self: self.plt.axis("equal")
     show_grid = lambda self: self.plt.grid(True)
-    
+    set_axis = lambda self, x0, y0, x1, y1: self.plt.axis([x0, x1, y0, y1])
+
     ''' plot point(s)'''
     point  = lambda self, point,  ls=".r": self.plt.plot(point[0], point[1], ls)
     points = lambda self, points, ls=".r": self.plt.plot(points[:, 0], points[:, 1], ls)
@@ -124,7 +125,7 @@ class Plot_base:
     
     ''' prepare title for display'''
     def prepare_title(self, iter_count, path_cost):
-        plot_title = "Number of iteration: {0}".format(iter_count)
+        plot_title = "Number of iterations: {0}".format(iter_count)
         if path_cost > 0 and path_cost != float('inf'):
             plot_title += ", path len: {:.2f}".format (path_cost)
         else:
@@ -165,5 +166,7 @@ class Plot_base:
             plt.plot([x, out_x], [y, out_y], "-k")
     
     ''' save plot as image/pdf/svg/eps'''
-    def save_figure(self, fig_name = "image",  file_extension = ".png", dpi=150):
+    def save_figure(self, fig_name = "image",  file_extension = ".png", dpi=150, bbox_inches ="tight"):
+        #self.plt.axis("off")   # turns off axes
+        #self.plt.axis("tight")  # gets rid of white border
         self.plt.savefig(fig_name + file_extension, bbox_inches ="tight", dpi=dpi)

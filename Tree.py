@@ -134,7 +134,8 @@ class Tree:
 
     ''' return node at give coords'''
     def get_node_by_coords(self, coordinate): # at_node
-        return self.dict[coordinate]
+        return self.dict.get(coordinate)
+        #return self.dict[coordinate]
 
     ''' add node to tree'''
     def add_node(self, new_node:Node):
@@ -285,12 +286,15 @@ class Tree:
     def neighbours_smallest_lmc(self, node_coordinate, neighbour_nodes):
         # check if there is neighbour nearby
         nearest_neighbour_node = None
-        if len(neighbour_nodes)> 0:
+        if neighbour_nodes is not None and len(neighbour_nodes) > 0:
             # calculate all cost from random's neighbours tree's node to tree's root
             n_lmces = np.array(self.node_lmcs(neighbour_nodes))
             # get distances from random node to all its neighbours
             n_dist = np.array(self.distances(node_coordinate, neighbour_nodes))
             # pick the closest neighbour
+            #print ("n_lmces", n_lmces)
+            #print ("n_lmces", n_dist)
+            #print ("neighbour_nodes"), neighbour_nodes
             n_idx = np.argmin(n_lmces +  n_dist)
             nearest_neighbour_node = neighbour_nodes[n_idx]
         return nearest_neighbour_node
@@ -348,9 +352,10 @@ class Tree:
         node = start_node
         path = []
         path.append(node)
-        while (node.parent in nodes):
-            node = node.parent
-            path.append(node)
+        if node is not None:
+            while (node.parent in nodes):
+                node = node.parent
+                path.append(node)
         return node, path
 
     ''' rewiring for RRT start '''
@@ -407,8 +412,8 @@ class Tree:
 
     ''' reduce inconsisitency (see algorithm paper) '''
     def reduce_inconsistency_v2(self, rrtx_queue: Priority_queue, currnode:Node):
-        while (rrtx_queue.size() > 0 and rrtx_queue.key_less(current_node=currnode) ) or \
-                currnode.cost == float("inf") or currnode.lmc != currnode.cost : 
+        while rrtx_queue.size() > 0 and (rrtx_queue.key_less(current_node=currnode) or \
+                currnode.cost == float("inf") or currnode.lmc != currnode.cost) : 
             top_node = rrtx_queue.pop()
             if top_node.cost - top_node.lmc > delta_consistency:
                 self.update_LMC(node=top_node)

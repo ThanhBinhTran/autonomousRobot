@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 import matplotlib.pyplot as plt
 try:
-    from Robot_main import *
+    from Robot_run import *
 except ImportError:
     raise
 
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     # scenario 3: 5_robots_demonstration -n 1 -gx 20 -gy 50
     # scenario 4: 5_robots_demonstration_result -n 0 -gx 20 -gy 50
 
-    scenario = 4
+    scenario = 2
 
     num_iter = 1
     map_name = "_map.csv"
@@ -46,8 +46,16 @@ if __name__ == '__main__':
     elif scenario == 3:
         goal = 20, 50
         num_iter = 1
+        num_iter = 2
+        num_iter = 17
     elif scenario == 4:
         goal = 20, 50
         num_iter = 0
     # run robot
-    robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius)
+
+        # run robot
+    robot_main( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
+                robot_vision=robot_vision, robot_type=robot_type, robot_radius=robot_radius, 
+                ranking_type = Ranking_type.RRTstar
+                )
+    #robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius)

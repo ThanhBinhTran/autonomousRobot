@@ -36,10 +36,10 @@ class Robot(Robot_base):
     ''' find working space boundaries'''
     def find_working_space_boundaries(self, obstacles):
         # find working space boundary
-        x_min = min(obstacles.x_lim[0], obstacles.y_lim[0], self.start[0], self.goal[0]) - self.vision_range
-        x_max = max(obstacles.x_lim[1], obstacles.y_lim[1], self.start[1], self.goal[1]) + self.vision_range
-        y_min = min(obstacles.x_lim[0], obstacles.y_lim[0], self.start[0], self.goal[0]) - self.vision_range
-        y_max = max(obstacles.x_lim[1], obstacles.y_lim[1], self.start[1], self.goal[1]) + self.vision_range
+        x_min = min(obstacles.x_lim[0], obstacles.y_lim[0], self.start[0], self.goal[0]) - self.vision_range/2
+        x_max = max(obstacles.x_lim[1], obstacles.y_lim[1], self.start[1], self.goal[1]) + self.vision_range/2
+        y_min = min(obstacles.x_lim[0], obstacles.y_lim[0], self.start[0], self.goal[0]) - self.vision_range/2
+        y_max = max(obstacles.x_lim[1], obstacles.y_lim[1], self.start[1], self.goal[1]) + self.vision_range/2
         return ([x_min, y_min], [x_max, y_max])
 
     def is_no_way_to_goal(self, noway):

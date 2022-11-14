@@ -166,7 +166,7 @@ class Plot_RRT(Plot_base):
     
     def RRTX_animation(self, Tree=Tree, obstacles=Obstacles, robot=Robot, obstacle_nodes=[],\
                     discovered_obstacle_nodes = [], all_children= [], rrt_queue=Priority_queue,\
-                    sql_nodes= []):
+                    sql_nodes= [], easy_experiment=False):
         
         # clear plot
         self.clear()
@@ -218,5 +218,5 @@ class Plot_RRT(Plot_base):
                 #self.point(pt.coords, "Pr")
                 self.point_text(pt.coords, "1r", 'q')
         if not easy_experiment:
-            self.pause(1)
+            self.pause(0.001)
 

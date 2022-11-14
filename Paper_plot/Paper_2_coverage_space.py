@@ -13,7 +13,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 import matplotlib.pyplot as plt
 try:
-    from Robot_lib import *
+    from Robot_math_lib import *
     from Robot_paths_lib import *
     from Robot_draw_lib import *
     from Robot_sight_lib import *

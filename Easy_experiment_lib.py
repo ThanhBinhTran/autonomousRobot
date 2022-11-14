@@ -41,9 +41,10 @@ class Experimental_Result(Result_Log):
                 data = data_start[result_data["goal"] == g_value]
                 #self.draw_plot(data, s_value, g_value)
                 self.draw_plot_RRTX_OUR(data, s_value=s_value, g_value=g_value)
-                plt.xlabel("vision range")
+                plt.xlabel("vision range $r$")
                 plt.ylabel("path length")
-                plt.legend(loc='upper left')
+                plt.legend(loc='upper right')
+                plt.title("Navigation comparison for map1")
                 plt.show()
 
     ''' draw plot '''
@@ -91,9 +92,9 @@ class Experimental_Result(Result_Log):
 
         colors_marker = {True:'green', False:'red'}
         legend_reached = {True:'Reached goal', False:'Not reached goal'}
-        legend_global = 'global: start{0}, goal{1}'.format(s_value, g_value)
-        legend_local = 'local: start{0}, goal{1}'.format(s_value, g_value)
-        legend_RRTx = 'RRTx: start{0}, goal{1}'.format(s_value, g_value)
+        legend_global = 'explored set first: start{0}, goal{1}'.format(s_value, g_value)
+        legend_local = 'neighbour set first: start{0}, goal{1}'.format(s_value, g_value)
+        legend_RRTx = 'RRTX: start{0}, goal{1}'.format(s_value, g_value)
 
 
         plt.plot(range, g_cost, label=legend_global)
@@ -170,7 +171,7 @@ class Experimental_Result(Result_Log):
                 img_A = self.image_text(image_name_A, "our global", start, goal, vision_range)
                 img_B = self.image_text(image_name_B, "our local", start, goal, vision_range)
                 img_C = self.image_text(image_name_C, "RRTreeX", start, goal, vision_range)
-
+            print ("images:",  [img_A, img_B,img_C])
             imgs_array.append([img_A, img_B,img_C])
             if ((i+1) %row_lim == 0) or (i == len(range_list)-1): # each big_image contains 2*10 imgs
 
@@ -178,9 +179,9 @@ class Experimental_Result(Result_Log):
                 imgs_array = []
             
             # clean up dispace space
-            if image_name_A is not  None: os.remove(image_name_A) 
-            if image_name_B is not None: os.remove(image_name_B) 
-            if image_name_C is not None: os.remove(image_name_C) 
+            #if image_name_A is not  None: os.remove(image_name_A) 
+            #if image_name_B is not None: os.remove(image_name_B) 
+            #if image_name_C is not None: os.remove(image_name_C) 
             i = i + 1
         
         # compositing image arrays into bigger ones

@@ -10,14 +10,14 @@ show_traversalSights = True
 
 show_openSight = True
 show_closedSight = True
-show_circleRange = False
+show_circleRange = True
 
-show_sketelonPath = True
-show_approximately_shortest_path = True
-show_critical_line_segments = True
+show_sketelonPath = False
+show_approximately_shortest_path = False
+show_critical_line_segments = False
 show_cls_orderednumber = False  # show ordered number of critical line segments
 
-show_visitedPath = True
+show_visitedPath = False
 show_visibilityGraph = True
 
 show_local_openpt = False
@@ -34,10 +34,10 @@ show_text_goal = True
 ################################################
 show_active_openpt_HA_Assumption = True         # active open points (HA Assumption)
 show_activeArc_HA_Assumption = True             # arc points (HA Assumption)
-show_parentArc_HA_Assumption = True             # parent arc points (HA Assumption)
-show_boundaryPts_HA_Assumption = True           # boundary points intersection between circle and obstacles
+show_parentArc_HA_Assumption = False             # parent arc points (HA Assumption)
+show_boundaryPts_HA_Assumption = False           # boundary points intersection between circle and obstacles
 show_circleGoal_HA_Assumption = True            # big circle (at goal within radius = dist(goal, robot center))
-show_activeArcPts_order_HA_Assumption = True    # show order of arc points according to its angles
+show_activeArcPts_order_HA_Assumption = False    # show order of arc points according to its angles
 # line styles
 ls_bp_HA = "k."     # boundary points (HA Assumption)
 ls_aap_HA = "c."    # active arc points (HA Assumption)
@@ -102,15 +102,6 @@ class TreeColor(Enum):
     by_cost = 1
     by_lmc = 2
     
-################################################
-# instead of show plot, saving image
-################################################
-easy_experiment = False
-save_image = True       # set easy_experiment = True to enable save_image
-g_strategy = "global"     # pick on open point global set
-l_strategy = "local"     # pick on open point local set first, if not exist go for global
-
-
 ################################################
 # Note: in case there is no obstracles:
 # the system will create 6 open points if divide_6 = True

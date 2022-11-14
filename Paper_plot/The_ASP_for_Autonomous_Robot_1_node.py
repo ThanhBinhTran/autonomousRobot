@@ -14,7 +14,7 @@ try:
     from Robot_paths_lib import *
     from Robot_draw_lib import *
     from Robot_sight_lib import *
-    from Robot import Robot
+    from Robot_class import Robot
 except ImportError:
     raise
 

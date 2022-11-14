@@ -7,6 +7,7 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.
 
 from matplotlib.pyplot import title
 import numpy as np
+from Robot_base import Picking_strategy
 
 from Tree import Node
 from RRTree import RRTree
@@ -59,7 +60,7 @@ class RRTree_x(RRTree):
         return None, None, None
 
     def build(self,  goal_coordinate, plotter: Plot_RRT=None, obstacles=None, rrt_queue=Priority_queue):
-        print ("builing Graph (adjacent graph and RRTreex) with {0} sampples".format(self.sampling_size))
+        print ("builing Graph with {0} sampples".format(self.sampling_size))
         first_saw_goal = False
 
         for i in range(1, self.sampling_size):
@@ -174,8 +175,8 @@ class RRTree_x(RRTree):
         return discovered_obstacle_nodes
 
 def robot_main( start_cooridinate, goal_coordinate, map_name, world_name, num_iter, robot_vision, \
-            robot_type, robot_radius, ranking_function, RRT_radius,\
-                RRT_step_size, RRT_sample_size):
+            robot_type, robot_radius, ranking_function, RRT_radius,RRT_step_size, RRT_sample_size, \
+            easy_experiment = True, save_image = True):
     
     ''' variable declaration '''
     robot = Robot(start=start_cooridinate, goal=goal_coordinate, vision_range=robot_vision)
@@ -192,16 +193,12 @@ def robot_main( start_cooridinate, goal_coordinate, map_name, world_name, num_it
     rrt_queue = Priority_queue()
 
     # find working space boundary
-    x_min = min(obstacles.x_lim[0], obstacles.y_lim[0], start_cooridinate[0], goal_coordinate[0]) - robot_vision
-    x_max = max(obstacles.x_lim[1], obstacles.y_lim[1], start_cooridinate[1], goal_coordinate[1]) + robot_vision
-    y_min = min(obstacles.x_lim[0], obstacles.y_lim[0], start_cooridinate[0], goal_coordinate[0]) - robot_vision
-    y_max = max(obstacles.x_lim[1], obstacles.y_lim[1], start_cooridinate[1], goal_coordinate[1]) + robot_vision
-    random_area = ([x_min, y_min], [x_max, y_max])
+    boundary_area = robot.find_working_space_boundaries(obstacles=obstacles)
 
     ''' build tree '''
     goal_node = Node(goal_coordinate, lmc=0, cost=0)    # initial goal node, rsh to goal =0, cost to goal = 0
     RRTx = RRTree_x(root=goal_node, step_size=RRT_step_size, radius=RRT_radius, 
-                    random_area=random_area, sample_size=RRT_sample_size)
+                    random_area=boundary_area, sample_size=RRT_sample_size)
     RRTx.build(goal_coordinate=start_cooridinate, plotter=plotter,obstacles=obstacles, rrt_queue=rrt_queue)
 
     #############################################################
@@ -245,11 +242,7 @@ def robot_main( start_cooridinate, goal_coordinate, map_name, world_name, num_it
                 break
 
             if show_animation and not easy_experiment:
-                plotter.RRTX_animation(Tree=RRTx, obstacles=obstacles, robot=robot)
-                #plotter.RRTX_animation(Tree=RRTx, obstacles=obstacles, robot=robot,\
-                #    obstacle_nodes=obstacle_nodes, discovered_obstacle_nodes = discovered_obstacle_nodes,\
-                #    all_children= all_children, rrt_queue=rrt_queue, sql_nodes=sql_nodes) 
-
+                plotter.RRTX_animation(Tree=RRTx, obstacles=obstacles, robot=robot, easy_experiment=easy_experiment)
 
             print ("from: {0} to {1}".format(robot.coordinate, curr_node.coords))
 
@@ -268,14 +261,10 @@ def robot_main( start_cooridinate, goal_coordinate, map_name, world_name, num_it
 
     elif save_image:
         # showing the final result (for save image and display as well)
-        plotter.RRTX_animation(Tree=RRTx, obstacles=obstacles, robot=robot)
-        fig_name = set_figure_name(map_name=map_name, range=robot.vision_range, start=start_cooridinate, 
-            goal=goal_coordinate, picking_strategy=g_strategy, ranking_function=ranking_function, RRTx=True)
+        plotter.RRTX_animation(Tree=RRTx, obstacles=obstacles, robot=robot, easy_experiment=easy_experiment)
+        save_figure(map_name=map_name, range=robot.vision_range, start=start_cooridinate, goal=goal_coordinate, \
+            picking_strategy=None, ranking_function=None, RRTx=True, plotter=plotter)
         
-        plotter.save_figure(fig_name, file_extension=".png")
-        #plotter.save_figure(fig_name, file_extension=".pdf")
-        print ("Saved: {0}.pdf".format(fig_name))
-
     return robot
             
 

@@ -10,21 +10,20 @@ from Robot_base import Picking_strategy, Ranking_type, RobotType
 from Robot_ranking import Ranking_function
 
 from Robot_run import robot_main
-from Robot_run_RRTstar_ranking import robot_main as robot_RRTstar_ranking
+from Robot_run import robot_main as robot_RRTstar_ranking
 from RRTree_X import robot_main as robot_RRTX
 from RRT_user_input import *
-from Program_config import save_image
 from Easy_experiment_lib import Experimental_Result, Experiment_type
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Code for Autonomous Robot.')
-    parser.add_argument('-n', metavar="number of iteration", type=int, help='number of iteration', default=100)
-    parser.add_argument('-m', metavar="data_map", help='map data', default='_map.csv')
+    parser.add_argument('-n', metavar="number of iteration", type=int, help='number of iteration', default=1000)
+    parser.add_argument('-m', metavar="data_map", help='map data', default='_MuchMoreFun.csv')
     parser.add_argument('-w', metavar="world_image", help='world model')
     parser.add_argument('-r', metavar="vision_range", type=float, help='vision range', default=5.0)
     parser.add_argument('-radius', metavar="robot radius", type=float, help='robot radius', default=0.5)
-
+    parser.add_argument('-ss', metavar="sample_size", type=int, help='sample size', default=8000)
     menu_result = parser.parse_args()
 
     # get user input
@@ -34,7 +33,8 @@ if __name__ == '__main__':
     robot_radius = menu_result.radius
     range_begin = menu_result.r
     robot_type = RobotType.circle
-
+    sample_size = menu_result.ss
+    
     # get start point and goal point
     start_list = []
 
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     # for much_more_fun.csv
     #goal_list.append ((50,50))
     #goal_list.append ((45,65))
-    #goal_list.append ((100,100))
+    goal_list.append ((100,100))
 
     # for map.csv
     # run robot
@@ -57,7 +57,8 @@ if __name__ == '__main__':
     #goal_list.append ((30, 50))
 
     # for map block_1.csv
-    goal_list.append ((99, 99))
+    #goal_list.append ((200, 200))
+    #goal_list.append ((99, 99))
 
     # for map block_1.csv
     #goal_list.append ((250, 320))
@@ -86,7 +87,8 @@ if __name__ == '__main__':
     pickingC_strategy = Picking_strategy.local_first
 
     range_step = 5
-    range_max = 81
+    range_max = 105
+    
     range_begin = 10
 
     print ("\n{0}, RobotA: {1}, RobotB {2}".format(experiment_type, 
@@ -125,24 +127,21 @@ if __name__ == '__main__':
                             num_iter, vision_range, robot_type, robot_radius, robotB_ranking_function)
 
                 elif experiment_type == Experiment_type.COMPARE_OUR_VS_RRTX_ALGORITHM:   # compare our vs RRtree X
-                    # get user input
-                    menu_result = menu_RRT()
-                    # get start_cooridinate and goal_coordinate
-                    step_size = menu_result.step_size
-                    radius = menu_result.radius
-                    sample_size = menu_result.ss
-
                     robotA = robot_RRTstar_ranking( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
                                         robot_vision=vision_range, robot_type=robot_type, robot_radius=robot_radius, 
                                         ranking_type = Ranking_type.RRTstar, ranking_function =robotA_ranking_function,
-                                        picking_strategy= Picking_strategy.global_first)
+                                        picking_strategy= Picking_strategy.global_first, sample_size=sample_size,
+                                        easy_experiment=True,save_image=True)
                     robotB = robot_RRTstar_ranking( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
                                         robot_vision=vision_range, robot_type=robot_type, robot_radius=robot_radius, 
                                         ranking_type = Ranking_type.RRTstar, ranking_function =robotA_ranking_function,
-                                        picking_strategy= Picking_strategy.local_first)
-                    robotC = robot_RRTX(start, goal, map_name, world_name,\
-                            num_iter, vision_range, robot_type, robot_radius, robotB_ranking_function, radius, \
-                                step_size, sample_size)
+                                        picking_strategy= Picking_strategy.local_first, sample_size=sample_size,
+                                        easy_experiment=True,save_image=True)
+                    robotC = robot_RRTX( start_cooridinate=start, goal_coordinate=goal, map_name=map_name, world_name=world_name,\
+                                        num_iter=num_iter, robot_vision=vision_range, robot_type=robot_type, robot_radius=robot_radius, \
+                                        ranking_function=robotB_ranking_function, RRT_radius=5,\
+                                        RRT_step_size=5, RRT_sample_size=sample_size,
+                                        easy_experiment=True,save_image=True)
                 # Log the result, careful with the data order (start, goal, vision....)
                 result.add_result([start, goal, vision_range, 
                         robotA.reach_goal, robotA.cost, 
@@ -150,14 +149,13 @@ if __name__ == '__main__':
                         robotC.reach_goal, robotC.cost ])
             
             # composite images for easy to analyze
-            if save_image:
-                result.compare_imgs(map_name= map_name, start=start, goal=goal, 
-                    range_list= range_experiment_list, experiment_type= experiment_type, 
-                    robotA_ranking_function= robotA_ranking_function, 
-                    robotB_ranking_function= robotB_ranking_function,
-                    pickingA_strategy= pickingA_strategy,
-                    pickingB_strategy= pickingB_strategy,
-                    pickingC_strategy= pickingC_strategy)
+            #result.compare_imgs(map_name= map_name, start=start, goal=goal, 
+            #        range_list= range_experiment_list, experiment_type= experiment_type, 
+            #        robotA_ranking_function= robotA_ranking_function, 
+            #        robotB_ranking_function= robotB_ranking_function,
+            #        pickingA_strategy= pickingA_strategy,
+            #        pickingB_strategy= pickingB_strategy,
+            #        pickingC_strategy= pickingC_strategy)
 
     # write log file
     if experiment_type == Experiment_type.COMPARE_LOCAL_GLOBAL:

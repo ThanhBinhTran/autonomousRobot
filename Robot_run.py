@@ -22,7 +22,8 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 robot_vision, robot_type, robot_radius, 
                 ranking_type = Ranking_type.Distance_Angle,
                 ranking_function =Ranking_function.Angular_similarity,
-                picking_strategy= Picking_strategy.local_first):
+                picking_strategy= Picking_strategy.local_first,
+                sample_size = 2000, easy_experiment=False, save_image=False):
     
     robot = Robot(start=start, goal=goal, vision_range= robot_vision, \
                     robot_type=robot_type, robot_radius=robot_radius)
@@ -45,7 +46,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
     if ranking_type == Ranking_type.RRTstar:
             # RRT start for ranking scores
         step_size = robot.vision_range
-        sample_size = 2000
+        
         # logging ranking
         rank_logger = Logging_ranking()
         r_logger_filename = rank_logger.set_logging_name(map_name=map_name, goal=goal,
@@ -78,7 +79,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         iter_count += 1
         robot.update_coordinate(robot.next_coordinate)
     
-        print("\n_number of iteration: {0}, current robot coordinate {1}".format(iter_count, robot.coordinate))
+        print("\n_number of iterations: {0}, current robot coordinate {1}".format(iter_count, robot.coordinate))
 
         # clean old data
         next_point = []
@@ -125,9 +126,9 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             #robot.next_coordinate = motion(robot.coordinate, next_point)  # simulate robot
             robot.next_coordinate = tuple(next_point)# motion(robot.coordinate, next_point)  # simulate robot
 
-        if show_animation:
+        if show_animation and not easy_experiment:
             plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
-                    closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
+                    closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point, easy_experiment=easy_experiment)
             #plotter.tree_all_nodes(RRTx)
             if ranking_type == Ranking_type.RRTstar:
                 plotter.tree(RRT_star,color_mode=TreeColor.by_cost)
@@ -149,13 +150,18 @@ def robot_main( start, goal, map_name, world_name, num_iter,
 
     elif save_image:
         # showing the final result (for save image and display as well)
-        plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
-                    closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point)
-        fig_name = set_figure_name(map_name=map_name, range=robot.vision_range, start=start, 
-            goal=goal, picking_strategy=picking_strategy, ranking_function=ranking_function)
-        plotter.save_figure(fig_name, file_extension=".png")
-        #plotter.save_figure(fig_name, file_extension=".pdf")
-        print ("Saved: {0}.pdf".format(fig_name))
+        plotter.show_animation(robot, world_name, iter_count, obstacles , goal, closed_sights,\
+            open_sights, skeleton_path, asp , critical_ls, next_point, easy_experiment=easy_experiment)
+        # draw some fig for paper
+        i = 0
+        if True:
+            for sight in robot.traversal_sights:
+                
+                plotter.point_text(point=sight[0], ls="ob",text="$C_{0}$".format(i))
+                i +=1
+        
+        save_figure(map_name=map_name, range=robot.vision_range, start=start, goal=goal,\
+            picking_strategy=picking_strategy, ranking_function=ranking_function, plotter=plotter)
 
     return robot
 
@@ -170,7 +176,7 @@ if __name__ == '__main__':
     goal = menu_result.gx, menu_result.gy
     robot_radius = menu_result.radius
     robot_vision = menu_result.r
-    
+    sample_size = menu_result.ss
     ranking_type = menu_result.rank_type
     if 'da' in ranking_type:
         ranking_type = Ranking_type.Distance_Angle
@@ -189,4 +195,5 @@ if __name__ == '__main__':
     # run robot
     robot_main( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
                 robot_vision=robot_vision, robot_type=robot_type, robot_radius=robot_radius, 
-                ranking_type = ranking_type, ranking_function =ranking_function, picking_strategy= picking_strategy)
+                ranking_type = ranking_type, ranking_function =ranking_function, 
+                picking_strategy= picking_strategy, sample_size=sample_size)

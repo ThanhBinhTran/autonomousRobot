@@ -16,7 +16,8 @@ def menu_Robot():
     parser.add_argument('-sy', metavar="start_y", type=float, help='start point y', default=0.0)
     parser.add_argument('-gx', metavar="goal_x", type=float, help='goal point x', default=70.0)
     parser.add_argument('-gy', metavar="goal_y", type=float, help='goal point y', default=90.0)
-
+    parser.add_argument('-ss', metavar="sample_size", type=int, help='sample size', default=2000)
+    
     parser.add_argument('-p', metavar="picking strategy", type=str, \
                 help='input : (g) for global first, (l) for local first', default='l')
 

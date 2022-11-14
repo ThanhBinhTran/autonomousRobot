@@ -6,6 +6,7 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.
 
 import numpy as np
 from sklearn.metrics import top_k_accuracy_score
+from Robot_base import Picking_strategy
 
 from Robot_math_lib import *
 from Robot_paths_lib import *
@@ -18,9 +19,13 @@ from Robot_class import Robot, RobotType
 from Robot_ranking import Ranker
 import argparse
 
-def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius):
+
+def robot_main( start, goal, map_name, world_name, num_iter, 
+                robot_vision, robot_type, robot_radius):
     
-    robot = Robot(start, robot_vision, robot_type, robot_radius)
+    robot = Robot(start=start, goal=goal, vision_range= robot_vision, \
+                    robot_type=robot_type, robot_radius=robot_radius)
+
     ranker = Ranker(alpha=0.9, beta= 0.1)
 
     # declare potter within window size
@@ -61,37 +66,26 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
         robot.check_goal(goal, closed_sights)
         #Robot.show_status()
 
+        #robot.show_status()
         if not robot.saw_goal and not robot.reach_goal:
             # get local active point and its ranking
-            robot.get_local_active_open_ranking_points(open_sights, ranker, goal)
-
+            robot.get_local_active_open_ranking_points(open_sights=open_sights, ranker=ranker, goal=goal)
             # stack local active open point to global set
             robot.expand_global_open_ranking_points(robot.local_active_open_rank_pts)
             
-
-            # add new active open points to graph_insert
             # add new active open points to graph_insert
             robot.visibility_graph.add_local_open_points(robot.coordinate, robot.local_active_open_pts)
-            #graph_add_lOpenPts(robot.visibility_graph, robot.coordinate, robot.local_active_open_pts)
-
-            # pick next point to make a move
-            next_point, next_pt_idx = robot.pick_next_point(robot.global_active_open_rank_pts, goal)
-
-            if next_point is not None:
-                # find the shortest skeleton path from current position (center) to next point
-                skeleton_path = robot.visibility_graph.BFS_skeleton_path(robot.coordinate, tuple(next_point))
-                #skeleton_path = BFS_skeleton_path(robot.visibility_graph, robot.coordinate, tuple(next_point))
-
-                # then remove picked point from active global open point
-                robot.remove_global_active_pts_by_index(next_pt_idx)
+        # pick next point to make a move
+        next_point = robot.pick_next_point(goal, picking_strategy=Picking_strategy.local_first)
+        if next_point is not None:
+            # find the shortest skeleton path from current position (center) to next point
+            if tuple(next_point) == tuple(goal):
+                skeleton_path = [robot.coordinate, goal]
             else:
-                print("No way to reach the goal!")
-                robot.is_no_way_to_goal(True)
-
+                skeleton_path = robot.visibility_graph.BFS_skeleton_path(robot.coordinate, tuple(next_point))
         else:
-            next_point = goal
-            # find the shortest path from center to next point
-            skeleton_path = [robot.coordinate, goal]
+            skeleton_path = []
+            robot.is_no_way_to_goal(True)
 
         # record the path and sight
         robot.expand_traversal_sights(closed_sights, open_sights)
@@ -119,7 +113,7 @@ def robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_
                       
             '''draw map obstacles/world '''            
             # prepare title
-            cost = robot.calculate_traveled_path_cost()
+            cost = robot.cost
             status_title = plotter.prepare_title(iter_count, cost)
             plotter.show_map(world_name=None, obstacles=obstacles, plot_title=status_title)
             
@@ -225,4 +219,5 @@ if __name__ == '__main__':
     robot_type=RobotType.circle
 
     # run robot
-    robot_main(start, goal, map_name, world_name, num_iter, robot_vision, robot_type, robot_radius)
+    robot_main( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
+                robot_vision=robot_vision, robot_type=robot_type, robot_radius=robot_radius)

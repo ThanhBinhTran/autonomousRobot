@@ -37,9 +37,9 @@ class Plot_robot(Plot_base):
         collection = PatchCollection(arc_patches, facecolor=cl, linestyle='solid', edgecolor='r', alpha=transparent)
         self.ax.add_collection(collection)
 
-    def vision_area(self, center, radius, ls=":"):
+    def vision_area(self, center, radius, ls=":", color="red"):
         """ draw a circle that limits the vision of robot """
-        vision = self.plt.Circle(center, radius, color="red", linestyle=ls, fill=False)
+        vision = self.plt.Circle(center, radius, color=color, linestyle=ls, fill=False)
         self.plt.gcf().gca().add_artist(vision)
 
     def vision(self, center, radius, csight, osight):
@@ -85,7 +85,7 @@ class Plot_robot(Plot_base):
             self.vision(local_center, vision_range, local_closed_sights, local_open_sights)
 
     def show_animation(self, Robot, world_name, iter_count, obstacles:Obstacles , goal, 
-                    closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point):
+                    closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point, easy_experiment= False):
 
         # clear plot
         self.clear()
@@ -155,7 +155,7 @@ class Plot_robot(Plot_base):
     ''' plot edges from node to its children '''
     def tree_edges(self, node, ls=ls_tree_edge):
         for node_children in node.children:
-            self.line_segment( (node.coords, node_children.coords), ls)
+            self.line_segment( (node.coords, node_children.coords), ls=ls, lw=0.3)
     
     ''' plot a tree's node '''
     def tree_node(self, node, ls_active=ls_tree_node_active, ls_inactive= ls_tree_node_inactive,\
