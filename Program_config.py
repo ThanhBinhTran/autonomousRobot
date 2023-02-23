@@ -4,18 +4,18 @@ from enum import Enum
 ################################################
 show_animation = True
 show_map = True
-show_world = True
+show_world = False
 
 show_traversalSights = True
 
 show_openSight = True
 show_closedSight = True
-show_circleRange = True
+show_circleRange = False
 
 show_sketelonPath = True
 show_approximately_shortest_path = True
 show_critical_line_segments = True
-show_cls_orderednumber = True  # show ordered number of critical line segments
+show_cls_orderednumber = False  # show ordered number of critical line segments
 
 show_visitedPath = True
 show_visibilityGraph = True
