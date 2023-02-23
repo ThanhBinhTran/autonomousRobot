@@ -2,14 +2,9 @@ __pycache__/*
 ROS_odom_imagePixel_converter/__pycache__/*
 *~
 venv/*
-debug.py
 test.*
 note.*
-paper.txt
-marker_fillstyle_reference.py
 result/*
-temp_log/*
-test_find_configuration_space.py
 .idea/csv-plugin.xml
 .idea/misc.xml
 .idea/modules.xml
