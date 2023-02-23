@@ -20,11 +20,11 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 import matplotlib.pyplot as plt
 try:
     from Robot_paths_lib import *
-    from Robot_draw_lib import *
+    from Plotter_lib import *
 except ImportError:
     raise
 
-plotter = Plot_robot(title="Ranking visualization")
+plotter = Plotter(title="Ranking visualization")
 plotter.ax = plotter.fig.add_subplot(projection='3d')
 
 map_size = 100

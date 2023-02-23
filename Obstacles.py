@@ -104,6 +104,22 @@ class Obstacles:
                 return True
         return False
 
+    ''' get_closest_point_collision: return closest collision point if any'''
+    def get_closest_point_collision(self, start_pt, end_pt, obstacles_line_segments):
+        lsA = (start_pt, end_pt)
+        cc_points = []
+        for obstracle_lss in obstacles_line_segments:
+            for ls in obstracle_lss:
+                pt_is = line_across(ls, lsA)
+                if pt_is is not None:
+                    cc_points.append(pt_is)
+        points_distance = [point_dist(start_pt, pt) for pt in cc_points]
+        if len(points_distance) > 0:
+            cc_points_distance_idx = np.argmin(points_distance)
+            return cc_points[cc_points_distance_idx]
+        else:
+            return end_pt
+
     ''' translate line segment by a vector '''
     def translate_line_segment(self, line_segment, vector):
         return [tuple(line_segment[0] +  vector), tuple(line_segment[1] +  vector)]

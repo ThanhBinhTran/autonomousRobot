@@ -10,6 +10,9 @@ from Robot_math_lib import approximately_num, point_dist
 import numpy as np
 from Queue_class import Priority_queue
 delta_consistency = 0
+from Obstacles import *
+
+
 ''' Node class '''
 class Node:
     def __init__(self, coords=None, cost=float('inf'), lmc=float('inf')):
@@ -240,6 +243,18 @@ class Tree:
 
         # bring random coordinate closer to nearest node
         picked_coordinate = nearest_node.bring_closer_coordinate(rand_coordinate, nearest_dist, self.step_size)
+        return picked_coordinate
+
+    ''' bring random coordinate closer to nearest node in tree '''
+    def bring_closer_avoid_obstacles(self, rand_coordinate, obstacles:Obstacles ):
+        # find the neareset node (in distance) to random coordinate
+        nearest_dist, nearest_node = self.nearest(rand_coordinate)
+        
+        picked_coordinate = nearest_node.bring_closer_coordinate(rand_coordinate, nearest_dist, self.step_size)
+        conllision = obstacles.check_point_collision(point=picked_coordinate,\
+                            obstacles_line_segments=obstacles.obstacles_line_segments)
+        if conllision:
+            picked_coordinate = None
         return picked_coordinate
 
     ''' update lmc of given node '''

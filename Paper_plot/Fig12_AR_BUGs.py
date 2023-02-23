@@ -22,7 +22,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 import matplotlib.pyplot as plt
 try:
-    from Robot_draw_lib import *
+    from Plotter_lib import *
     from Robot_sight_lib import *
     import matplotlib.pyplot as plt
     from matplotlib.path import Path
@@ -44,7 +44,7 @@ def main():
     x_min , x_max = -5.5, 16
     y_min, y_max = -6, 14.5
     space_add = 14
-    plotter = Plot_robot(size=((x_max - x_min + space_add)*0.15, (y_max-y_min)*0.15), title="")
+    plotter = Plotter(size=((x_max - x_min + space_add)*0.15, (y_max-y_min)*0.15), title="")
     goal = tuple((7 , 5))
 
     center_points = np.array([[0, 0],

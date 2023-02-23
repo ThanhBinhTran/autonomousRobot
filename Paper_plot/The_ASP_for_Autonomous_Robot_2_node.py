@@ -12,14 +12,14 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 import matplotlib.pyplot as plt
 try:
     from Robot_paths_lib import *
-    from Robot_draw_lib import *
+    from Plotter_lib import *
     from Robot_sight_lib import *
     from Robot_class import Robot
     from Obstacles import Obstacles
     from Robot_ranking import Ranking_function
     from Robot_base import Picking_strategy, Ranking_type
     from Robot_paths_lib import *
-    from Robot_draw_lib import *
+    from Plotter_lib import *
     from Robot_sight_lib import *
     from Robot_class import Robot
     from Obstacles import Obstacles
@@ -32,7 +32,7 @@ except ImportError:
     raise
 
 pt_offset = np.zeros((100,2))  # 100 offsets of point
-plotter = Plot_robot(title="The_ASP_for_Autonomous_Robot_2_node")
+plotter = Plotter(title="The_ASP_for_Autonomous_Robot_2_node")
 def main():
     goal = [10,10]
     robot_vision = 2

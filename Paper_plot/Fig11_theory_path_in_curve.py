@@ -21,7 +21,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 import matplotlib.pyplot as plt
 try:
-    from Robot_draw_lib import *
+    from Plotter_lib import *
     from Robot_sight_lib import *
     import matplotlib.pyplot as plt
     from matplotlib.path import Path
@@ -39,7 +39,7 @@ def main():
         Path.CURVE4
     ]
     robot_vision = 5
-    plotter = Plot_robot(size=(3.7*1.6,2.0*1.6), title="")
+    plotter = Plotter(size=(3.7*1.6,2.0*1.6), title="")
     goal = tuple((27,3))
 
     center_points = np.array([[0, 0],

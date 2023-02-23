@@ -512,9 +512,8 @@ def save_figure(map_name: str = "", range=0, start=0, goal=0, picking_strategy=0
         ranking_function=0, RRTx=False, fig_type= None, plotter=None):
     fig_name = set_figure_name(map_name=map_name, range=range, start=start, 
             goal=goal, picking_strategy=picking_strategy, ranking_function=ranking_function)
-    #file_extension = ".pdf"
-    file_extension = ".pgf"
-    plotter.save_figure(fig_name, file_extension=file_extension)
-    file_extension = ".png"
+    file_extension = ".pdf"
+    #file_extension = ".pgf"
+    #file_extension = ".png"
     plotter.save_figure(fig_name, file_extension=file_extension)
     print ("saved: {0}{1}".format(fig_name, file_extension))

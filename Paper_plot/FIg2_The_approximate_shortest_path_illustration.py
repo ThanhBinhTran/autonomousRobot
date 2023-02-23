@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 import matplotlib.pyplot as plt
 try:
-    from Robot_draw_lib import *
+    from Plotter_lib import *
 except ImportError:
     raise
 
@@ -44,7 +44,7 @@ def main():
     end = [4,3]
     x_min, x_max = -0.2, 4.1
     y_min, y_max = -0.1, 4.1
-    plotter = Plot_robot(size=((x_max-x_min), (y_max-y_min)),title="The_approximate_shortest_path_illustration")
+    plotter = Plotter(size=((x_max-x_min), (y_max-y_min)),title="The_approximate_shortest_path_illustration")
     plotter.plt.axis("off")   # turns off axes
     plotter.plt.axis("tight")  # gets rid of white border
     #plotter.plt.axis("image")  # square up the image instead of filling the "figure" space    

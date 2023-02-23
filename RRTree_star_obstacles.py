@@ -1,14 +1,16 @@
 import numpy as np
 
-from Tree import Tree, Node
+from Tree import Node
 from RRTree import RRTree
-''' plotter lib '''
-from Plotter_lib import Plotter
 from Robot_math_lib import *
 
 from RRT_user_input import menu_RRT
 from Program_config import *
 from Obstacles import Obstacles
+from Robot_class import Robot
+
+''' plotter lib '''
+from Plotter_lib import Plotter
 
 class RRTree_star(RRTree):
 
@@ -33,22 +35,22 @@ class RRTree_star(RRTree):
             return new_node, neighbour_nodes, nearest_neighbour_node
         return None, None, None        
 
-    def build(self,  goal_coordinate, plotter: Plotter=None, obstacles=None, show_animation=False):
+    def build(self,  goal_coordinate, plotter: Plotter=None, obstacles=None, robot:Robot=None, compare_ASP=False):
         first_saw_goal = False
+        count = 0
 
         for i in range(1, self.sampling_size):
-            
             # generate random coordinate in sampling area = [min, max]
             rand_coordinate = self.random_coordinate()
             
             # orient to goal sometime :))
-            if i %100 == 0 and not self.reach_goal: # bias to goal sometime
+            if i %50 == 0 and not self.reach_goal: # bias to goal sometime
                 rand_coordinate = np.array(goal_coordinate)
 
             # bring closer random coordinate to tree 
-            accepted_coordinate = self.bring_closer(rand_coordinate=rand_coordinate)
-
-            
+            accepted_coordinate = self.bring_closer_avoid_obstacles(rand_coordinate=rand_coordinate, obstacles=obstacles)
+            if accepted_coordinate is None or (not robot.inside_explored_area(pt=accepted_coordinate) and compare_ASP):
+                continue
             # if tree first saw given goal , instead of adding new random , add goal
             if not first_saw_goal:
                 nn_goal = self.saw_goal(goal_coordinate)    # return nearst neighbour node of goal
@@ -67,10 +69,13 @@ class RRTree_star(RRTree):
                 goal_node = self.get_node_by_coords(goal_coordinate)
                 self.path_to_goal = self.path_to_root(goal_node)
                 self.total_goal_cost = goal_node.cost
+                count += 1
+                if count == 200:
+                    break
 
             ''' for display '''
             if show_animation:
-                plotter.build_tree_animation(num_iter= i, Tree= self, obstacles=None,  goal_coords=goal_coordinate, \
+                plotter.build_tree_animation(num_iter= i, Tree= self, obstacles=obstacles,  goal_coords=goal_coordinate, \
                     start_coords=self.root.coords, rand_coordinate= rand_coordinate, rand_node=new_node, 
                     neighbour_nodes=neighbour_nodes, nearest_neighbour_node=nearest_neighbour_node, color_tree=TreeColor.by_cost)
 
@@ -87,26 +92,27 @@ if __name__ == '__main__':
     sample_size = menu_result.ss
     map_name = menu_result.m
     world_name = None
+    vision_range = menu_result.r
 
     ''' Running '''
     # set same window size to capture pictures
     plotter = Plotter(title="Rapidly-exploring Random Tree Star (RRT*)")
     plotter.set_equal()
 
-    obstacles = Obstacles()
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
-    #obstacles.read(world_name, map_name)
+    obstacles = Obstacles()
+    obstacles.read(world_name, map_name)
+    obstacles.line_segments()
+
 
     # find working space boundary
-    x_min = min(obstacles.x_lim[0], obstacles.y_lim[0], start_cooridinate[0], goal_coordinate[0])
-    x_max = max(obstacles.x_lim[1], obstacles.y_lim[1], start_cooridinate[1], goal_coordinate[1])
-    y_min = min(obstacles.x_lim[0], obstacles.y_lim[0], start_cooridinate[0], goal_coordinate[0])
-    y_max = max(obstacles.x_lim[1], obstacles.y_lim[1], start_cooridinate[1], goal_coordinate[1])
-    random_area = ([x_min, y_min], [x_max, y_max])
+    robot = Robot(start=start_cooridinate, goal=goal_coordinate, vision_range=vision_range)
+    # find working space boundary
+    boundary_area = robot.find_working_space_boundaries(obstacles=obstacles)
 
     ''' build tree '''
     start_node = Node(start_cooridinate, cost=0)            # initial root node, cost to root = 0
     RRT_star = RRTree_star(root=start_node, step_size=step_size, radius=radius, 
-                    random_area=random_area, sample_size=sample_size)
-    RRT_star.build(goal_coordinate=goal_coordinate, plotter=plotter, obstacles=obstacles, show_animation=True)
+                    random_area=boundary_area, sample_size=sample_size)
+    RRT_star.build(goal_coordinate=goal_coordinate, plotter=plotter, obstacles=obstacles, robot=robot)
     plotter.show()

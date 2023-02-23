@@ -4,7 +4,7 @@ from enum import Enum
 ################################################
 show_animation = True
 show_map = True
-show_world = False
+show_world = True
 
 show_traversalSights = True
 
@@ -12,15 +12,15 @@ show_openSight = True
 show_closedSight = True
 show_circleRange = True
 
-show_sketelonPath = False
-show_approximately_shortest_path = False
-show_critical_line_segments = False
-show_cls_orderednumber = False  # show ordered number of critical line segments
+show_sketelonPath = True
+show_approximately_shortest_path = True
+show_critical_line_segments = True
+show_cls_orderednumber = True  # show ordered number of critical line segments
 
-show_visitedPath = False
+show_visitedPath = True
 show_visibilityGraph = True
 
-show_local_openpt = False
+show_local_openpt = True
 show_active_openpt = True
 show_next_point = True
 
@@ -34,10 +34,10 @@ show_text_goal = True
 ################################################
 show_active_openpt_HA_Assumption = True         # active open points (HA Assumption)
 show_activeArc_HA_Assumption = True             # arc points (HA Assumption)
-show_parentArc_HA_Assumption = False             # parent arc points (HA Assumption)
-show_boundaryPts_HA_Assumption = False           # boundary points intersection between circle and obstacles
+show_parentArc_HA_Assumption = True             # parent arc points (HA Assumption)
+show_boundaryPts_HA_Assumption = True           # boundary points intersection between circle and obstacles
 show_circleGoal_HA_Assumption = True            # big circle (at goal within radius = dist(goal, robot center))
-show_activeArcPts_order_HA_Assumption = False    # show order of arc points according to its angles
+show_activeArcPts_order_HA_Assumption = True    # show order of arc points according to its angles
 # line styles
 ls_bp_HA = "k."     # boundary points (HA Assumption)
 ls_aap_HA = "c."    # active arc points (HA Assumption)
@@ -48,13 +48,13 @@ transparent = 0.1   # closed sights
 ################################################
 # parementers to hide/show information
 ################################################
-print_local_obstacles_boundary = False
-print_closed_sights = False
-print_open_sights = False
-print_ref_csight_line_segments = False
-print_csight_line_segments = False
-print_traversalSights = False
-print_visited_path = False
+print_local_obstacles_boundary = True
+print_closed_sights = True
+print_open_sights = True
+print_ref_csight_line_segments = True
+print_csight_line_segments = True
+print_traversalSights = True
+print_visited_path = True
 
 ################################################
 # LINE STYPE for robot
@@ -105,5 +105,5 @@ class TreeColor(Enum):
 ################################################
 # Note: in case there is no obstracles:
 # the system will create 6 open points if divide_6 = True
-# if divide_6 = false, 3 open points will be created
+# if divide_6 = True, 3 open points will be created
 divide_6 = True

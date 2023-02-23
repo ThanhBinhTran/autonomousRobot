@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 import matplotlib.pyplot as plt
 try:
     from Robot_paths_lib import *
-    from Robot_draw_lib import *
+    from Plotter_lib import *
     from Robot_sight_lib import *
     from Robot_class import Robot
 except ImportError:
@@ -20,7 +20,7 @@ except ImportError:
 
 
 pt_offset = np.zeros((100,2))  # 100 offsets of point
-plotter = Plot_robot(title="The_ASP_for_Autonomous_Robot_1_node")
+plotter = Plotter(title="The_ASP_for_Autonomous_Robot_1_node")
 
 def main():
     
@@ -100,7 +100,7 @@ def main():
             i += 1
         # show_approximately_shortest_path
         if 0:
-            plotter.path( asp, "-r")
+            plotter.RRT_path( asp, "-r")
             print ("________________")
             print (asp)
             print ("________________")
@@ -152,7 +152,7 @@ def main():
         
         
     # skeleton path
-    plotter.path(skeleton_path, ls="--.b")
+    plotter.RRT_path(skeleton_path, ls="--.b")
     
 
     # mid path
@@ -180,7 +180,7 @@ def main():
         
     # final approximate shortest path
     if 1:
-        plotter.path( asp, "-r")
+        plotter.RRT_path( asp, "-r")
         i = 0
         pt_offset[0] = [0, -0.1]
         pt_offset[1] = [+0.1, + 0.1]

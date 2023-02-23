@@ -11,8 +11,8 @@ See Wikipedia article (https://en.wikipedia.org/wiki/A*_search_algorithm)
 
 import math
 
-show_animation = False
-
+from Program_config import show_animation
+import time
 
 class AStarPlanner:
 
@@ -179,9 +179,14 @@ class AStarPlanner:
             return False
 
         # collision check
-        if self.obstacle_map[node.x][node.y]:
+        rows_len = len(self.obstacle_map)
+        columns_len = len(self.obstacle_map[0])
+        if node.x < rows_len and node.y < columns_len:
+            if self.obstacle_map[node.x][node.y]:
+                return False
+        else:
             return False
-
+            print ("out of map")
         return True
 
     def calc_obstacle_map(self, ox, oy):
@@ -222,13 +227,19 @@ class AStarPlanner:
         return motion
 
 
-def main(start, goal, ox, oy, robot_radius, plt):
+def main(start, goal, ox, oy, robot_radius, plt, grid_size = 1.0):
     # start and goal position
     sx, sy = start
     gx, gy = goal  # [m]
-    grid_size = 1.0  # [m]
-
+    l = grid_size/2
     if show_animation:  # pragma: no cover
+        plt.cla()
+        for x,y in zip(ox, oy):
+            a = x - l 
+            b = x + l
+            c = y - l
+            d = y + l
+            plt.fill([a,b,b,a,a],[c,c,d,d,c], color='black', alpha=0.5)
         plt.plot(ox, oy, ".k")
         plt.plot(sx, sy, "og")
         plt.plot(gx, gy, "xb")
@@ -236,15 +247,18 @@ def main(start, goal, ox, oy, robot_radius, plt):
         plt.axis("equal")
         
     a_star = AStarPlanner(ox, oy, grid_size, robot_radius)
+    sp_Astar_start = time.time()
     rx, ry = a_star.planning(sx, sy, gx, gy, plt)
+    sp_Astar_end = time.time()
 
+    sp_Astar_time = sp_Astar_end - sp_Astar_start
     if show_animation:  # pragma: no cover
         plt.plot(rx, ry, "-r")
         plt.pause(0.001)
-    asp_Astar = []
+    sp_Astar_path = []
     for x,y in zip (rx,ry):
-        asp_Astar.append((x,y))
-    return asp_Astar
+        sp_Astar_path.append((x,y))
+    return sp_Astar_path, sp_Astar_time
 
 if __name__ == '__main__':
     start = 10, 10

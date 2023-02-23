@@ -10,7 +10,7 @@ from Robot_base import Picking_strategy
 
 from Robot_math_lib import *
 from Robot_paths_lib import *
-from Robot_draw_lib import Plot_robot
+from Plotter_lib import Plotter
 from Robot_sight_lib import *
 from Robot_map_lib import Map
 from Obstacles import *
@@ -29,7 +29,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
     ranker = Ranker(alpha=0.9, beta= 0.1)
 
     # declare potter within window size
-    plotter = Plot_robot(title="Path Planning for Autonomous Robot: {0}".format(map_name))
+    plotter = Plotter(title="Path Planning for Autonomous Robot: {0}".format(map_name))
     
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
@@ -160,10 +160,10 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 plotter.paths(robot.visited_paths, ls_vp, ls_goingp)
             
             if show_sketelonPath:
-                plotter.path(skeleton_path, ls_sp)
+                plotter.RRT_path(skeleton_path, ls_sp)
             
             if show_approximately_shortest_path:
-                plotter.path(asp, ls_asp)
+                plotter.RRT_path(asp, ls_asp)
             
             if show_critical_line_segments:
                 plotter.critical_line_segments(critical_ls, ls_cls)

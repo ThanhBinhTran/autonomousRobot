@@ -11,7 +11,7 @@ from Robot_base import Picking_strategy
 
 from Tree import Node
 from RRTree import RRTree
-from RRT_draw_lib import Plot_RRT
+from Plotter_lib import Plotter
 from Robot_math_lib import *
 
 from RRT_user_input import menu_RRT
@@ -59,7 +59,7 @@ class RRTree_x(RRTree):
             return new_node, neighbour_nodes, nearest_neighbour_node
         return None, None, None
 
-    def build(self,  goal_coordinate, plotter: Plot_RRT=None, obstacles=None, rrt_queue=Priority_queue):
+    def build(self,  goal_coordinate, plotter: Plotter=None, obstacles=None, rrt_queue=Priority_queue):
         print ("builing Graph with {0} sampples".format(self.sampling_size))
         first_saw_goal = False
 
@@ -176,15 +176,14 @@ class RRTree_x(RRTree):
 
 def robot_main( start_cooridinate, goal_coordinate, map_name, world_name, num_iter, robot_vision, \
             robot_type, robot_radius, ranking_function, RRT_radius,RRT_step_size, RRT_sample_size, \
-            easy_experiment = True, save_image = True):
+            easy_experiment = False, save_image = True):
     
     ''' variable declaration '''
     robot = Robot(start=start_cooridinate, goal=goal_coordinate, vision_range=robot_vision)
     # set same window size to capture pictures
-    wintitle = "Rapidly-exploring Random Tree X (RRT_X)"
-    plotter = Plot_RRT(title=wintitle)
+    plotter = Plotter(title="Rapidly-exploring Random Tree X (RRT_X)")
     plotter.set_equal()
-    print (wintitle)
+
 
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()

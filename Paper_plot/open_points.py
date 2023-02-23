@@ -20,7 +20,7 @@ try:
     from Robot_ranking import Ranking_function
     from Robot_base import Picking_strategy, Ranking_type
     from Robot_paths_lib import *
-    from Robot_draw_lib import *
+    from Plotter_lib import *
     from Robot_sight_lib import *
     from Robot_class import Robot
     from Obstacles import Obstacles
@@ -37,7 +37,7 @@ def main():
     map_name = "_map.csv"
     robot_vision = 20
     ranker = Ranker()
-    plotter = Plot_robot(title="The_ASP_for_Autonomous_Robot_2_node")
+    plotter = Plotter(title="The_ASP_for_Autonomous_Robot_2_node")
     # display map
     obstacles = Obstacles()
     ''' get obstacles data whether from world (if indicated) or map (by default)'''

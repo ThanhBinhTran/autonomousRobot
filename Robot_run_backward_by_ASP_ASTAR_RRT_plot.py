@@ -20,13 +20,19 @@ class Experimental_Astar_Asp(Result_Log):
         # read result as frame
         result_data = pd.read_csv(result_file)
         
-        df_time = result_data[['asp_time', 'Astar_time']]
-        df_time.plot(logy=True, kind="bar")
+        df_time = result_data[['asp_time', 
+                'Astar_time',
+                'RRTStar_time'
+            ]]
+        df_time.plot(logy=False, kind="bar")
         #data = np.log2(df_time[['asp_time', 'Astar_time']])
         
         #data.plot.bar()
         #data.
-        df_path_cost = result_data[['asp_path_cost', 'Astar_path_cost']]
+        df_path_cost = result_data[['asp_path_cost', 
+            'Astar_path_cost',
+            'RRTStar_path_cost'
+            ]]
         df_path_cost.plot(kind="bar")
         plt.show()
 
