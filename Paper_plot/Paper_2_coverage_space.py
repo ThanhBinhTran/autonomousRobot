@@ -187,8 +187,6 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             
         # record the path
         traversal_sight.append([center, closed_sights, open_sights])
-        if print_traversalSights:
-            print ("traversal_sight:", traversal_sight)
         
         asp, critical_ls = approximately_shortest_path(skeleton_path, traversal_sight, robot_vision)
         #asp = remove_validation(asp)

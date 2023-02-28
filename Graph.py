@@ -8,15 +8,19 @@ class Graph:
     def add_local_open_points(self, center, lActive_OpenPts):
         if len(lActive_OpenPts) > 0:
             self.graph_insert(center, lActive_OpenPts)
+    
+    def graph_create_edge(self, nodeA, nodeB):
+        self.graph[tuple(nodeA)].append(tuple(nodeB))
+        self.graph[tuple(nodeB)].append(tuple(nodeA))
 
     # Function to insert edges into graph
     def graph_insert(self, pnode, leafs):
-        # print ("__pnode:", pnode)
-        # print ("__leafs:", leafs)
+        #print ("__pnode: {0}, ___leafs{1}".format (pnode, leafs))
         if len(leafs) > 0:
             for leaf in leafs:
-                self.graph[tuple(pnode)].append(tuple(leaf))
-                self.graph[tuple(leaf)].append(tuple(pnode))
+                self.graph_create_edge(pnode, leaf)
+                #self.graph[tuple(pnode)].append(tuple(leaf))
+                #self.graph[tuple(leaf)].append(tuple(pnode))
 
     def get_all_non_leaf(self):
         non_leaves = []

@@ -7,7 +7,7 @@ get user inputs
 def menu_Robot():
 
     parser = argparse.ArgumentParser(description='Code for Autonomous Robot.')
-    parser.add_argument('-n', metavar="number of iteration", type=int, help='number of iteration', default=9)
+    parser.add_argument('-n', metavar="number of iteration", type=int, help='number of iteration', default=39)
     parser.add_argument('-m', metavar="data_map", help='map data', default='_map.csv')
     parser.add_argument('-w', metavar="world_image", help='world model')
     parser.add_argument('-r', metavar="vision_range", type=float, help='vision range', default=20.0)

@@ -90,9 +90,6 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         # record the path and sight
         robot.expand_traversal_sights(closed_sights, open_sights)
 
-        if print_traversalSights:
-            robot.print_traversal_sights()
-
         asp, critical_ls = approximately_shortest_path(skeleton_path, robot.traversal_sights, robot.vision_range)
 
         # mark visited path

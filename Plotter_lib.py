@@ -223,7 +223,7 @@ class Plotter(Plot_base):
         self.tree(Tree)
         self.goal(goal_coords, reach_goal, None)
         self.start(start_coords)
-        self.pause(0.1)
+        #self.pause(0.1)
     
     
     
@@ -366,7 +366,7 @@ class Plotter(Plot_base):
         self.start(start_coords)
 
         ''' animation new node '''
-        if rand_coordinate is not None:
+        if rand_coordinate is not None and rand_node is not None:
             self.point(rand_coordinate, ls=ls_rand_coordinates)
             self.line_segment((rand_coordinate, rand_node.coords), ls=ls_ls_to_nn)
             
@@ -375,8 +375,9 @@ class Plotter(Plot_base):
             self.point(rand_node.coords, ls=ls_random_node)
         if nearest_neighbour_node is not None:
             self.point(nearest_neighbour_node.coords, ls=ls_nearest_n_node)
-        for neighbour_node in neighbour_nodes:
-            self.point(neighbour_node.coords, ls=ls_neighbour_node)
+        if neighbour_nodes is not None:
+            for neighbour_node in neighbour_nodes:
+                self.point(neighbour_node.coords, ls=ls_neighbour_node)
         
         # path from root to goal
         self.RRT_path(Tree.path_to_goal, ls_edge=ls_ahead_path, ls_node=ls_path_node, lw=lw_path)

@@ -5,6 +5,22 @@ from Robot_sight_lib import inside_local_true_sight, inside_global_true_sight
 from Robot_base import Picking_strategy, Ranking_type, Robot_base, RobotType
 from Program_config import *
 from Graph import Graph
+
+import ctypes
+import glob
+
+# find the shared library, the path depends on the platform and Python version
+libfile = glob.glob('build/*/cgal_intersection_tri*.so')[0]
+
+# 1. open the shared library
+mylib = ctypes.CDLL(libfile)
+
+# 2. tell Python the argument and result types of function main
+mylib.main.restype = ctypes.c_int
+mylib.main.argtypes = [np.ctypeslib.ndpointer(dtype=np.float64), np.ctypeslib.ndpointer(dtype=np.float64),
+		       np.ctypeslib.ndpointer(dtype=np.float64), np.ctypeslib.ndpointer(dtype=np.float64)]
+
+
 #from RRTree_star import RRTree_star
 class Robot(Robot_base):
     def __init__(self, start, goal, vision_range=20, robot_type= RobotType.circle, robot_radius= 0.2):
@@ -53,7 +69,14 @@ class Robot(Robot_base):
 
     def expand_traversal_sights(self, closed_sights, open_sights):
         self.traversal_sights.append([self.coordinate, closed_sights, open_sights])
-   
+    
+    def get_sights_by_coordinate(self, coordinate):
+        for centre, c_sights, o_sights in self.traversal_sights:
+            #if centre == coordinate:
+            if math.isclose(point_dist(centre, coordinate), 0):  # for avoid floating point miss match
+                return centre, c_sights, o_sights
+        return None, None, None
+        
     ''' expand visited path and its cost also '''
     def expand_visited_path(self, path):
         '''
@@ -67,6 +90,70 @@ class Robot(Robot_base):
             direction = len(path) == 2
             self.visited_path_directions.append(direction)
             self.cost += path_cost(path)
+    
+    ''' connect nearby visited nodes '''
+    def bridge_visibility_graph(self, cur_coordinate, cur_open_sights):
+        # get all visited node
+        center_pts_x = []
+        center_pts_y = []
+        is_tri_pts_x = []
+        is_tri_pts_y = []
+
+        all_visited_nodes = np.array(self.visibility_graph.get_all_non_leaf())
+        print ("all_visited_nodes__________", all_visited_nodes)
+        if len(all_visited_nodes) > 0:
+            # get nearby node (distance < 2 range) from all visited node
+            node_distance = np.array([point_dist(pt, cur_coordinate) for pt in all_visited_nodes])
+            mask = np.logical_and(node_distance > 0 ,node_distance < self.vision_range*2 ) 
+            nearby_nodes = all_visited_nodes[mask]
+            print ("nearby_nodes______________", nearby_nodes)
+            # find intersection between nearby node and new coorindate
+            for nearby_node in nearby_nodes:
+                # flag to skip if connecting point is found
+                connectable = False
+                # get open sight of nearby_node
+                center, _, opensights = self.get_sights_by_coordinate(tuple(nearby_node))
+                if opensights is None:
+                    continue
+                for osight in opensights:
+                    # get open sight of new node
+                    for cur_osights, inside_status in zip(cur_open_sights, self.local_open_pts_status):
+                        
+                        if not inside_status:
+                            pts_triA = np.array([center[0],center[1],
+                                                osight[0][0], osight[0][1], osight[1][0], osight[1][1]], np.double)
+                            pts_triB = np.array([cur_coordinate[0],cur_coordinate[1],
+                                                cur_osights[0][0], cur_osights[0][1], cur_osights[1][0],cur_osights[1][1]], np.double)
+
+                            pts_data = np.array([0,0, 0,0, 0,0, 0,0, 0,0, 0,0], np.double) # maximun of 6 points of intersection of 2 triangles
+                            pt_centre = np.array([0,0], np.double) # centre of mass of intersection polygon if found.
+                            result = mylib.main(pts_triA, pts_triB, pts_data, pt_centre)
+                            if result > 0:
+                                
+                                print ("result--------------", result)
+                                print ("pts_triA--------------", pts_triA)
+                                print ("pts_triB--------------", pts_triB)
+                                print ("pts_data--------------", pts_data)
+                                print ("pt_centre--------------", pt_centre)
+                                center_pts_x.append(pt_centre[0])
+                                center_pts_y.append(pt_centre[1])
+                                for i in range (result):
+                                    is_tri_pts_x.append(pts_data[2*i])
+                                    is_tri_pts_y.append(pts_data[2*i+1])
+                                connectable = True
+                                self.visibility_graph.graph_create_edge(pt_centre, center)
+                                self.visibility_graph.graph_create_edge(pt_centre, cur_coordinate)
+                                csights = []
+                                for i in range(result):
+                                    if i == (result-1):
+                                        csights.append(((pts_data[2*i],pts_data[2*i+1]),(pts_data[0],pts_data[1])))
+                                    else:
+                                        csights.append(((pts_data[2*i],pts_data[2*i+1]),(pts_data[2*i+2],pts_data[2*i+3])))
+                                self.traversal_sights.append([pt_centre, csights , []])
+                                break
+                    if connectable:
+                        break
+        return center_pts_x, center_pts_y, is_tri_pts_x, is_tri_pts_y
 
     ''' Check if robot saw goal '''
     def is_saw_goal(self, goal, true_sight):
@@ -91,9 +178,6 @@ class Robot(Robot_base):
             print ("Reached goal!")
         elif self.saw_goal:
             print ("Saw goal!")
-
-        if print_traversalSights:
-            print("traversal_sights:", self.traversal_sights)
 
         if print_visited_path:
             print("visited path:", self.visited_paths)
@@ -146,8 +230,8 @@ class Robot(Robot_base):
 
             # remove local_point which is inside explored area
             if len(self.traversal_sights) > 0:
-                local_open_pts_status = [inside_global_true_sight(pt, self.vision_range, self.traversal_sights) for pt in self.local_active_open_pts]
-                self.local_active_open_pts = self.local_active_open_pts[np.logical_not(local_open_pts_status)]
+                self.local_open_pts_status = [inside_global_true_sight(pt, self.vision_range, self.traversal_sights) for pt in self.local_active_open_pts]
+                self.local_active_open_pts = self.local_active_open_pts[np.logical_not(self.local_open_pts_status)]
         
 
     ''' check if a point is inside explored area '''

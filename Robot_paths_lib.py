@@ -67,7 +67,9 @@ def get_critical_ls(skeleton_path, traversal_sight, robot_vision):
         # query true sight for center node
         tsight = []
         for ts in traversal_sight:
-            if c_pt == ts[0]:
+            print ("delete_______________________", ts)
+            #if c_pt == ts[0]:
+            if math.isclose(point_dist(c_pt, ts[0]), 0):    # avoid floating point compare error
                 tsight = ts[1]
         # print ("true closed sight for current point:", tsight)
         local_ls = []

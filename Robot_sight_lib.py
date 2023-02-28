@@ -371,8 +371,6 @@ def get_open_sights_in_active_arc_theory(arc_pts, parent_arc, robot_vision, ob, 
 def get_closed_sights(Robot, obstacles):
     # get boundary line segments where is limited by obstacles
     local_obs_boundary = get_local_obstacles_boundary(Robot.coordinate, Robot.vision_range, obstacles)
-    if print_local_obstacles_boundary:
-        print_pairs("local_obs_boundary", local_obs_boundary)
 
     closed_sights = get_closed_sights_from_blss(Robot.coordinate, local_obs_boundary)
     if print_closed_sights:
@@ -382,7 +380,7 @@ def get_closed_sights(Robot, obstacles):
 
 
 def inside_global_true_sight(pt, radius, traversal_path):
-    result = [inside_local_true_sight(pt, x, radius, tsight) for x, tsight, _ in traversal_path]
+    result = [inside_local_true_sight(pt, centre, radius, tsight) for centre, tsight, _ in traversal_path]
     ret_result = np.sum(result) > 0
     # print ("inside global sight result: ", result, ", return :", ret_result)
     return ret_result
@@ -708,12 +706,7 @@ def get_open_sights(Robot, goal, closed_sights):
     # get reference closed line segments
     ref_csight_lss = [get_ref_csight_lss(Robot.coordinate, Robot.vision_range, c_sight) for c_sight in closed_sights]
 
-    if print_ref_csight_line_segments:
-        print("print_ref_csight_linesegments", ref_csight_lss)
-
     csights_lss = get_csight_lss(Robot.coordinate, ref_csight_lss)
-    if print_csight_line_segments:
-        print_cpairs("print_closed_linesegments", csights_lss)
 
     open_sights = get_osight_linesegments(Robot.coordinate, Robot.vision_range, goal, csights_lss)
     if print_open_sights:

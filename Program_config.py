@@ -17,7 +17,7 @@ show_approximately_shortest_path = True
 show_critical_line_segments = True
 show_cls_orderednumber = False  # show ordered number of critical line segments
 
-show_visitedPath = True
+show_visitedPath = False
 show_visibilityGraph = True
 
 show_local_openpt = True
@@ -48,13 +48,9 @@ transparent = 0.1   # closed sights
 ################################################
 # parementers to hide/show information
 ################################################
-print_local_obstacles_boundary = True
 print_closed_sights = True
 print_open_sights = True
-print_ref_csight_line_segments = True
-print_csight_line_segments = True
-print_traversalSights = True
-print_visited_path = True
+print_visited_path = False
 
 ################################################
 # LINE STYPE for robot
@@ -93,9 +89,6 @@ ls_visited_path = 'r'           # visited path
 ls_ahead_path = 'c'             # look ahead path
 ls_path_node = '.'              # path node
 lw_path = 2                     # paths' line width
-
-delta = 0
-MAX_RANGE = 200                 # represent infinity value in color range
 
 class TreeColor(Enum):
     no = 0

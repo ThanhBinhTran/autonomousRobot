@@ -32,7 +32,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 ranking_type = Ranking_type.Distance_Angle,
                 ranking_function =Ranking_function.Angular_similarity,
                 picking_strategy= Picking_strategy.local_first,
-                sample_size = 2000, easy_experiment=True, save_image=False):
+                sample_size = 2000, easy_experiment=True, save_image=True):
     
     robot = Robot(start=start, goal=goal, vision_range= robot_vision, \
                     robot_type=robot_type, robot_radius=robot_radius)
@@ -117,8 +117,18 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             
             # add new active open points to graph_insert
             robot.visibility_graph.add_local_open_points(robot.coordinate, robot.local_active_open_pts)
+        
+        # record the path and sight
+        robot.expand_traversal_sights(closed_sights, open_sights)
+        center_pts_x = []
+        center_pts_y = []
+        is_tri_pts_x = []
+        is_tri_pts_y = []
+        center_pts_x, center_pts_y, is_tri_pts_x, is_tri_pts_y = robot.bridge_visibility_graph(robot.coordinate, open_sights)
+
         # pick next point to make a move
         next_point = robot.pick_next_point(goal, picking_strategy=picking_strategy)
+
         if next_point is not None:
             # find the shortest skeleton path from current position (center) to next point
             if tuple(next_point) == tuple(goal):
@@ -129,8 +139,6 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             skeleton_path = []
             robot.is_no_way_to_goal(True)
 
-        # record the path and sight
-        robot.expand_traversal_sights(closed_sights, open_sights)
 
         ''' [COMPARASON] apply Astar, RRT to find shortest path in visibility area '''
         Astar_sp = []
@@ -141,13 +149,12 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         RRT_time = 0
         RRT_path_cost = 0
 
-        if len(skeleton_path) > 2:
+        if len(skeleton_path) > 2 and False:
             print ("__backward path:")
             
             ''' ASTAR '''
             obstacles_Astar = []
             grid_size = 1
-            #robot.visibility_graph.get_all_non_leaf()
             visited_area = robot.visibility_graph.get_all_non_leaf()
             x_visited_area = [x for x,y in visited_area]
             y_visited_area = [y for x,y in visited_area]
@@ -202,8 +209,8 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 plotter.path(Astar_sp, "-b")
             if len(RRT_sp) > 0:
                 plotter.RRT_path(RRT_sp)
-            if len(Astar_sp)>0:
-                save_figure(map_name=map_name, range=iter_count, start=start, goal=goal,\
+            #if len(Astar_sp)>0:
+            save_figure(map_name=map_name, range=iter_count, start=start, goal=goal,\
                     picking_strategy=picking_strategy, ranking_function=ranking_function, plotter=plotter)
         # mark visited path
         robot.expand_visited_path(asp)
@@ -220,10 +227,16 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 plotter.path(Astar_sp, "-b")
             if len(RRT_sp) > 0:
                 plotter.RRT_path(RRT_sp)
-            if len(Astar_sp)>0:
+            #if len(Astar_sp)>0:
+            #    save_figure(map_name=map_name, range=iter_count, start=start, goal=goal,\
+            #        picking_strategy=picking_strategy, ranking_function=ranking_function, plotter=plotter)
+            if len(skeleton_path) > 2:
                 save_figure(map_name=map_name, range=iter_count, start=start, goal=goal,\
-                    picking_strategy=picking_strategy, ranking_function=ranking_function, plotter=plotter)
-
+                        picking_strategy=picking_strategy, ranking_function=ranking_function, plotter=plotter)
+            if len(center_pts_x) > 0:
+                plotter.plt.plot(center_pts_x, center_pts_y, marker = "H", ls="", color = 'red')
+                plotter.plt.plot(is_tri_pts_x, is_tri_pts_y, marker = "X", ls="", color = 'red')
+            #plotter.plt.pause(1)
 
             #plotter.tree_all_nodes(RRTx)
             if ranking_type == Ranking_type.RRTstar:
@@ -255,12 +268,12 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 plotter.point_text(point=sight[0], ls="ob",text="$C_{0}$".format(i))
                 i +=1
         
-        save_figure(map_name=map_name, range=robot.vision_range, start=start, goal=goal,\
-            picking_strategy=picking_strategy, ranking_function=ranking_function, plotter=plotter)
+        #save_figure(map_name=map_name, range=robot.vision_range, start=start, goal=goal,\
+        #    picking_strategy=picking_strategy, ranking_function=ranking_function, plotter=plotter)
 
         # log time and past cost
     if len(experiment_results.results_data) > 0:
-        result_file= "result_Astar_ASP_{0}.csv".format(datetime.now().strftime("%m_%d_%H_%M_%S") )
+        result_file= "result_Astar_ASP_{0}.csv".format(datetime.now().strftime("%Y_%m_%d_%H_%M_%S") )
         experiment_results.write_csv(file_name=result_file)
         print ("saved: {0}".format(result_file))
         print ("\nTo visualize the result, run:\n" +
@@ -272,16 +285,21 @@ if __name__ == '__main__':
     # get user input
     menu_result = menu_Robot()
     num_iter = menu_result.n
-    num_iter = 100
+    
     map_name = menu_result.m
-    map_name = '_MuchMoreFun.csv'
+    
     world_name = menu_result.w
     start = menu_result.sx, menu_result.sy
     goal = menu_result.gx, menu_result.gy
-    goal = 40, 60 # for '_MuchMoreFun.csv'
+    #goal = 40, 60 # for '_MuchMoreFun.csv'
     robot_radius = menu_result.radius
     robot_vision = menu_result.r
     robot_vision = 20
+
+    num_iter = 98
+    map_name = '_MuchMoreFun.csv'
+    goal = 40, 60 # for '_MuchMoreFun.csv'
+
 
     sample_size = menu_result.ss
     ranking_type = menu_result.rank_type
