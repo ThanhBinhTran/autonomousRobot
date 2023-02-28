@@ -7,7 +7,7 @@ import pandas as pd
 import argparse
 import matplotlib.pyplot as plt
 
-class Experimental_Astar_Asp():
+class plot_compare_result():
 
     ''' visualizate result from result file '''
     def result_plot(self, result_file):
@@ -37,5 +37,5 @@ if __name__ == '__main__':
     # get user input
     result_file = menu_result.r
 
-    result = Experimental_Astar_Asp()
+    result = plot_compare_result()
     result.result_plot(result_file=result_file)
