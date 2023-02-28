@@ -4,22 +4,15 @@ This project is to simulate an autonomousRobot that try to find a way to reach a
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.com
 """
 import pandas as pd
-import numpy as np
 import argparse
 import matplotlib.pyplot as plt
-from sklearn.feature_extraction import img_to_graph
-from Robot_math_lib import set_figure_name
-from Program_config import *
-from Result_log import Result_Log
-class Experimental_Astar_Asp(Result_Log):
-    def __init__(self) -> None:
-        super().__init__()
+
+class Experimental_Astar_Asp():
 
     ''' visualizate result from result file '''
     def result_plot(self, result_file):
         # read result as frame
         result_data = pd.read_csv(result_file)
-        
         df_time = result_data[['asp_time', 
                 'Astar_time',
                 'RRTStar_time'
@@ -28,7 +21,6 @@ class Experimental_Astar_Asp(Result_Log):
         #data = np.log2(df_time[['asp_time', 'Astar_time']])
         
         #data.plot.bar()
-        #data.
         df_path_cost = result_data[['asp_path_cost', 
             'Astar_path_cost',
             'RRTStar_path_cost'
