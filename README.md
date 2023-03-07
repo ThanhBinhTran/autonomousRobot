@@ -111,3 +111,13 @@ From world image <img src="https://github.com/ThanhBinhTran/autonomousRobot/blob
 ``` python map_display.py -m <map name> ```
 
 Example: ``` python map_display.py -m _map_temp.csv ```
+
+#### to build CGAL shared-Object: 
+##### Install CGAL : 
+``` sudo apt-get install libcgal-dev ```
+
+##### Compile CGAL shared-object
+``` python share_setup_build.py build ```
+
+##### testing result by calling compiled shared-Objects 
+``` python share_test_calling_CGAL.py ```
