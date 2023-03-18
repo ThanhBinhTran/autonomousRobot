@@ -20,7 +20,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 import matplotlib.pyplot as plt
 try:
     from Robot_paths_lib import *
-    from Plotter_lib import *
+    from Plotter import *
 except ImportError:
     raise
 

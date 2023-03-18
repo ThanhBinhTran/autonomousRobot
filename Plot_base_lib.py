@@ -51,7 +51,7 @@ class Plot_base:
         self.text(point, text)
 
     ''' plot line segment connecting 2 points'''
-    line_segment = lambda self, line, ls="-.k", lw=1: self.plt.plot((line[0][0], line[1][0]), (line[0][1], line[1][1]),\
+    line_segment = lambda self, line, ls="-.k", lw=0.8: self.plt.plot((line[0][0], line[1][0]), (line[0][1], line[1][1]),\
          ls,linewidth=lw)
     
     ''' plot path containing list of points '''

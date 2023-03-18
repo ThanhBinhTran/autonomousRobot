@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 import matplotlib.pyplot as plt
 try:
     from Robot_paths_lib import *
-    from Plotter_lib import *
+    from Plotter import *
     from Robot_sight_lib import *
     from Robot_class import Robot
 except ImportError:
@@ -101,9 +101,6 @@ def main():
         # show_approximately_shortest_path
         if 0:
             plotter.RRT_path( asp, "-r")
-            print ("________________")
-            print (asp)
-            print ("________________")
             i = 0
             for pt in asp:
                 plotter.point( pt, ".r")

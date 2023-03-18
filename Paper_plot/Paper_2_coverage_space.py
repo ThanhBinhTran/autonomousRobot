@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 try:
     from Robot_math_lib import *
     from Robot_paths_lib import *
-    from Plotter_lib import *
+    from Plotter import *
     from Robot_sight_lib import *
     from Obstacles import read_map_csv
     from Program_config import *
@@ -59,7 +59,7 @@ def plot_robot(plt, x, y, yaw, config):  # pragma: no cover
     
     
 def saw_goal(center, radius, t_sight, goal):
-    return inside_local_true_sight(goal, center, radius, t_sight)
+    return inside_local_sights(goal, center, radius, t_sight)
 
 def reached_goal(center, goal, config):
     return point_dist(center, goal) <= config.robot_radius
@@ -111,8 +111,6 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
     # for display information
     run_count = 0
     
-    print ("\n____Robot is reaching to goal: {0} from start {1}".format(goal, start))
-    
     while True:
         run_count += 1
         center = [cpos[0], cpos[1] ]
@@ -149,7 +147,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
                     # add local to global
                     ao_gobal = np.array(ao_local)
                 else:
-                    open_local_pts_status = [inside_global_true_sight(pt, robot_vision, traversal_sight) for pt in open_local_pts]
+                    open_local_pts_status = [inside_visited_sights(pt, robot_vision, traversal_sight) for pt in open_local_pts]
                     ao_local_pts = open_local_pts[np.logical_not(open_local_pts_status)]
                     print ("ao_local_pts,", ao_local_pts)
                     if len(ao_local_pts) > 0:
@@ -210,7 +208,7 @@ def main(gx=10.0, gy=10.0, robot_type=RobotType.circle):
             #map_display(plt, mapname, ob)
 
             # show_traversal_sight
-            if show_traversalSights:
+            if show_visitedSights:
                 for local in traversal_sight:
                     lcenter = local[0]  # center of robot at local
                     lc_sight = local[1] # closed sight at local

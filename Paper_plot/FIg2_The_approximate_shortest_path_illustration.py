@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 import matplotlib.pyplot as plt
 try:
-    from Plotter_lib import *
+    from Plotter import *
 except ImportError:
     raise
 
@@ -108,9 +108,7 @@ def main():
         
     #draw line segment
     if draw_line_segment:
-        #
-        i = 0
-        for line in ls:
+        for i, line in enumerate(ls):
             plotter.line_segment(line, ls="-b")
             spt = line [0]
             ept = line [1]
@@ -120,7 +118,6 @@ def main():
                 plt.text(ept[0] - 0.15 , ept[1] + 0.2, "ce{0}".format(i))
             elif i == 2:
                 plt.text(ept[0] + 0.1 , ept[1] + 0.1, "ce{0}".format(i))
-            i = i + 1
         
     #shortest path step 1
     if shortest_path_step_1:

@@ -131,12 +131,12 @@ if __name__ == '__main__':
                                         robot_vision=vision_range, robot_type=robot_type, robot_radius=robot_radius, 
                                         ranking_type = Ranking_type.RRTstar, ranking_function =robotA_ranking_function,
                                         picking_strategy= Picking_strategy.global_first, sample_size=sample_size,
-                                        easy_experiment=True,save_image=True)
+                                        log_experiment=True,save_image=True)
                     robotB = robot_RRTstar_ranking( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
                                         robot_vision=vision_range, robot_type=robot_type, robot_radius=robot_radius, 
                                         ranking_type = Ranking_type.RRTstar, ranking_function =robotA_ranking_function,
                                         picking_strategy= Picking_strategy.local_first, sample_size=sample_size,
-                                        easy_experiment=True,save_image=True)
+                                        log_experiment=True,save_image=True)
                     robotC = robot_RRTX( start_cooridinate=start, goal_coordinate=goal, map_name=map_name, world_name=world_name,\
                                         num_iter=num_iter, robot_vision=vision_range, robot_type=robot_type, robot_radius=robot_radius, \
                                         ranking_function=robotB_ranking_function, RRT_radius=5,\

@@ -12,16 +12,12 @@ import os
 import matplotlib.patches as patches
 import numpy as np
 
-from torch import true_divide
-
-
-
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 import matplotlib.pyplot as plt
 try:
-    from Plotter_lib import *
+    from Plotter import *
     from Robot_sight_lib import *
     import matplotlib.pyplot as plt
     from matplotlib.path import Path

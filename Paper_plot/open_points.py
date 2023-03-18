@@ -8,11 +8,6 @@ import numpy as np
 import sys
 import os
 
-from torch import true_divide
-
-
-
-
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 import matplotlib.pyplot as plt
@@ -20,7 +15,7 @@ try:
     from Robot_ranking import Ranking_function
     from Robot_base import Picking_strategy, Ranking_type
     from Robot_paths_lib import *
-    from Plotter_lib import *
+    from Plotter import *
     from Robot_sight_lib import *
     from Robot_class import Robot
     from Obstacles import Obstacles

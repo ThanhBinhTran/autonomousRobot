@@ -45,8 +45,6 @@ def menu():
     parser.add_argument('-px', type=float, help='(next point) pixel: x',default=200.0)
     parser.add_argument('-py', type=float, help='(next point) pixel: y',default=150.0)
     args = parser.parse_args()
-    print ("___________________")
-    print (args)
 
     return args
 if __name__ == "__main__":
@@ -105,8 +103,7 @@ if __name__ == "__main__":
     print (points)
 
     # for testing
-    i = 0
-    for pt in points:
+    for i, pt in enumerate(points):
         plt.plot(pt[0], pt[1], 'r.')
         if i == 0:  # middle pixel in image
             plt.text(pt[0], pt[1], "central px") 
@@ -118,6 +115,5 @@ if __name__ == "__main__":
             plt.text(pt[0], pt[1], "robot_next {0}".format(nxt_odom_pose))
         else:
             plt.text(pt[0], pt[1], "pt{0}".format(i))
-        i = i + 1
     plt.show()
 

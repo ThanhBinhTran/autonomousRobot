@@ -5,7 +5,6 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
 """
 from cProfile import label
 import random
-from re import I
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
@@ -13,16 +12,11 @@ import os
 import matplotlib.patches as patches
 import numpy as np
 
-from torch import true_divide
-
-
-
-
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 import matplotlib.pyplot as plt
 try:
-    from Plotter_lib import *
+    from Plotter import *
     from Robot_sight_lib import *
     from Robot_theory import *
     import matplotlib.pyplot as plt

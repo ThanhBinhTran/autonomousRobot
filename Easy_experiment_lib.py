@@ -3,8 +3,6 @@ autonomousRobot
 This project is to simulate an autonomousRobot that try to find a way to reach a goal (target)
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.com
 """
-from email.policy import default
-import os
 import cv2
 import numpy as np
 import argparse
@@ -78,10 +76,6 @@ class Experimental_Result(Result_Log):
         txt_lobal_cost = "our_lobal_cost"
         txt_rrtx_cost = "rrtreeX__cost"
         
-        ls_global = '-7'
-        ls_lobal = '-8'
-        ls_rrtx = '-9'
-        maker_global = "cut_star"
         txt_global_reached = "our_global_reached"
         txt_lobal_reached = "our_lobal_reached"
         txt_rrtx_reached = "rrtreeX_reached"
@@ -132,8 +126,7 @@ class Experimental_Result(Result_Log):
         row_lim = 10        # image row limmited by 10
         images_array = []
         imgs_array = []
-        i = 0
-        for vision_range in range_list:
+        for i, vision_range in enumerate(range_list):
             image_name_A = None
             image_name_B = None
             image_name_C = None
@@ -178,15 +171,8 @@ class Experimental_Result(Result_Log):
                 images_array.append(imgs_array)
                 imgs_array = []
             
-            # clean up dispace space
-            #if image_name_A is not  None: os.remove(image_name_A) 
-            #if image_name_B is not None: os.remove(image_name_B) 
-            #if image_name_C is not None: os.remove(image_name_C) 
-            i = i + 1
-        
         # compositing image arrays into bigger ones
-        i = 0
-        for imgs_array in images_array:
+        for i, imgs_array in enumerate(images_array):
 
             imgStack = self.stack_images(scale=1, imgArray=imgs_array)
             # read images, add text note
@@ -200,7 +186,6 @@ class Experimental_Result(Result_Log):
             else:   # default
                 imgStack_name = "compare_{0}_".format(map_name) + start_goal_name
             cv2.imwrite(imgStack_name, imgStack)
-            i += 1
 
     ''' stack array of images into a bigger image'''
     def stack_images(self, scale, imgArray):
