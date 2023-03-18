@@ -1,24 +1,25 @@
-from types import new_class
 from Robot_paths_lib import *
 from Robot_math_lib import *
-from Robot_sight_lib import inside_local_true_sight, inside_global_true_sight
+from Robot_sight_lib import inside_local_sights, inside_visited_sights
 from Robot_base import Picking_strategy, Ranking_type, Robot_base, RobotType
 from Program_config import *
 from Graph import Graph
-
+from Sight import Sight
+import platform
 import ctypes
 import glob
 
-# find the shared library, the path depends on the platform and Python version
-libfile = glob.glob('build/*/cgal_intersection_tri*.so')[0]
+if platform.system() == 'Linux':
+    # find the shared library, the path depends on the platform and Python version
+    libfile = glob.glob('build/*/cgal_intersection_tri*.so')[0]
 
-# 1. open the shared library
-mylib = ctypes.CDLL(libfile)
+    # 1. open the shared library
+    mylib = ctypes.CDLL(libfile)
 
-# 2. tell Python the argument and result types of function main
-mylib.main.restype = ctypes.c_int
-mylib.main.argtypes = [np.ctypeslib.ndpointer(dtype=np.float64), np.ctypeslib.ndpointer(dtype=np.float64),
-		       np.ctypeslib.ndpointer(dtype=np.float64), np.ctypeslib.ndpointer(dtype=np.float64)]
+    # 2. tell Python the argument and result types of function main
+    mylib.main.restype = ctypes.c_int
+    mylib.main.argtypes = [np.ctypeslib.ndpointer(dtype=np.float64), np.ctypeslib.ndpointer(dtype=np.float64),
+                np.ctypeslib.ndpointer(dtype=np.float64), np.ctypeslib.ndpointer(dtype=np.float64)]
 
 
 #from RRTree_star import RRTree_star
@@ -32,6 +33,7 @@ class Robot(Robot_base):
         self.cost = 0                       # cost of visited path
         self.coordinate = tuple(start)      # hold current coordinate of robot
         self.next_coordinate = tuple(start) # hold next coordinate where robot moves to
+        self.next_point = 0,0               # for display only
         self.reach_goal = False             # True if robot reach goal
         self.saw_goal = False               # True if robot saw goal
         self.no_way_to_goal = False         # True if there is no path to goal
@@ -42,12 +44,20 @@ class Robot(Robot_base):
         self.local_active_open_rank_pts = []     # local active open point and its ranking
         self.global_active_open_rank_pts = []    # global active open points and its ranking
 
-        self.traversal_sights = []          # hold traversal sights where robot visited
+        
         self.visited_paths = []              # path where robot visited
         self.visited_path_directions = []    # status of visited subpath, true = forward, false = backward
 
         # visibility Graph containing information of visited places
         self.visibility_graph = Graph()
+        
+        # visited sights
+        self.visited_sights = Sight()          # hold traversal sights where robot visited
+
+        # skeleton_path, line_segment, approximate shortest path
+        self.skeleton_path = []
+        self.ls = []
+        self.asp = []
 
     ''' find working space boundaries'''
     def find_working_space_boundaries(self, obstacles):
@@ -67,16 +77,10 @@ class Robot(Robot_base):
     def update_coordinate(self, point):
         self.coordinate = point
 
-    def expand_traversal_sights(self, closed_sights, open_sights):
-        self.traversal_sights.append([self.coordinate, closed_sights, open_sights])
+    def add_visited_sights(self, closed_sights, open_sights):
+        self.visited_sights.add_sight(center=self.coordinate, closed_sights=closed_sights,
+                                        open_sights= open_sights)
     
-    def get_sights_by_coordinate(self, coordinate):
-        for centre, c_sights, o_sights in self.traversal_sights:
-            #if centre == coordinate:
-            if math.isclose(point_dist(centre, coordinate), 0):  # for avoid floating point miss match
-                return centre, c_sights, o_sights
-        return None, None, None
-        
     ''' expand visited path and its cost also '''
     def expand_visited_path(self, path):
         '''
@@ -100,22 +104,21 @@ class Robot(Robot_base):
         is_tri_pts_y = []
 
         all_visited_nodes = np.array(self.visibility_graph.get_all_non_leaf())
-        print ("all_visited_nodes__________", all_visited_nodes)
         if len(all_visited_nodes) > 0:
             # get nearby node (distance < 2 range) from all visited node
             node_distance = np.array([point_dist(pt, cur_coordinate) for pt in all_visited_nodes])
             mask = np.logical_and(node_distance > 0 ,node_distance < self.vision_range*2 ) 
             nearby_nodes = all_visited_nodes[mask]
-            print ("nearby_nodes______________", nearby_nodes)
             # find intersection between nearby node and new coorindate
             for nearby_node in nearby_nodes:
                 # flag to skip if connecting point is found
                 connectable = False
                 # get open sight of nearby_node
-                center, _, opensights = self.get_sights_by_coordinate(tuple(nearby_node))
-                if opensights is None:
+                center = nearby_node
+                open_sights = self.visited_sights.get_open_sights(center=center)
+                if open_sights is None:
                     continue
-                for osight in opensights:
+                for osight in open_sights:
                     # get open sight of new node
                     for cur_osights, inside_status in zip(cur_open_sights, self.local_open_pts_status):
                         
@@ -149,26 +152,26 @@ class Robot(Robot_base):
                                         csights.append(((pts_data[2*i],pts_data[2*i+1]),(pts_data[0],pts_data[1])))
                                     else:
                                         csights.append(((pts_data[2*i],pts_data[2*i+1]),(pts_data[2*i+2],pts_data[2*i+3])))
-                                self.traversal_sights.append([pt_centre, csights , []])
+                                self.visited_sights.append([pt_centre, csights , []])
                                 break
                     if connectable:
                         break
         return center_pts_x, center_pts_y, is_tri_pts_x, is_tri_pts_y
 
     ''' Check if robot saw goal '''
-    def is_saw_goal(self, goal, true_sight):
-        self.saw_goal = inside_local_true_sight(goal, self.coordinate, self.vision_range, true_sight)
+    def is_saw_goal(self, goal, closed_sights):
+        self.saw_goal = inside_local_sights(goal, self.coordinate, self.vision_range, closed_sights)
 
     ''' Check if robot reached goal '''
     def is_reach_goal(self, goal):
         self.reach_goal = point_dist(self.coordinate, goal) <= self.radius
 
     ''' Check if robot whether reached or saw goal '''
-    def check_goal(self, goal, true_sight):
+    def check_goal(self, goal, closed_sights):
         
         self.is_reach_goal(goal)
         if not self.reach_goal:
-            self.is_saw_goal(goal, true_sight)
+            self.is_saw_goal(goal, closed_sights)
 
     ''' print status and information of robot '''
     def print_infomation(self):
@@ -179,15 +182,6 @@ class Robot(Robot_base):
         elif self.saw_goal:
             print ("Saw goal!")
 
-        if print_visited_path:
-            print("visited path:", self.visited_paths)
-    ''' print global open points and its ranking '''
-    def print_global_set(self):
-        print ("Global open points and its ranking", self.global_active_open_rank_pts)
-
-    ''' print gobal open points and its ranking '''
-    def print_lobal_set(self):
-        print ("Llobal open points and its ranking", self.local_active_open_rank_pts)
 
     def finish(self):
         return self.no_way_to_goal or self.reach_goal
@@ -197,6 +191,7 @@ class Robot(Robot_base):
         self.local_open_pts = []
         self.local_active_open_pts = []
         self.local_active_open_rank_pts = []
+        self.next_point = []
         
     ''' get local open points '''
     def get_local_open_points_and_rank_by_RRTree_start(self, open_sights, nodes):
@@ -229,15 +224,15 @@ class Robot(Robot_base):
             self.local_active_open_pts = np.array(self.local_open_pts)
 
             # remove local_point which is inside explored area
-            if len(self.traversal_sights) > 0:
-                self.local_open_pts_status = [inside_global_true_sight(pt, self.vision_range, self.traversal_sights) for pt in self.local_active_open_pts]
+            if self.visited_sights.size():
+                self.local_open_pts_status = [inside_visited_sights(pt, self.vision_range, self.visited_sights) for pt in self.local_active_open_pts]
                 self.local_active_open_pts = self.local_active_open_pts[np.logical_not(self.local_open_pts_status)]
         
 
     ''' check if a point is inside explored area '''
     def inside_explored_area(self, pt):
-        if len(self.traversal_sights) > 0:
-            return inside_global_true_sight(pt, self.vision_range, self.traversal_sights)
+        if self.visited_sights.size() > 0:
+            return inside_visited_sights(pt, self.vision_range, self.visited_sights)
         return False
 
     def ranking_active_open_point(self, ranker, goal):
@@ -267,8 +262,8 @@ class Robot(Robot_base):
 
             active_open_nodes = np.array(neighbour_nodes)
             # remove local_point which is inside explored area
-            if len(self.traversal_sights) > 0:
-                inside_status = [inside_global_true_sight(node.coords, self.vision_range, self.traversal_sights) for node in neighbour_nodes]
+            if len(self.visited_sights) > 0:
+                inside_status = [inside_visited_sights(node.coords, self.vision_range, self.visited_sights) for node in neighbour_nodes]
                 active_open_nodes = active_open_nodes[np.logical_not(inside_status)]
 
 

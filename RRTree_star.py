@@ -3,7 +3,7 @@ import numpy as np
 from Tree import Tree, Node
 from RRTree import RRTree
 ''' plotter lib '''
-from Plotter_lib import Plotter
+from Plotter import Plotter
 from Robot_math_lib import *
 
 from RRT_user_input import menu_RRT

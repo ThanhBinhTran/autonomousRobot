@@ -6,25 +6,35 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.
 
 from Robot_math_lib import *
 from Robot_paths_lib import *
-from Plotter_lib import Plotter
 from Robot_sight_lib import *
-from Obstacles import *
-from Program_config import *
+
 from Robot_ranking import Ranker, Ranking_function
 from Robot_class import Robot
 from Robot_base import Picking_strategy, Ranking_type, RobotType
 from logging_ranking import Logging_ranking
 from Tree import Node
 from RRTree_star import RRTree_star
+
+# hide/display animation
+from Program_config import *
+# obstacles class
+from Obstacles import *
+# input from user
 from Robot_user_input import menu_Robot
+# get result log for experiment
+from Result_log import Result_Log
+# plot for animation
+from Plotter import Plotter
+from datetime import datetime
 
 def robot_main( start, goal, map_name, world_name, num_iter, 
                 robot_vision, robot_type, robot_radius, 
                 ranking_type = Ranking_type.Distance_Angle,
                 ranking_function =Ranking_function.Angular_similarity,
                 picking_strategy= Picking_strategy.local_first,
-                sample_size = 2000, easy_experiment=False, save_image=False):
+                sample_size = 2000, log_experiment=True, save_image=False):
     
+    # robot ojbect
     robot = Robot(start=start, goal=goal, vision_range= robot_vision, \
                     robot_type=robot_type, robot_radius=robot_radius)
     
@@ -34,14 +44,22 @@ def robot_main( start, goal, map_name, world_name, num_iter,
     ranker = Ranker(alpha=0.9, beta= 0.1, ranking_function=ranking_function)
 
     # declare plotter
-    title = "Autonomous Robot Path-Planning: {0}".format(map_name)
-    plotter = Plotter(title="Path Planning for Autonomous Robot: {0}".format(map_name))
+    plotter = Plotter(title="Path Planning for Autonomous Robot{0}".format(map_name))
     
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
     obstacles.read(world_name, map_name)
     #obstacles.find_configuration_space(robot.radius)
  
+    time_stamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    experiment_results = Result_Log(header_csv=["asp_time","asp_path_cost"
+                                            ,"Astar_time","Astar_path_cost"
+                                            ,"RRTStar_time","RRTStar_path_cost"
+                                            ])
+    experiment_results.set_file_name(f"result_ASP_timing{time_stamp}.csv")
+    l_stime = 0.0
+    a_time = 0.0
+
     ''' generate a RRTree_star if ranking type is RRTree_Star_ranking '''
     if ranking_type == Ranking_type.RRTstar:
             # RRT start for ranking scores
@@ -72,26 +90,21 @@ def robot_main( start, goal, map_name, world_name, num_iter,
 
     iter_count = 0
 
-    print("\nRobot is reaching to goal: {0} from start {1}".format(goal, start))
-    print("Ranking type: {0}, picking strategy: {1}".format(ranking_type, picking_strategy))
-
     while True:
         iter_count += 1
-        robot.update_coordinate(robot.next_coordinate)
-    
-        print("\n_number of iterations: {0}, current robot coordinate {1}".format(iter_count, robot.coordinate))
+        print(f"\n_number of iterations: {iter_count}")
 
+        robot.update_coordinate(robot.next_coordinate)
+        
         # clean old data
-        next_point = []
         robot.clear_local()
 
         # scan to get sights at local
         closed_sights, open_sights = scan_around(robot, obstacles, goal)
-        
+
         # check whether the robot saw or reach the given goal
         robot.check_goal(goal, closed_sights)
         
-        #robot.show_status()
         if not robot.saw_goal and not robot.reach_goal:
             # get local active point and its ranking
             robot.get_local_active_open_ranking_points(open_sights=open_sights, ranker=ranker, goal=goal,\
@@ -101,34 +114,44 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             
             # add new active open points to graph_insert
             robot.visibility_graph.add_local_open_points(robot.coordinate, robot.local_active_open_pts)
+        
         # pick next point to make a move
-        next_point = robot.pick_next_point(goal, picking_strategy=picking_strategy)
-        if next_point is not None:
+        robot.next_point = robot.pick_next_point(goal, picking_strategy=picking_strategy)
+        if robot.next_point is not None:
             # find the shortest skeleton path from current position (center) to next point
-            if tuple(next_point) == tuple(goal):
-                skeleton_path = [robot.coordinate, goal]
+            if tuple(robot.next_point) == tuple(goal):
+                robot.skeleton_path = [robot.coordinate, goal]
             else:
-                skeleton_path = robot.visibility_graph.BFS_skeleton_path(robot.coordinate, tuple(next_point))
+                robot.skeleton_path = robot.visibility_graph.BFS_skeleton_path(robot.coordinate, tuple(robot.next_point))
         else:
-            skeleton_path = []
+            robot.skeleton_path = []
             robot.is_no_way_to_goal(True)
 
         # record the path and sight
-        robot.expand_traversal_sights(closed_sights, open_sights)
+        robot.add_visited_sights(closed_sights, open_sights)
 
-        asp, critical_ls = approximately_shortest_path(skeleton_path, robot.traversal_sights, robot.vision_range)
-
+        robot.asp, robot.ls, l_stime, a_time = approximately_shortest_path(robot.skeleton_path, robot.visited_sights, robot.vision_range)
+        asp_path_cost = path_cost(robot.asp)
+        #robot.asp, robot.ls, l_stime_old, a_time_old = approximately_shortest_path_old(robot.skeleton_path, robot.visited_sights, robot.vision_range)
+        #asp_path_cost_old = path_cost(robot.asp)
+        
+        if len(robot.skeleton_path)>2:
+            print ("backward path")
+            compare_Astar_RRTstar(robot=robot,plotter=plotter, obstacles=obstacles)
+            experiment_results.add_result([
+                                            asp_path_cost, l_stime + a_time
+                                        ])
         # mark visited path
-        robot.expand_visited_path(asp)
+        robot.expand_visited_path(robot.asp)
 
         # make a move from current position
         if not robot.no_way_to_goal:
-            #robot.next_coordinate = motion(robot.coordinate, next_point)  # simulate robot
-            robot.next_coordinate = tuple(next_point)# motion(robot.coordinate, next_point)  # simulate robot
+            #robot.next_coordinate = motion(robot.coordinate, next_point)  # make smoother path
+            robot.next_coordinate = tuple(robot.next_point)
 
-        if show_animation and not easy_experiment:
-            plotter.show_animation(robot, world_name, iter_count, obstacles , goal, 
-                    closed_sights, open_sights, skeleton_path, asp , critical_ls, next_point, easy_experiment=easy_experiment)
+        if show_animation and not log_experiment:
+            plotter.show_animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
+                                   obstacles=obstacles, easy_experiment=log_experiment)
             #plotter.tree_all_nodes(RRTx)
             if ranking_type == Ranking_type.RRTstar:
                 plotter.tree(RRT_star,color_mode=TreeColor.by_cost)
@@ -137,32 +160,27 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         robot.print_infomation()
 
         # Run n times for debugging
-        if  iter_count == num_iter:
-            break
-        
-        if robot.finish():
+        if  iter_count == num_iter or robot.finish():
             break
     
-    if not easy_experiment: # skip printing and showing animation if running easy experiment
-        print("Done")
-        if show_animation:
-            plotter.show()
+    if not log_experiment and show_animation: 
+        plotter.show()  # show animation for display
 
     elif save_image:
         # showing the final result (for save image and display as well)
-        plotter.show_animation(robot, world_name, iter_count, obstacles , goal, closed_sights,\
-            open_sights, skeleton_path, asp , critical_ls, next_point, easy_experiment=easy_experiment)
+        plotter.show_animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
+                                   obstacles=obstacles, easy_experiment=log_experiment)
+        
         # draw some fig for paper
-        i = 0
+        
         if True:
-            for sight in robot.traversal_sights:
-                
+            for i, sight in enumerate(robot.visited_sights):
                 plotter.point_text(point=sight[0], ls="ob",text="$C_{0}$".format(i))
-                i +=1
         
         save_figure(map_name=map_name, range=robot.vision_range, start=start, goal=goal,\
             picking_strategy=picking_strategy, ranking_function=ranking_function, plotter=plotter)
-
+    if log_experiment:
+        experiment_results.write_csv()
     return robot
 
 if __name__ == '__main__':

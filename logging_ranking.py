@@ -1,7 +1,5 @@
-from operator import contains
 from pathlib import Path
 from RRTree_star import RRTree_star
-import json
 import csv
 from Robot_math_lib import approximately_num
 from Tree import Node

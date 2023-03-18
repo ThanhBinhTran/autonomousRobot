@@ -8,7 +8,7 @@ from Program_config import *
 from Obstacles import Obstacles
 from Robot_class import Robot
 ''' plotter lib '''
-from Plotter_lib import Plotter
+from Plotter import Plotter
 class RRTree(Tree):
 
     """ RRTree class from Tree class """

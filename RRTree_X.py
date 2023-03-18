@@ -11,7 +11,7 @@ from Robot_base import Picking_strategy
 
 from Tree import Node
 from RRTree import RRTree
-from Plotter_lib import Plotter
+from Plotter import Plotter
 from Robot_math_lib import *
 
 from RRT_user_input import menu_RRT

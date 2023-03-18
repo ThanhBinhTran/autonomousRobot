@@ -8,7 +8,7 @@ from RRT_user_input import menu_RRT
 from Program_config import *
 from Obstacles import Obstacles
 ''' plotter lib '''
-from Plotter_lib import Plotter
+from Plotter import Plotter
 
 class RRTree(Tree):
 

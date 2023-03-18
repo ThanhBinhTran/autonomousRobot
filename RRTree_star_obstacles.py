@@ -10,7 +10,7 @@ from Obstacles import Obstacles
 from Robot_class import Robot
 
 ''' plotter lib '''
-from Plotter_lib import Plotter
+from Plotter import Plotter
 
 class RRTree_star(RRTree):
 

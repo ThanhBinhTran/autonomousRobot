@@ -5,7 +5,6 @@ https://pdfs.semanticscholar.org/0cac/84962d0f1176c43b3319d379a6bf478d50fd.pdf
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.com
 '''
 
-from platform import node
 from Robot_math_lib import approximately_num, point_dist
 import numpy as np
 from Queue_class import Priority_queue

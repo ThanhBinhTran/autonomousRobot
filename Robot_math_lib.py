@@ -38,26 +38,40 @@ def inside_line_segment(point, line_segment):
     dp = dp1 + dp2
     return math.isclose(dp, dls)
 
+def inside_line_segment_faster(point, line_segment):
+    ptx, pty = point
+    ptAx, ptAy = line_segment[0]
+    ptBx, ptBy = line_segment[1]
+    crossproduct = (pty - ptAy) * (ptBx - ptAx) - (ptx - ptAx) * (ptBy - ptAy)
+
+    if not math.isclose(abs(crossproduct),0):
+        return False
+    dotproduct = (ptx - ptAx) * (ptBx - ptAx) + (pty - ptAy)*(ptBy - ptAy)
+    if dotproduct < 0:
+        return False
+    squaredlengthba = (ptBx - ptAx)*(ptBx - ptAx) + (ptBy - ptAy)*(ptBy - ptAy)
+    if dotproduct > squaredlengthba:
+        return False
+    return True
 
 def rotate_vector_center(center, v, radian):
     '''
-    rotate a vector with a angle of radians around center point
+    rotate a vector with a angle of radians around center point in clockwise direction
     '''
     vector_vc = np.subtract(v, center)
     r_vector_vc = rotate_vector(vector_vc, radian)
-    result = np.add(center, r_vector_vc)
     return np.add(center, r_vector_vc)
 
 
 def rotate_vector(v, radian):
     '''
-    rotate vector with a angle of radians around (0,0)
+    rotate vector with a angle of radians around (0,0) in clockwise direction
     '''
-    x, y = v
-    rx = x * math.cos(radian) + y * math.sin(radian)
-    ry = -x * math.sin(radian) + y * math.cos(radian)
-    return rx, ry
-
+    
+    rot = np.array([[math.cos(radian), -math.sin(radian)], 
+                    [math.sin(radian), math.cos(radian)]]
+                    )
+    return np.dot(v, rot)
 
 def unit_vector(vector):
     '''
@@ -65,11 +79,20 @@ def unit_vector(vector):
     '''
     return vector / np.linalg.norm(vector)
 
-
 def unsigned_angle(v1, v2):
     '''
     Find unsigned angle between two vectors
     '''
+    usa = signed_angle(v1, v2)
+    if usa < 0:
+        usa = 2 * math.pi + usa
+    return usa
+
+def unsigned_angle_vector_xAxis(v1):
+    '''
+    Find unsigned angle between two vectors
+    '''
+    v2 = (1,0)
     usa = signed_angle(v1, v2)
     if usa < 0:
         usa = 2 * math.pi + usa
@@ -378,12 +401,6 @@ def print_point(message_ID, point_x, point_y):
         print("{0} {1}".format(point_x[i], point_y[i]))
 
 
-def print_cpairs(message_ID, cpairs):  # print circle pairs
-    print("{0}, len: {1}".format(message_ID, len(cpairs)))
-    for pairs in cpairs:
-        print(pairs)
-
-
 def approximately_num(num):
     return float(format(float(num), '.10f'))
 
@@ -422,7 +439,6 @@ def cal_bisector(ptA, ptMid, ptB, robot_radius):
     vector_bisector = np.add(ptMid, vector_bisector)
     vector_AB = np.subtract(u_vectorA, u_vectorB)
     limit_ls = np.add(vector_bisector, vector_AB)
-    #print("___________", vector_bisector, limit_ls)
     line_segment_bs = [tuple(vector_bisector), tuple(limit_ls)]
     return line_segment_bs
 
@@ -461,7 +477,6 @@ def get_intersections_2circles(center_0, radius_0, center_1, radius_1):
 
 ''' check whether a point is inside a polygon or not using ray_tracing_method'''
 def point_inside_polygons(pt, polygons):
-    result = False
     for polygon in polygons:
         if ray_tracing_method(pt[0], pt[1], polygon):
             return True
@@ -520,3 +535,29 @@ def save_figure(map_name: str = "", range=0, start=0, goal=0, picking_strategy=0
     #file_extension = ".png"
     #plotter.save_figure(fig_name, file_extension=file_extension)
     print ("saved: {0}{1}".format(fig_name, file_extension))
+
+def scale_vector(begin, end, scale):
+    v = np.subtract(end, begin)
+    scaled_v = v*scale
+    scaled_v = np.add(scaled_v, begin)
+    return begin, scaled_v
+
+def safe_linesegment(begin, end, length):
+    v_dist = point_dist(begin, end)
+    
+    if v_dist <= length:
+        return begin, end
+    
+    v = np.subtract(end, begin)
+    uv = unit_vector(v)
+    lv = uv*length
+    lv = np.add(lv, begin)
+    return begin, lv
+
+''' give length and reference vector , return the vector with same direction and give length'''
+def make_length_vector(begin, end, length):
+    v = np.subtract(end, begin)
+    uv = unit_vector(v)
+    lv = uv*length
+    lv = np.add(lv, begin)
+    return begin, lv

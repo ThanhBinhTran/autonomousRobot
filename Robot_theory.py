@@ -10,7 +10,7 @@ from Robot_base import Picking_strategy
 
 from Robot_math_lib import *
 from Robot_paths_lib import *
-from Plotter_lib import Plotter
+from Plotter import Plotter
 from Robot_sight_lib import *
 from Robot_map_lib import Map
 from Obstacles import *
@@ -88,9 +88,9 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             robot.is_no_way_to_goal(True)
 
         # record the path and sight
-        robot.expand_traversal_sights(closed_sights, open_sights)
+        robot.add_visited_sights(closed_sights, open_sights)
 
-        asp, critical_ls = approximately_shortest_path(skeleton_path, robot.traversal_sights, robot.vision_range)
+        asp, critical_ls = approximately_shortest_path(skeleton_path, robot.visited_sights, robot.vision_range)
 
         # mark visited path
         robot.expand_visited_path(asp)
@@ -132,8 +132,8 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                             plotter.text(arc_pts[i], "{0}".format(i))
 
             # show_traversalSights
-            if show_traversalSights:
-                plotter.show_traversal_sights(robot.traversal_sights, robot.vision_range)
+            if show_visitedSights:
+                plotter.show_visited_sights(robot.visited_sights, robot.vision_range)
             
             if show_robot:
                 plotter.robot(robot)
