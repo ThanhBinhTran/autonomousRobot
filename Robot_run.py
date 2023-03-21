@@ -92,12 +92,11 @@ def robot_main( start, goal, map_name, world_name, num_iter,
 
     while True:
         iter_count += 1
-        print(f"\n_number of iterations: {iter_count}")
-
         robot.update_coordinate(robot.next_coordinate)
-        
+
         # clean old data
         robot.clear_local()
+        print(f"______iteration {iter_count}, robot coordinate {robot.coordinate}")
 
         # scan to get sights at local
         # closed sights = array of (pointA (x,y), pointB(x,y), angle(angleA, angleB))
@@ -138,6 +137,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         #asp_path_cost_old = path_cost(robot.asp)
         
         if len(robot.skeleton_path)>2:
+            print ("back-ward path")
             experiment_results.add_result([
                                             asp_path_cost, l_stime + a_time
                                         ])
@@ -208,10 +208,8 @@ if __name__ == '__main__':
 
     robot_type = RobotType.circle
 
-    map_name = '_MuchMoreFun.csv'
-    goal = 40, 60 # for '_MuchMoreFun.csv' never reached goal
-    goal = 75, 50 # for '_MuchMoreFun.csv' never reached goal
     ranking_function =Ranking_function.RHS_RRT_base
+
     # run robot
     robot_main( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
                 robot_vision=robot_vision, robot_type=robot_type, robot_radius=robot_radius, 

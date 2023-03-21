@@ -74,9 +74,6 @@ class Robot(Robot_base):
     def update_coordinate(self, coords):
         self.coordinate = coords
 
-    def update_coordinate(self, point):
-        self.coordinate = point
-
     def add_visited_sights(self, closed_sights, open_sights):
         self.visited_sights.add_sight(center=self.coordinate, closed_sights=closed_sights,
                                         open_sights= open_sights)
