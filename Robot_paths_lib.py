@@ -113,15 +113,15 @@ def get_sorted_local_linesegments(closed_sights, center, pre_pt, post_pt, vision
     result = []
     root = center
     side_pts = []
-    print ("closed sights: ", closed_sights)
+    #print ("closed sights: ", closed_sights)
     len_closed_sight = len(closed_sights)
     if len_closed_sight> 0:
         ls_pts = closed_sights[:,:2]   # get the first 2 columns= a pair
         ls_angles = closed_sights[:,2]
         lsptA_angles = ls_angles[:,0]
-        print ("ls_pts",ls_pts)
-        print ("ls_angles",ls_angles)
-        print ("lsptA_angles",lsptA_angles)
+        #print ("ls_pts",ls_pts)
+        #print ("ls_angles",ls_angles)
+        #print ("lsptA_angles",lsptA_angles)
 
     if len_closed_sight == 1:
         #print ("________________________1 CLOSED SIGHT, center = " , center )

@@ -2,7 +2,7 @@ from enum import Enum
 ################################################
 # Parameters to show/hide element(s) of animation 
 ################################################
-show_animation = True
+show_animation = False
 show_map = True
 show_world = False
 
