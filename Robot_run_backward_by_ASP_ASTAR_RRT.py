@@ -40,7 +40,6 @@ def jagged_path(path):
         return turn_num
     for i in range (1,len(path)-1):
         if not inside_line_segment(point=path[i], line_segment=(path[i-1], path[i+1])):
-            print ("inside")
             turn_num +=1
     return turn_num
 
@@ -91,7 +90,7 @@ def compare_Astar_RRTstar(robot:Robot, plotter:Plotter, obstacles:Obstacles, cas
     # boundary_area = ([x_min, y_min], [x_max, y_max])
     boundary_area = ((x_min-robot.vision_range, y_min-robot.vision_range),((x_max+robot.vision_range, y_max+robot.vision_range)))
     start_node = Node(coords=robot.start, cost=0)            # initial root node, cost to root = 0
-    RRT_star = RRTree_star(root=start_node, step_size=4, radius=5, 
+    RRT_star = RRTree_star(root=start_node, step_size=3, radius=5, 
                     #random_area=boundary_area, sample_size=20000)
                     random_area=boundary_area, sample_size=20000)
     
@@ -252,9 +251,9 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             RRTstar_path_cost = 0.0
             Astar_jagged_path = 0.0
             RRTstar_jagged_path = 0.0
-            #(Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time) =\
-            #                    compare_Astar_RRTstar(robot=robot,plotter=plotter, obstacles=obstacles, 
-            #                                          save_image=save_image, case_count = case_count)
+            (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time) =\
+                                compare_Astar_RRTstar(robot=robot,plotter=plotter, obstacles=obstacles, 
+                                                      save_image=save_image, case_count = case_count)
             if save_image:
                 # showing the final result (for save image and display as well)
                 plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
@@ -269,8 +268,8 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                     plotter.save_figure(f"case{case_count}_ASP", file_extension=".pdf")
 
             ASP_jagged_path = jagged_path(robot.asp)
-            #Astar_jagged_path = jagged_path(Astar_path)
-            #RRTstar_jagged_path = jagged_path(RRTstar_path)
+            Astar_jagged_path = jagged_path(Astar_path)
+            RRTstar_jagged_path = jagged_path(RRTstar_path)
             result_timing.add_result([ l_stime + a_time, Astar_time, RRTstar_time])
             result_path_cost.add_result([ asp_path_cost, Astar_path_cost, RRTstar_path_cost])
             result_jagged_path.add_result([ASP_jagged_path, Astar_jagged_path, RRTstar_jagged_path])
