@@ -97,7 +97,7 @@ class Plotter(Plot_base):
             osights=visited_sights.open_sights[center]
             self.vision(center, vision_range, csights, osights)
 
-    def show_animation(self, Robot:Robot, world_name, iter_count, obstacles:Obstacles, easy_experiment= False):
+    def animation(self, Robot:Robot, world_name, iter_count, obstacles:Obstacles, easy_experiment= False):
         # clear plot
         self.clear()
 
@@ -214,25 +214,6 @@ class Plotter(Plot_base):
             self.tree_node(node)   # plot nodes
             #self.text(node.coords, "{0:.2f}".format(node.rhs))
 
-    ''' plot all info ( number of iteration, cost, path, tree) '''
-    def animation(self, num_iter, cost, path, Tree, obstacles,  start_coords, goal_coords):
-        # prepare title
-        reach_goal = (cost > 0 and cost != float("inf") )
-        status_title = self.prepare_title(num_iter,cost)
-
-        # clear old one
-        self.clear()
-
-        # plot new one
-        self.show_map(world_name=None, obstacles=obstacles, plot_title=status_title)
-        self.tree(Tree)
-        self.goal(goal_coords, reach_goal, None)
-        self.start(start_coords)
-        #self.pause(0.1)
-    
-    
-    
-    
     ''' plot connection between 2 nodes'''
     def connection(self, nodeA, nodeB, ls="-b", lw=1):
         self.line_segment( (nodeA.coords, nodeB.coords), ls=ls, lw=lw)
@@ -451,12 +432,22 @@ class Plotter(Plot_base):
 import pandas as pd
 import argparse
 import matplotlib.pyplot as plt
+import os
+import glob
+
+path = '/path/to/directory'
+for file in glob.glob(os.path.join(path, '*.py')):
+    print(file)
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Code for Autonomous Robot.')
     parser.add_argument('-r', metavar="result file",  help='result file', default="result.csv")
     menu_result = parser.parse_args()
     # get user input
-    result_file = menu_result.r
-    result_data = pd.read_csv(result_file)
-    result_data.plot(kind="bar")
-    plt.show()
+    result_files = menu_result.r
+    path = ''
+    print (result_files)
+    for file in glob.glob(os.path.join(path, result_files)):
+        print(file)
+        result_data = pd.read_csv(file)
+        result_data.plot(kind="bar", title=f"{file}")
+        plt.show()

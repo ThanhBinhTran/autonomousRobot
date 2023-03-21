@@ -33,8 +33,6 @@ class Result_Log:
         writer.writerow(self.header_csv)
         for result_items in self.results_data:
             writer.writerow(result_items)
-        print ("\nTo visualize the result, run:\n" +
-               f"Python Plotter.py -r {self.file_name}")
         f.close()
 
     ''' read csv as dataframe '''
