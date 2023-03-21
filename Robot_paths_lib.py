@@ -116,9 +116,9 @@ def get_sorted_local_linesegments(closed_sights, center, pre_pt, post_pt, vision
     print ("closed sights: ", closed_sights)
     len_closed_sight = len(closed_sights)
     if len_closed_sight> 0:
-        ls_pts = closed_sights[:,0:2]   # get 2 first = a pair
-        ls_angles = closed_sights[:,2:4]
-        lsptA_angles = closed_sights[:,4:5]
+        ls_pts = closed_sights[:,:2]   # get the first 2 columns= a pair
+        ls_angles = closed_sights[:,2]
+        lsptA_angles = ls_angles[:,0]
         print ("ls_pts",ls_pts)
         print ("ls_angles",ls_angles)
         print ("lsptA_angles",lsptA_angles)
@@ -180,8 +180,8 @@ def get_sorted_local_linesegments(closed_sights, center, pre_pt, post_pt, vision
         for i in range (len(side_temp_pt)):
             duplicate = False
             if i > 0:
-                angle_pair_pre = side_temp_angle[i-1][0]
-                angle_pair_post = side_temp_angle[i][0]
+                angle_pair_pre = side_temp_angle[i-1]
+                angle_pair_post = side_temp_angle[i]
                 if math.isclose(angle_pair_pre[1], angle_pair_post[0]):    # duplicate points
                     duplicate = True
             if not duplicate:
