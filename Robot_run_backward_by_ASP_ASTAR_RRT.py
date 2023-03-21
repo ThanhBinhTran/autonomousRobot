@@ -33,6 +33,9 @@ from a_star import main as A_star_planner
 from RRTree_star_obstacles import RRTree_star
 from Graph import *
 
+enable_compare = True
+enable_improve = False
+
 ''' return number of turn actions times '''
 def get_path_turn(path):
     turn_num = 0
@@ -43,8 +46,6 @@ def get_path_turn(path):
             turn_num +=1
     return turn_num
 
-disable_compare = True
-
 def compare_Astar_RRTstar(robot:Robot, plotter:Plotter, obstacles:Obstacles, case_count=int, save_image=False):
     Astar_path =[]
     Astar_path_cost = 0.0
@@ -52,7 +53,7 @@ def compare_Astar_RRTstar(robot:Robot, plotter:Plotter, obstacles:Obstacles, cas
     RRTstar_path =[]
     RRTstar_path_cost = 0.0
     RRTstar_time = 0.0
-    if disable_compare:
+    if not enable_compare:
         return (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time)
     
     ''' ASTAR '''
@@ -162,19 +163,31 @@ def robot_main( start, goal, map_name, world_name, num_iter,
     #obstacles.find_configuration_space(robot.radius)
  
     time_stamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-
-    if platform.system() == 'Linux':
-        result_timing = Result_Log(header_csv=["ASP_improve_time_v01","ASP_improve_time_v02"])
-        result_path_cost = Result_Log(header_csv=["ASP_improve_path_cost_v01","ASP_improve_path_cost_v02"])
-        result_jagged_path = Result_Log(header_csv=["ASP_improve_jagged_path_v01", "ASP_improve_jagged_path_v02"])
-    else:
-        result_timing = Result_Log(header_csv=["ASP_time", "Astar_time", "RRTStar_time" ])
-        result_path_cost = Result_Log(header_csv=["ASP_path_cost", "Astar_path_cost", "RRTStar_path_cost" ])
-        result_jagged_path = Result_Log(header_csv=["ASP_jagged_path", "Astar_jagged_path", "RRTStar_jagged_path" ])
     
-    result_timing.set_file_name(f"result_ASP_AStar_RRTStar_time{time_stamp}.csv")
-    result_path_cost.set_file_name(f"result_ASP_AStar_RRTStar_path_cost_{time_stamp}.csv")
-    result_jagged_path.set_file_name(f"result_ASP_AStar_RRTStar_path_turn_{time_stamp}.csv")
+    csv_head_time = []
+    csv_head_cost = []
+    csv_head_turn = []
+    if platform.system() == 'Linux':
+        if enable_improve:
+            csv_head_time = ["ASP_improve_time_v01","ASP_improve_time_v02", "Astar_time", "RRTStar_time"]
+            csv_head_cost = ["ASP_improve_path_cost_v01","ASP_improve_path_cost_v02", "Astar_path_cost", "RRTStar_path_cost"]
+            csv_head_turn = ["ASP_improve_path_turn_v01", "ASP_improve_path_turn_v02","Astar_path_turn", "RRTStar_path_turn"]
+        else:
+            csv_head_time = ["ASP_time_v01","ASP_time_v02", "Astar_time", "RRTStar_time"]
+            csv_head_cost = ["ASP_path_cost_v01","ASP_path_cost_v02", "Astar_path_cost", "RRTStar_path_cost"]
+            csv_head_turn = ["ASP_path_turn_v01", "ASP_path_turn_v02","Astar_path_turn", "RRTStar_path_turn"]
+    else:
+        csv_head_time = ["ASP_time", "Astar_time", "RRTStar_time"]
+        csv_head_cost = ["ASP_path_cost", "Astar_path_cost", "RRTStar_path_cost"]
+        csv_head_turn = ["ASP_path_turn","Astar_path_turn", "RRTStar_path_turn"]
+
+    result_time = Result_Log(header_csv=csv_head_time)
+    result_cost = Result_Log(header_csv=csv_head_cost)
+    result_turn = Result_Log(header_csv=csv_head_turn)
+
+    result_time.set_file_name(f"result_ASP_AStar_RRTStar_time_{time_stamp}.csv")
+    result_cost.set_file_name(f"result_ASP_AStar_RRTStar_path_cost_{time_stamp}.csv")
+    result_turn.set_file_name(f"result_ASP_AStar_RRTStar_path_turn_{time_stamp}.csv")
 
     ''' generate a RRTree_star if ranking type is RRTree_Star_ranking '''
     if ranking_type == Ranking_type.RRTstar:
@@ -236,7 +249,8 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         # record the path and sight
         robot.add_visited_sights(closed_sights, open_sights)
         if platform.system() == 'Linux':
-            is_pts_center_x, is_pts_center_y, is_pts_x, is_pts_y = robot.bridge_visibility_graph(robot.coordinate, open_sights)
+            if enable_improve:
+                robot.bridge_visibility_graph(robot.coordinate, open_sights)
 
         # pick next point to make a move
         robot.next_point = robot.pick_next_point(goal, picking_strategy=picking_strategy)
@@ -273,22 +287,23 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 # draw some fig for paper
                 
                 #plotter.show()
-                if platform.system() == 'Linux':
-                    plotter.save_figure(f"case{case_count}_ASP_improve_log2_lsegment", file_extension=".pdf")
-                else:
-                    plotter.save_figure(f"case{case_count}_ASP", file_extension=".pdf")
+                save_name = f"case{case_count}_ASP"
+                if platform.system() == 'Linux' and enable_improve:
+                        save_name = f"case{case_count}_ASP_improve"
+                        
+                plotter.save_figure(fig_name=save_name, file_extension=".pdf")
 
             ASP_jagged_path = get_path_turn(robot.asp)
             Astar_jagged_path = get_path_turn(Astar_path)
             RRTstar_jagged_path = get_path_turn(RRTstar_path)
             if platform.system() == 'Linux':
-                result_timing.add_result([l_stime_old + a_time_old, l_stime + a_time])
-                result_path_cost.add_result([asp_path_cost_old, asp_path_cost])
-                result_jagged_path.add_result([ASP_jagged_path_old, ASP_jagged_path])
+                result_time.add_result([l_stime_old + a_time_old, l_stime + a_time])
+                result_cost.add_result([asp_path_cost_old, asp_path_cost])
+                result_turn.add_result([ASP_jagged_path_old, ASP_jagged_path])
             else:
-                result_timing.add_result([ l_stime + a_time, Astar_time, RRTstar_time])
-                result_path_cost.add_result([ asp_path_cost, Astar_path_cost, RRTstar_path_cost])
-                result_jagged_path.add_result([ASP_jagged_path, Astar_jagged_path, RRTstar_jagged_path])
+                result_time.add_result([ l_stime + a_time, Astar_time, RRTstar_time])
+                result_cost.add_result([ asp_path_cost, Astar_path_cost, RRTstar_path_cost])
+                result_turn.add_result([ASP_jagged_path, Astar_jagged_path, RRTstar_jagged_path])
         # mark visited path
         robot.expand_visited_path(robot.asp)
 
@@ -312,9 +327,9 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         plotter.show()  # show animation for display
 
     if log_experiment:
-        result_timing.write_csv()
-        result_path_cost.write_csv()
-        result_jagged_path.write_csv()
+        result_time.write_csv()
+        result_cost.write_csv()
+        result_turn.write_csv()
         print ("\nTo visualize the results, run:\n" +
                f"Python Plotter.py -r result\*{time_stamp}.csv")
     return robot

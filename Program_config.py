@@ -70,6 +70,10 @@ ls_sp = "-r"        # shortest skeleton path
 ls_asp = "-m"       # approximately shortest path
 ls_cspace = "-r"    # configuration space
 
+################################################
+# path for results
+################################################
+result_path_repo = "result"
 
 ################################################
 # LINE STYPE for RRTree family

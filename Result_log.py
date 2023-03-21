@@ -6,6 +6,7 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.
 import csv
 import pandas as pd
 import os
+from Program_config import result_path_repo
 
 class Result_Log:
     def __init__(self, header_csv = ["header1","header2"]):
@@ -17,7 +18,6 @@ class Result_Log:
         self.results_data.append (result)
 
     def set_file_name(self, name):
-        result_path_repo = "result"
         isExist = os.path.exists(result_path_repo)
         if not isExist:
             os.mkdir(result_path_repo)

@@ -54,7 +54,7 @@ int main(double pts_Tri1[], double pts_Tri2[], double pts_data[], double pt_cent
 	Triangle_2 Tri2(D, E, F);
 
 	if ( ! CGAL::do_intersect(Tri1, Tri2) ) {
-		std::cout << "empty" << std::endl;
+		//std::cout << "empty" << std::endl;
 	}
 	else {
 		CGAL::Object result = CGAL::intersection(Tri1, Tri2);
@@ -78,14 +78,14 @@ int main(double pts_Tri1[], double pts_Tri2[], double pts_data[], double pt_cent
 			}
 		}
 		else {
-			std::cout << "unknown!" << std::endl;
+			//std::cout << "unknown!" << std::endl;
 		}
 	}
-    std::cout << "number of intesection points " << pt_num << std::endl;
+    //std::cout << "number of intesection points " << pt_num << std::endl;
 
     // find central of mass
     if (pt_num >2){
-        std::cout << "calculating centre of mass" << std::endl;
+        //std::cout << "calculating centre of mass" << std::endl;
         Point_mass points[N] = {
            Point_mass(Point_2(pts_data[ 0],pts_data[ 1]), 1),
            Point_mass(Point_2(pts_data[ 2],pts_data[ 3]), 1),
@@ -95,7 +95,7 @@ int main(double pts_Tri1[], double pts_Tri2[], double pts_data[], double pt_cent
            Point_mass(Point_2(pts_data[10],pts_data[11]), 1)
        };
        Point_2 centre = centre_of_mass(points, points+pt_num);
-       std::cout << "The centre of mass is: (" << centre.x() <<", "<< centre.y() <<")" << std::endl;
+       //std::cout << "The centre of mass is: (" << centre.x() <<", "<< centre.y() <<")" << std::endl;
        pt_centre[0] = centre.x();
        pt_centre[1] = centre.y();
     }

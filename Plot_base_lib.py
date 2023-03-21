@@ -168,11 +168,7 @@ class Plot_base:
     
     ''' save plot as image/pdf/svg/eps'''
     def save_figure(self, fig_name = "image",  file_extension = ".png", dpi=150, bbox_inches ="tight"):
-        # importing os module
 
- 
-        # Path
-        result_path_repo = "result"
         isExist = os.path.exists(result_path_repo)
         if not isExist:
             os.mkdir(result_path_repo)
