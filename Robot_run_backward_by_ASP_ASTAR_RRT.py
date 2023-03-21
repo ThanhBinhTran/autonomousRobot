@@ -235,8 +235,8 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         
         # record the path and sight
         robot.add_visited_sights(closed_sights, open_sights)
-        #if platform.system() == 'Linux':
-        #    is_pts_center_x, is_pts_center_y, is_pts_x, is_pts_y = robot.bridge_visibility_graph(robot.coordinate, open_sights)
+        if platform.system() == 'Linux':
+            is_pts_center_x, is_pts_center_y, is_pts_x, is_pts_y = robot.bridge_visibility_graph(robot.coordinate, open_sights)
 
         # pick next point to make a move
         robot.next_point = robot.pick_next_point(goal, picking_strategy=picking_strategy)
@@ -260,9 +260,22 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         if len(robot.skeleton_path)>2:
             print ("back-ward path")
             case_count += 1
+<<<<<<< HEAD
             (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time) =\
+=======
+            Astar_time = 0.0
+            RRTstar_time =0.0
+            Astar_path_cost = 0.0
+            RRTstar_path_cost = 0.0
+            Astar_jagged_path = 0.0
+            RRTstar_jagged_path = 0.0
+            if platform.system() != 'Linux':
+                (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time) =\
+>>>>>>> 59f8b368b4ca308aff4b11ebdd7fe0ce9b760588
                                 compare_Astar_RRTstar(robot=robot,plotter=plotter, obstacles=obstacles, 
                                                       save_image=save_image, case_count = case_count)
+                Astar_jagged_path = jagged_path(Astar_path)
+                RRTstar_jagged_path = jagged_path(RRTstar_path)
             if save_image:
                 # showing the final result (for save image and display as well)
                 plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
@@ -272,10 +285,11 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 
                 #plotter.show()
                 if platform.system() == 'Linux':
-                    plotter.save_figure(f"case{case_count}_ASP_improve", file_extension=".pdf")
+                    plotter.save_figure(f"case{case_count}_ASP_improve_log2_lsegment", file_extension=".pdf")
                 else:
                     plotter.save_figure(f"case{case_count}_ASP", file_extension=".pdf")
 
+<<<<<<< HEAD
             ASP_jagged_path = get_path_turn(robot.asp)
             Astar_jagged_path = get_path_turn(Astar_path)
             RRTstar_jagged_path = get_path_turn(RRTstar_path)
@@ -287,6 +301,13 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 result_timing.add_result([ l_stime + a_time, Astar_time, RRTstar_time])
                 result_path_cost.add_result([ asp_path_cost, Astar_path_cost, RRTstar_path_cost])
                 result_jagged_path.add_result([ASP_jagged_path, Astar_jagged_path, RRTstar_jagged_path])
+=======
+            ASP_jagged_path = jagged_path(robot.asp)
+
+            result_timing.add_result([ l_stime + a_time, Astar_time, RRTstar_time])
+            result_path_cost.add_result([ asp_path_cost, Astar_path_cost, RRTstar_path_cost])
+            result_jagged_path.add_result([ASP_jagged_path, Astar_jagged_path, RRTstar_jagged_path])
+>>>>>>> 59f8b368b4ca308aff4b11ebdd7fe0ce9b760588
         # mark visited path
         robot.expand_visited_path(robot.asp)
 
@@ -302,6 +323,14 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             if ranking_type == Ranking_type.RRTstar:
                 plotter.tree(RRT_star,color_mode=TreeColor.by_cost)
 
+<<<<<<< HEAD
+=======
+        
+        robot.print_infomation()
+        plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
+                                    obstacles=obstacles, easy_experiment=log_experiment)
+        plotter.show()
+>>>>>>> 59f8b368b4ca308aff4b11ebdd7fe0ce9b760588
         # Run n times for debugging
         if  iter_count == num_iter or robot.finish():
             break
@@ -331,6 +360,18 @@ if __name__ == '__main__':
     
     robot_radius = menu_result.radius
     robot_vision = menu_result.r
+<<<<<<< HEAD
+=======
+    robot_vision = 20
+
+    num_iter = 98
+    num_iter = 8
+
+    map_name = '_MuchMoreFun.csv'
+    goal = 40, 60 # for '_MuchMoreFun.csv' never reached goal
+    goal = 50, 50 # for '_MuchMoreFun.csv' never reached goal
+
+>>>>>>> 59f8b368b4ca308aff4b11ebdd7fe0ce9b760588
 
     sample_size = menu_result.ss
     ranking_type = menu_result.rank_type
