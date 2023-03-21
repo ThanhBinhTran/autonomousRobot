@@ -113,12 +113,15 @@ def get_sorted_local_linesegments(closed_sights, center, pre_pt, post_pt, vision
     result = []
     root = center
     side_pts = []
-    #print ("closed sights: ", closed_sights)
+    print ("closed sights: ", closed_sights)
     len_closed_sight = len(closed_sights)
     if len_closed_sight> 0:
-        ls_pts = closed_sights[:,0:2]   # get 2 first = a pair
-        ls_angles = closed_sights[:,2:4]
-        lsptA_angles = closed_sights[:,2]
+        ls_pts = closed_sights[:,:2]   # get the first 2 columns= a pair
+        ls_angles = closed_sights[:,2]
+        lsptA_angles = ls_angles[:,0]
+        print ("ls_pts",ls_pts)
+        print ("ls_angles",ls_angles)
+        print ("lsptA_angles",lsptA_angles)
 
     if len_closed_sight == 1:
         #print ("________________________1 CLOSED SIGHT, center = " , center )
@@ -177,7 +180,9 @@ def get_sorted_local_linesegments(closed_sights, center, pre_pt, post_pt, vision
         for i in range (len(side_temp_pt)):
             duplicate = False
             if i > 0:
-                if math.isclose(side_temp_angle[i-1][1], side_temp_angle[i][0]):    # duplicate points
+                angle_pair_pre = side_temp_angle[i-1]
+                angle_pair_post = side_temp_angle[i]
+                if math.isclose(angle_pair_pre[1], angle_pair_post[0]):    # duplicate points
                     duplicate = True
             if not duplicate:
                 side_pts.append(side_temp_pt[i][0])
@@ -221,7 +226,7 @@ def get_critical_linesegments(skeleton_path, visited_sights:Sight, robot_vision)
 
         # get closed sights according to its center
         closed_sights = visited_sights.get_closed_sights(center_pt)
-
+        
         local_ls = get_sorted_local_linesegments(closed_sights, center_pt, pre_pt, post_pt,robot_vision, safe_radius)
 
         critical_linesegments.extend(local_ls)

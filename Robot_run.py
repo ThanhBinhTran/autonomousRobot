@@ -100,6 +100,8 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         robot.clear_local()
 
         # scan to get sights at local
+        # closed sights = array of (pointA (x,y), pointB(x,y), angle(angleA, angleB))
+        # open sights = array of (pointA (x,y), pointB(x,y), open_point(x, y))
         closed_sights, open_sights = scan_around(robot, obstacles, goal)
 
         # check whether the robot saw or reach the given goal
@@ -160,7 +162,6 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         # Run n times for debugging
         if  iter_count == num_iter or robot.finish():
             break
-    
     if not log_experiment and show_animation: 
         plotter.show()  # show animation for display
 
@@ -207,6 +208,9 @@ if __name__ == '__main__':
 
     robot_type = RobotType.circle
 
+    map_name = '_MuchMoreFun.csv'
+    goal = 40, 60 # for '_MuchMoreFun.csv' never reached goal
+    goal = 75, 50 # for '_MuchMoreFun.csv' never reached goal
     ranking_function =Ranking_function.RHS_RRT_base
     # run robot
     robot_main( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 

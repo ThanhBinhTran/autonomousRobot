@@ -35,14 +35,10 @@ from Graph import *
 
 ''' return number of turn actions times '''
 def jagged_path(path):
-    print (path)
-    print ("len path: " , len(path))
     turn_num = 0
     if len(path) < 2:
         return turn_num
     for i in range (1,len(path)-1):
-        print (f"i = {i}")
-        print (f"path{path[i-1]}, path{path[i]}, path{path[i+1]}")
         if not inside_line_segment(point=path[i], line_segment=(path[i-1], path[i+1])):
             print ("inside")
             turn_num +=1
@@ -87,7 +83,7 @@ def compare_Astar_RRTstar(robot:Robot, plotter:Plotter, obstacles:Obstacles, cas
         plotter.point(robot.next_point, ls_nextpt)
     plotter.path(Astar_path, "-r")
     if save_image:
-        plotter.save_figure(f"result\case{case_count}_Astar", file_extension=".pdf")
+        plotter.save_figure(f"case{case_count}_Astar", file_extension=".pdf")
 
 
     
@@ -126,13 +122,8 @@ def compare_Astar_RRTstar(robot:Robot, plotter:Plotter, obstacles:Obstacles, cas
     plotter.path(RRTstar_path, "-.r")
     
     if save_image:
-        plotter.save_figure(f"result\case{case_count}_RRTstar", file_extension=".pdf")
-
-    #RRTstar_path_cost = RRT_star.total_goal_cost
-    #RRT_path = RRT_star.path_to_goal
-    
-    
-
+        plotter.save_figure(f"case{case_count}_RRTstar", file_extension=".pdf")
+ 
     return (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time)
 
 def robot_main( start, goal, map_name, world_name, num_iter, 
@@ -171,7 +162,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         result_path_cost = Result_Log(header_csv=["ASP_path_cost", "Astar_path_cost", "RRTStar_path_cost" ])
         result_jagged_path = Result_Log(header_csv=["ASP_jagged_path", "Astar_jagged_path", "RRTStar_jagged_path" ])
     
-    result_timing.set_file_name(f"result_ASP_AStar_RRTStar_timing_{time_stamp}.csv")
+    result_timing.set_file_name(f"result_ASP_AStar_RRTStar_{time_stamp}.csv")
     result_path_cost.set_file_name(f"result_ASP_AStar_RRTStar_path_cost_{time_stamp}.csv")
     result_jagged_path.set_file_name(f"result_ASP_AStar_RRTStar_jagged_path_{time_stamp}.csv")
 
@@ -216,6 +207,8 @@ def robot_main( start, goal, map_name, world_name, num_iter,
 
         # scan to get sights at local
         closed_sights, open_sights = scan_around(robot, obstacles, goal)
+        #print ("\n\nclosed sights : ", closed_sights)
+        #print ("\n\nopen sights : ", open_sights)
 
         # check whether the robot saw or reach the given goal
         robot.check_goal(goal, closed_sights)
@@ -232,12 +225,8 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         
         # record the path and sight
         robot.add_visited_sights(closed_sights, open_sights)
-        if platform.system() == 'Linux':
-            center_pts_x = []
-            center_pts_y = []
-            is_tri_pts_x = []
-            is_tri_pts_y = []
-            center_pts_x, center_pts_y, is_tri_pts_x, is_tri_pts_y = robot.bridge_visibility_graph(robot.coordinate, open_sights)
+        #if platform.system() == 'Linux':
+        #    is_pts_center_x, is_pts_center_y, is_pts_x, is_pts_y = robot.bridge_visibility_graph(robot.coordinate, open_sights)
 
         # pick next point to make a move
         robot.next_point = robot.pick_next_point(goal, picking_strategy=picking_strategy)
@@ -252,27 +241,36 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             robot.is_no_way_to_goal(True)
 
         robot.asp, robot.ls, l_stime, a_time = approximately_shortest_path(robot.skeleton_path, robot.visited_sights, robot.vision_range)
+        #robot.asp, robot.ls, l_stime, a_time = approximately_shortest_path_old(robot.skeleton_path, robot.visited_sights, robot.vision_range)
         asp_path_cost = path_cost(robot.asp)
-        #robot.asp, robot.ls, l_stime_old, a_time_old = approximately_shortest_path_old(robot.skeleton_path, robot.visited_sights, robot.vision_range)
-        #asp_path_cost_old = path_cost(robot.asp)
 
-        
         if len(robot.skeleton_path)>2:
             case_count += 1
-            (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time) =\
-                                compare_Astar_RRTstar(robot=robot,plotter=plotter, obstacles=obstacles, 
-                                                      save_image=save_image, case_count = case_count)
+            Astar_time = 0.0
+            RRTstar_time =0.0
+            Astar_path_cost = 0.0
+            RRTstar_path_cost = 0.0
+            Astar_jagged_path = 0.0
+            RRTstar_jagged_path = 0.0
+            #(Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time) =\
+            #                    compare_Astar_RRTstar(robot=robot,plotter=plotter, obstacles=obstacles, 
+            #                                          save_image=save_image, case_count = case_count)
             if save_image:
                 # showing the final result (for save image and display as well)
                 plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
                                     obstacles=obstacles, easy_experiment=log_experiment)
                 
                 # draw some fig for paper
+                
                 #plotter.show()
-                plotter.save_figure(f"result\case{case_count}_ASP", file_extension=".pdf")
+                if platform.system() == 'Linux':
+                    plotter.save_figure(f"case{case_count}_ASP_improve", file_extension=".pdf")
+                else:
+                    plotter.save_figure(f"case{case_count}_ASP", file_extension=".pdf")
+
             ASP_jagged_path = jagged_path(robot.asp)
-            Astar_jagged_path = jagged_path(Astar_path)
-            RRTstar_jagged_path = jagged_path(RRTstar_path)
+            #Astar_jagged_path = jagged_path(Astar_path)
+            #RRTstar_jagged_path = jagged_path(RRTstar_path)
             result_timing.add_result([ l_stime + a_time, Astar_time, RRTstar_time])
             result_path_cost.add_result([ asp_path_cost, Astar_path_cost, RRTstar_path_cost])
             result_jagged_path.add_result([ASP_jagged_path, Astar_jagged_path, RRTstar_jagged_path])
