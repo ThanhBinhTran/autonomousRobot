@@ -449,5 +449,5 @@ if __name__ == '__main__':
     for file in glob.glob(os.path.join(path, result_files)):
         print(file)
         result_data = pd.read_csv(file)
-        result_data.plot(kind="bar", title=f"{file}")
+        result_data.plot(kind="bar")
         plt.show()
