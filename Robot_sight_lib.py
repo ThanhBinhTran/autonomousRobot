@@ -379,7 +379,7 @@ def get_closed_sights(Robot, obstacles):
     return closed_sights
 
 ''' sort closed sight in anti_clockwise direction'''
-def sort_closed_sights(center, closed_sights:np.array):
+def sort_closed_sights(center, closed_sights):
     c_sight_angle_list = []
     for c_sight in closed_sights:
         _, starpt, endpt = get_angle_info(center=center, ptA=c_sight[0], ptB=c_sight[1])
@@ -390,8 +390,7 @@ def sort_closed_sights(center, closed_sights:np.array):
         e_angle = math.pi*2 - unsigned_angle_vector_xAxis(ve)
         c_sight_angle_list.append(s_angle)
         
-        c_sight.append(s_angle)
-        c_sight.append(e_angle)
+        c_sight.append((s_angle,e_angle))
 
     sort_index = np.argsort(c_sight_angle_list)
     closed_sights = np.array(closed_sights)

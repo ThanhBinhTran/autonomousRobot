@@ -8,6 +8,7 @@ from Robot_world_lib import World
 from Robot_base import RobotType
 from Program_config import *
 
+import os
 
 class Plot_base:
     def __init__(self, size=(7,7), title="Autonomous Robot"):
@@ -167,7 +168,18 @@ class Plot_base:
     
     ''' save plot as image/pdf/svg/eps'''
     def save_figure(self, fig_name = "image",  file_extension = ".png", dpi=150, bbox_inches ="tight"):
+        # importing os module
+
+ 
+        # Path
+        result_path_repo = "result"
+        isExist = os.path.exists(result_path_repo)
+        if not isExist:
+            os.mkdir(result_path_repo)
+
+        # Join various path components
+        full_path = os.path.join(result_path_repo, fig_name + file_extension)
         #self.plt.axis("off")   # turns off axes
         #self.plt.axis("tight")  # gets rid of white border
-        self.plt.savefig(fig_name + file_extension, bbox_inches ="tight", dpi=dpi)
-        print (f"saved: {fig_name + file_extension}")
+        self.plt.savefig(full_path, bbox_inches ="tight", dpi=dpi)
+        print (f"saved: {full_path}")

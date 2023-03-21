@@ -1,6 +1,6 @@
 from Robot_paths_lib import *
 from Robot_math_lib import *
-from Robot_sight_lib import inside_local_sights, inside_visited_sights
+from Robot_sight_lib import *
 from Robot_base import Picking_strategy, Ranking_type, Robot_base, RobotType
 from Program_config import *
 from Graph import Graph
@@ -102,57 +102,85 @@ class Robot(Robot_base):
         center_pts_y = []
         is_tri_pts_x = []
         is_tri_pts_y = []
-
+        
+        # get all visited nodes
         all_visited_nodes = np.array(self.visibility_graph.get_all_non_leaf())
+        
+        # if there are visited nodes
         if len(all_visited_nodes) > 0:
+        
             # get nearby node (distance < 2 range) from all visited node
             node_distance = np.array([point_dist(pt, cur_coordinate) for pt in all_visited_nodes])
+            # get all nodes in closed range (0, 2*r) 
             mask = np.logical_and(node_distance > 0 ,node_distance < self.vision_range*2 ) 
-            nearby_nodes = all_visited_nodes[mask]
+            neighbor_nodes = all_visited_nodes[mask]
+            
             # find intersection between nearby node and new coorindate
-            for nearby_node in nearby_nodes:
+            for neighbor_node in neighbor_nodes:
                 # flag to skip if connecting point is found
                 connectable = False
                 # get open sight of nearby_node
-                center = nearby_node
-                open_sights = self.visited_sights.get_open_sights(center=center)
+                neighbor_center = neighbor_node
+                open_sights = self.visited_sights.get_open_sights(center=neighbor_center)
+
+                # continue if there are no open sights
                 if open_sights is None:
                     continue
+                    
                 for osight in open_sights:
                     # get open sight of new node
                     for cur_osights, inside_status in zip(cur_open_sights, self.local_open_pts_status):
                         
                         if not inside_status:
-                            pts_triA = np.array([center[0],center[1],
+                            pts_triA = np.array([neighbor_center[0],neighbor_center[1],
                                                 osight[0][0], osight[0][1], osight[1][0], osight[1][1]], np.double)
                             pts_triB = np.array([cur_coordinate[0],cur_coordinate[1],
                                                 cur_osights[0][0], cur_osights[0][1], cur_osights[1][0],cur_osights[1][1]], np.double)
 
                             pts_data = np.array([0,0, 0,0, 0,0, 0,0, 0,0, 0,0], np.double) # maximun of 6 points of intersection of 2 triangles
                             pt_centre = np.array([0,0], np.double) # centre of mass of intersection polygon if found.
+                            # pts_data is initialed of max of 12 values  0.0 (= max 6 intersection points)
+                            # result will holded a length of intersection pts_data
                             result = mylib.main(pts_triA, pts_triB, pts_data, pt_centre)
                             if result > 0:
-                                
+                                pt_centre = tuple(pt_centre)
                                 print ("result--------------", result)
                                 print ("pts_triA--------------", pts_triA)
                                 print ("pts_triB--------------", pts_triB)
                                 print ("pts_data--------------", pts_data)
                                 print ("pt_centre--------------", pt_centre)
+                                
+                                # for display only
                                 center_pts_x.append(pt_centre[0])
                                 center_pts_y.append(pt_centre[1])
                                 for i in range (result):
                                     is_tri_pts_x.append(pts_data[2*i])
                                     is_tri_pts_y.append(pts_data[2*i+1])
+
                                 connectable = True
-                                self.visibility_graph.graph_create_edge(pt_centre, center)
+                                self.visibility_graph.graph_create_edge(pt_centre, neighbor_center)
                                 self.visibility_graph.graph_create_edge(pt_centre, cur_coordinate)
+
                                 csights = []
                                 for i in range(result):
+                                    ptA = (pts_data[2*i],pts_data[2*i+1])
                                     if i == (result-1):
-                                        csights.append(((pts_data[2*i],pts_data[2*i+1]),(pts_data[0],pts_data[1])))
+                                        ptB =(pts_data[0],pts_data[1])
                                     else:
-                                        csights.append(((pts_data[2*i],pts_data[2*i+1]),(pts_data[2*i+2],pts_data[2*i+3])))
-                                self.visited_sights.append([pt_centre, csights , []])
+                                        ptB = (pts_data[2*i+2],pts_data[2*i+3])
+                                    
+                                    if line_across(line1=(ptA, ptB), line2=(pt_centre, neighbor_center)) is not None:
+                                        continue
+                                    
+                                    if line_across(line1=(ptA, ptB), line2=(pt_centre, cur_coordinate)) is not None:
+                                        continue
+                                    csights.append([ptA,ptB])
+                                closed_sights = sort_closed_sights(center=pt_centre, closed_sights=csights)
+                                
+                                #dictionary can not get ndarray as key cause unhashbale
+                                
+                                self.visited_sights.add_sight(center=pt_centre, closed_sights=closed_sights,
+                                        open_sights= [])
                                 break
                     if connectable:
                         break
