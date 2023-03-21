@@ -32,7 +32,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 ranking_type = Ranking_type.Distance_Angle,
                 ranking_function =Ranking_function.Angular_similarity,
                 picking_strategy= Picking_strategy.local_first,
-                sample_size = 2000, log_experiment=True, save_image=False):
+                sample_size = 2000, log_experiment=False, save_image=False):
     
     # robot ojbect
     robot = Robot(start=start, goal=goal, vision_range= robot_vision, \
@@ -136,8 +136,6 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         #asp_path_cost_old = path_cost(robot.asp)
         
         if len(robot.skeleton_path)>2:
-            print ("backward path")
-            compare_Astar_RRTstar(robot=robot,plotter=plotter, obstacles=obstacles)
             experiment_results.add_result([
                                             asp_path_cost, l_stime + a_time
                                         ])
@@ -150,7 +148,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             robot.next_coordinate = tuple(robot.next_point)
 
         if show_animation and not log_experiment:
-            plotter.show_animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
+            plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
                                    obstacles=obstacles, easy_experiment=log_experiment)
             #plotter.tree_all_nodes(RRTx)
             if ranking_type == Ranking_type.RRTstar:
@@ -168,7 +166,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
 
     elif save_image:
         # showing the final result (for save image and display as well)
-        plotter.show_animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
+        plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
                                    obstacles=obstacles, easy_experiment=log_experiment)
         
         # draw some fig for paper

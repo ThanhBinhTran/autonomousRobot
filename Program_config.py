@@ -2,15 +2,15 @@ from enum import Enum
 ################################################
 # Parameters to show/hide element(s) of animation 
 ################################################
-show_animation = True
+show_animation = False
 show_map = True
 show_world = False
 
-show_traversalSights = True
+show_visitedSights = True
 
 show_openSight = True
 show_closedSight = True
-show_circleRange = False
+show_circleRange = True
 
 show_sketelonPath = True
 show_approximately_shortest_path = True
@@ -20,7 +20,7 @@ show_cls_orderednumber = False  # show ordered number of critical line segments
 show_visitedPath = False
 show_visibilityGraph = True
 
-show_local_openpt = True
+show_local_openpt = False
 show_active_openpt = True
 show_next_point = True
 
@@ -50,7 +50,7 @@ transparent = 0.1   # closed sights
 ################################################
 print_closed_sights = True
 print_open_sights = True
-print_visited_path = False
+print_visited_path = True
 
 ################################################
 # LINE STYPE for robot

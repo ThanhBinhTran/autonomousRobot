@@ -70,7 +70,7 @@ class RRTree_star(RRTree):
                 self.path_to_goal = self.path_to_root(goal_node)
                 self.total_goal_cost = goal_node.cost
                 count += 1
-                if count == 200:
+                if count == 1000:
                     break
 
             ''' for display '''

@@ -170,3 +170,4 @@ class Plot_base:
         #self.plt.axis("off")   # turns off axes
         #self.plt.axis("tight")  # gets rid of white border
         self.plt.savefig(fig_name + file_extension, bbox_inches ="tight", dpi=dpi)
+        print (f"saved: {fig_name + file_extension}")

@@ -19,8 +19,6 @@ class Graph:
         if len(leafs) > 0:
             for leaf in leafs:
                 self.graph_create_edge(pnode, leaf)
-                #self.graph[tuple(pnode)].append(tuple(leaf))
-                #self.graph[tuple(leaf)].append(tuple(pnode))
 
     def get_all_non_leaf(self):
         non_leaves = []
