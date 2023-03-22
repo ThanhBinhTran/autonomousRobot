@@ -26,6 +26,10 @@ class Graph:
             if len(self.graph[pnode]) > 1:
                 non_leaves.append(pnode)
         return non_leaves
+    
+    def get_neighbor_nodes(self, node):
+        return self.graph[tuple(node)]
+    
     # path between two nodes of a graph
     def BFS_skeleton_path(self, start, goal):
 

@@ -1,15 +1,14 @@
 import numpy as np
 
 from Tree import Tree, Node
-
 from Robot_math_lib import *
 
 from RRT_user_input import menu_RRT
 from Program_config import *
 from Obstacles import Obstacles
+from Robot_class import Robot
 ''' plotter lib '''
 from Plotter import Plotter
-
 class RRTree(Tree):
 
     """ RRTree class from Tree class """
@@ -25,7 +24,13 @@ class RRTree(Tree):
 
     def set_step_size(self, x): self.step_size = x
     def set_radius(self, x): self.radius = x
+    
+    def set_sampling_size(self, sample_size):
+        self.sampling_size = sample_size
 
+    def set_sampling_area(self, random_area=([0, 100],[0,100])):
+        self.sampling_area = random_area
+        
     ''' random node coords '''
     def random_coordinate(self):
         return np.random.random(2)*np.subtract(self.sampling_area[1],self.sampling_area[0]) + self.sampling_area[0]
@@ -43,43 +48,49 @@ class RRTree(Tree):
         self.add_edge(parent_node=nearest_node, node=new_node)
         return new_node, neighbour_nodes, nearest_node
 
-    def build(self,  goal_coordinate, plotter: Plotter=None, obstacles=None):
-        first_saw_goal = False
+    def add_coordinate_to_RRT(self, robot, coordinate, obstacles, goal_coordinate, compare_ASP=False):
+        # bring closer random coordinate to tree 
+        accepted_coordinate = self.bring_closer_avoid_obstacles(rand_coordinate=coordinate, obstacles=obstacles)
+        if accepted_coordinate is None or (not robot.inside_explored_area(pt=accepted_coordinate)and compare_ASP):
+            return None, None, None 
+            
+        # if tree first saw given goal , instead of adding new random , add goal
+        if not self.reach_goal:
+            nn_goal = self.saw_goal(goal_coordinate)    # return nearst neighbour node of goal
+            if nn_goal is not None: # existing a node nearby goal
+                self.reach_goal = True
+                accepted_coordinate = goal_coordinate
 
+        # add and link node to tree
+        new_node, neighbour_nodes, nearest_neighbour_node  = self.add_node_RRT(accepted_coordinate)
+        return new_node, neighbour_nodes, nearest_neighbour_node
+        
+    def build(self,  goal_coordinate, plotter: Plotter=None, obstacles=None, robot:Robot=None, compare_ASP=False):
+        prevent_recalculate = False
         for i in range(1, self.sampling_size):
-
-            # generate random coordinate in sampling area = [min, max]
-            rand_coordinate = self.random_coordinate()
-
             # orient to goal sometime :))
-            if i %100 == 0 and not self.reach_goal: # bias to goal sometime
+            if i %30 == 0 and not self.reach_goal: # bias to goal sometime
                 rand_coordinate = np.array(goal_coordinate)
+            else:
+                rand_coordinate = self.random_coordinate()
 
-            # bring closer random coordinate to tree 
-            accepted_coordinate = self.bring_closer(rand_coordinate=rand_coordinate)
+            new_node, neighbour_nodes, nearest_neighbour_node = \
+                self.add_coordinate_to_RRT(robot=robot, coordinate=rand_coordinate, \
+                                           obstacles= obstacles, goal_coordinate= goal_coordinate)
 
-            # if tree first saw given goal , instead of adding new random , add goal
-            if not first_saw_goal:
-                nn_goal = self.saw_goal(goal_coordinate)    # return nearst neighbour node of goal
-                if nn_goal is not None: # existing a node nearby goal
-                    first_saw_goal = True
-                    self.reach_goal = True
-                    accepted_coordinate = goal_coordinate
-
-            # add and link node to tree
-            new_node, neighbour_nodes, nearest_neighbour_node  = self.add_node_RRT(accepted_coordinate)
-
-                
-            if self.reach_goal:
+            if self.reach_goal and not prevent_recalculate:
                 goal_node = self.get_node_by_coords(goal_coordinate)
                 self.path_to_goal = self.path_to_root(goal_node)
                 self.total_goal_cost = goal_node.cost
+                prevent_recalculate = True
+                #break
             
             ''' for display '''
             if show_animation:
-                plotter.build_tree_animation(num_iter= i, Tree= self, obstacles=None,  goal_coords=goal_coordinate, \
+                plotter.build_tree_animation(num_iter= i, Tree= self, obstacles=obstacles,  goal_coords=goal_coordinate, \
                     start_coords=self.root.coords, rand_coordinate= rand_coordinate, rand_node=new_node, 
                     neighbour_nodes=neighbour_nodes, nearest_neighbour_node=nearest_neighbour_node)
+        
 
     ''' 
         check if the RRT contain nodes that are inside goal radius
@@ -115,6 +126,7 @@ if __name__ == '__main__':
     radius = menu_result.radius
     sample_size = menu_result.ss
     map_name = menu_result.m
+    vision_range = menu_result.r
     world_name = None
 
     ''' Running '''
@@ -125,18 +137,17 @@ if __name__ == '__main__':
     obstacles = Obstacles()
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles.read(world_name, map_name)
+    obstacles.line_segments()
 
+    robot = Robot(start=start_cooridinate, goal=goal_coordinate, vision_range=vision_range)
     # find working space boundary
-    x_min = min(obstacles.x_lim[0], obstacles.y_lim[0], start_cooridinate[0], goal_coordinate[0])
-    x_max = max(obstacles.x_lim[1], obstacles.y_lim[1], start_cooridinate[1], goal_coordinate[1])
-    y_min = min(obstacles.x_lim[0], obstacles.y_lim[0], start_cooridinate[0], goal_coordinate[0])
-    y_max = max(obstacles.x_lim[1], obstacles.y_lim[1], start_cooridinate[1], goal_coordinate[1])
-    random_area = ([x_min, y_min], [x_max, y_max])
+    boundary_area = robot.find_working_space_boundaries(obstacles=obstacles)
 
     ''' build tree '''
     start_node = Node(start_cooridinate, cost=0)            # initial root node, cost to root = 0
     RRT = RRTree(root=start_node, step_size=step_size, radius=radius, 
-                    random_area=random_area, sample_size=sample_size)
-    RRT.build(goal_coordinate=goal_coordinate, plotter=plotter, obstacles=obstacles)
+                    random_area=boundary_area, sample_size=sample_size)
+    
+    RRT.build(goal_coordinate=goal_coordinate, plotter=plotter, obstacles=obstacles, robot=robot)
     
     plotter.show()

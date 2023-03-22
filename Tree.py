@@ -136,7 +136,8 @@ class Tree:
 
     ''' return node at give coords'''
     def get_node_by_coords(self, coordinate): # at_node
-        return self.dict.get(coordinate)
+        pt = tuple(coordinate)
+        return self.dict.get(pt)
         #return self.dict[coordinate]
 
     ''' add node to tree'''

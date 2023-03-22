@@ -38,7 +38,7 @@ class Robot(Robot_base):
         self.saw_goal = False               # True if robot saw goal
         self.no_way_to_goal = False         # True if there is no path to goal
         self.path_look_ahead_to_goal = []   # path look a head to goal (estimate)
-
+        
         #self.local_open_pts = []            # local open point
         self.local_active_open_pts = []     # local active open point
         self.local_active_open_rank_pts = []     # local active open point and its ranking
@@ -112,12 +112,23 @@ class Robot(Robot_base):
             mask = np.logical_and(node_distance > 0 ,node_distance < self.vision_range*2 ) 
             neighbor_nodes = all_visited_nodes[mask]
             
+            connected_neighbors = self.visibility_graph.get_neighbor_nodes(cur_coordinate)
+            
             # find intersection between nearby node and new coorindate
             for neighbor_node in neighbor_nodes:
                 # flag to skip if connecting point is found
-                connectable = False
+            
+                skip = False
                 # get open sight of nearby_node
                 neighbor_center = neighbor_node
+                for pt in connected_neighbors:
+                    pd = point_dist(pt, neighbor_center)
+                    if math.isclose(pd, 0.0):
+                        skip = True
+                        break
+                if skip:
+                    continue
+
                 open_sights = self.visited_sights.get_open_sights(center=neighbor_center)
 
                 # continue if there are no open sights
@@ -126,60 +137,60 @@ class Robot(Robot_base):
                     
                 for osight in open_sights:
                     # get open sight of new node
-                    for cur_osights, inside_status in zip(cur_open_sights, self.local_open_pts_status):
-                        
-                        if not inside_status:
-                            pts_triA = np.array([neighbor_center[0],neighbor_center[1],
+                    for cur_osights in cur_open_sights:
+                        #if not inside_status:
+                        pts_triA = np.array([neighbor_center[0],neighbor_center[1],
                                                 osight[0][0], osight[0][1], osight[1][0], osight[1][1]], np.double)
-                            pts_triB = np.array([cur_coordinate[0],cur_coordinate[1],
+                        pts_triB = np.array([cur_coordinate[0],cur_coordinate[1],
                                                 cur_osights[0][0], cur_osights[0][1], cur_osights[1][0],cur_osights[1][1]], np.double)
 
-                            pts_data = np.array([0,0, 0,0, 0,0, 0,0, 0,0, 0,0], np.double) # maximun of 6 points of intersection of 2 triangles
-                            pt_centre = np.array([0,0], np.double) # centre of mass of intersection polygon if found.
-                            # pts_data is initialed of max of 12 values  0.0 (= max 6 intersection points)
-                            # result will holded a length of intersection pts_data
-                            result = mylib.main(pts_triA, pts_triB, pts_data, pt_centre)
-                            if result > 0:
-                                pt_centre = tuple(pt_centre)
-                                print ("result--------------", result)
-                                print ("pts_triA--------------", pts_triA)
-                                print ("pts_triB--------------", pts_triB)
-                                print ("pts_data--------------", pts_data)
-                                print ("pt_centre--------------", pt_centre)
+                        pts_data = np.array([0,0, 0,0, 0,0, 0,0, 0,0, 0,0], np.double) # maximun of 6 points of intersection of 2 triangles
+                        pt_centre = np.array([0,0], np.double) # centre of mass of intersection polygon if found.
+                        # pts_data is initialed of max of 12 values  0.0 (= max 6 intersection points)
+                        # result will holded a length of intersection pts_data
+                        result = mylib.main(pts_triA, pts_triB, pts_data, pt_centre)
+                        if result > 0:
+                            pt_centre = tuple(pt_centre)
+                            #print ("result--------------", result)
+                            #print ("pts_triA--------------", pts_triA)
+                            #print ("pts_triB--------------", pts_triB)
+                            #print ("pts_data--------------", pts_data)
+                            #print ("pt_centre--------------", pt_centre)
                                 
-                                # for display only
-                                center_pts_x.append(pt_centre[0])
-                                center_pts_y.append(pt_centre[1])
-                                for i in range (result):
-                                    is_tri_pts_x.append(pts_data[2*i])
-                                    is_tri_pts_y.append(pts_data[2*i+1])
+                            # for display only
+                            center_pts_x.append(pt_centre[0])
+                            center_pts_y.append(pt_centre[1])
+                            for i in range (result):
+                                is_tri_pts_x.append(pts_data[2*i])
+                                is_tri_pts_y.append(pts_data[2*i+1])
 
-                                connectable = True
-                                self.visibility_graph.graph_create_edge(pt_centre, neighbor_center)
-                                self.visibility_graph.graph_create_edge(pt_centre, cur_coordinate)
+                            
+                            self.visibility_graph.graph_create_edge(pt_centre, neighbor_center)
+                            self.visibility_graph.graph_create_edge(pt_centre, cur_coordinate)
 
-                                csights = []
-                                for i in range(result):
-                                    ptA = (pts_data[2*i],pts_data[2*i+1])
-                                    if i == (result-1):
-                                        ptB =(pts_data[0],pts_data[1])
-                                    else:
-                                        ptB = (pts_data[2*i+2],pts_data[2*i+3])
+                            csights = []
+                            for i in range(result):
+                                ptA = (pts_data[2*i],pts_data[2*i+1])
+                                if i == (result-1):
+                                    ptB =(pts_data[0],pts_data[1])
+                                else:
+                                    ptB = (pts_data[2*i+2],pts_data[2*i+3])
+                                   
+                                if line_across(line1=(ptA, ptB), line2=(pt_centre, neighbor_center)) is not None:
+                                    continue
                                     
-                                    if line_across(line1=(ptA, ptB), line2=(pt_centre, neighbor_center)) is not None:
-                                        continue
-                                    
-                                    if line_across(line1=(ptA, ptB), line2=(pt_centre, cur_coordinate)) is not None:
-                                        continue
-                                    csights.append([ptA,ptB])
-                                closed_sights = sort_closed_sights(center=pt_centre, closed_sights=csights)
+                                if line_across(line1=(ptA, ptB), line2=(pt_centre, cur_coordinate)) is not None:
+                                    continue
+                                csights.append([ptA,ptB])
+                            closed_sights = sort_closed_sights(center=pt_centre, closed_sights=csights)
                                 
-                                #dictionary can not get ndarray as key cause unhashbale
+                            #dictionary can not get ndarray as key cause unhashbale
                                 
-                                self.visited_sights.add_sight(center=pt_centre, closed_sights=closed_sights,
-                                        open_sights= [])
-                                break
-                    if connectable:
+                            self.visited_sights.add_sight(center=pt_centre, closed_sights=closed_sights,
+                                    open_sights= [])
+                            skip = True
+                            break
+                    if skip:
                         break
         return center_pts_x, center_pts_y, is_tri_pts_x, is_tri_pts_y
 

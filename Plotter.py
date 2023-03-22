@@ -340,7 +340,7 @@ class Plotter(Plot_base):
             obstacles = Obstacles() # replace with empty obstacle
 
         if show_map:
-            self.show_map(world_name=None, obstacles=obstacles, plot_title=status_title)
+            self.show_map(obstacles=obstacles, plot_title=status_title)
         
         # draw current tree
         self.RRTree(Tree, color_mode=color_tree, neighbour_en=True)
@@ -352,9 +352,10 @@ class Plotter(Plot_base):
         self.start(start_coords)
 
         ''' animation new node '''
-        if rand_coordinate is not None and rand_node is not None:
+        if rand_coordinate is not None:
             self.point(rand_coordinate, ls=ls_rand_coordinates)
-            self.line_segment((rand_coordinate, rand_node.coords), ls=ls_ls_to_nn)
+            if rand_node is not None:
+                self.line_segment((rand_coordinate, rand_node.coords), ls=ls_ls_to_nn)
             
         if rand_node is not None:
             self.vision_area(rand_node.coords, Tree.radius)

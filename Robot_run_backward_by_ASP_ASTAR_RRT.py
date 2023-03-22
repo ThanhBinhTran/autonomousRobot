@@ -30,11 +30,13 @@ import time
 from datetime import datetime
 
 from a_star import main as A_star_planner
-from RRTree_star_obstacles import RRTree_star
+from RRTree_star import RRTree_star
 from Graph import *
 
-enable_compare = True
-enable_improve = False
+enable_compare_AStar = False
+enable_compare_RRTStar = False
+enable_improve = True
+sample_size_each_cell = 100
 
 ''' return number of turn actions times '''
 def get_path_turn(path):
@@ -46,94 +48,113 @@ def get_path_turn(path):
             turn_num +=1
     return turn_num
 
-def compare_Astar_RRTstar(robot:Robot, plotter:Plotter, obstacles:Obstacles, case_count=int, save_image=False):
+def RRTStar_initial_build(robot:Robot, plotter:Plotter, obstacles:Obstacles):
+    ''' RRT '''
+    x, y = robot.coordinate
+    # boundary_area = ([x_min, y_min], [x_max, y_max])
+    boundary_area =  ((x - robot.vision_range, y - robot.vision_range),
+                     ((x + robot.vision_range, y + robot.vision_range)))
+    start_node = Node(coords=robot.start, cost=0)            # initial root node, cost to root = 0
+    RRT_star = RRTree_star(root=start_node, step_size=3, radius=5, 
+                    random_area=boundary_area, sample_size=sample_size_each_cell)
+    RRT_star.build(goal_coordinate=robot.goal, plotter=plotter, obstacles=obstacles, robot=robot) 
+    return RRT_star
+
+def RRTStar_expand(RRTstar:RRTree_star, robot:Robot, plotter:Plotter, obstacles:Obstacles, goal):
+    ''' RRT '''
+    x, y = robot.coordinate
+    # boundary_area = ([x_min, y_min], [x_max, y_max])
+    boundary_area =  ((x - robot.vision_range, y - robot.vision_range),
+                     ((x + robot.vision_range, y + robot.vision_range)))
+    RRTstar.set_sampling_area(random_area=boundary_area)
+    RRTstar.set_sampling_size(sample_size=sample_size_each_cell)
+    RRTstar.build(goal_coordinate=goal, plotter=plotter, obstacles=obstacles, robot=robot) 
+    return RRTstar
+
+def compare_Astar_RRTstar(robot:Robot, plotter:Plotter, obstacles:Obstacles, RRT_star=RRTree_star,
+                          case_count=int, save_image=False, iter_count=int):
+
+    start=robot.skeleton_path[0]
+    goal=robot.skeleton_path[-1]
+    
     Astar_path =[]
     Astar_path_cost = 0.0
     Astar_time = 0.0
+
     RRTstar_path =[]
     RRTstar_path_cost = 0.0
     RRTstar_time = 0.0
-    if not enable_compare:
-        return (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time)
     
-    ''' ASTAR '''
-    robot.skeleton_path
-    robot.vision_range
-    obstacles_Astar = []
-    grid_size = 1
-    goal=robot.skeleton_path[-1]
-    start=robot.skeleton_path[0]
-    
-    visited_area = robot.visibility_graph.get_all_non_leaf()
-    x_visited_area = [x for x,y in visited_area]
-    y_visited_area = [y for x,y in visited_area]
-    x_max, x_min = max(x_visited_area), min(x_visited_area)
-    y_max, y_min = max(y_visited_area), min(y_visited_area)
-    for x,y in visited_area:
-        for i in range (int(x- robot.vision_range - 3), int(x + robot.vision_range + 3)):
-            for j in range (int(y- robot.vision_range - 3),int(y + robot.vision_range + 3)):
-                pt = (i,j)
-                if not inside_visited_sights(pt, robot.vision_range+1, robot.visited_sights):
-                    if pt not in obstacles_Astar:
-                        obstacles_Astar.append(pt)
-    obstacles_x_Astar = []
-    obstacles_y_Astar = []
-    for ob in obstacles_Astar:
-        obstacles_x_Astar.append(ob[0])
-        obstacles_y_Astar.append(ob[1])
-    Astar_path, Astar_time = A_star_planner(start=start, goal=goal, ox=obstacles_x_Astar, 
-        oy=obstacles_y_Astar, robot_radius=robot.radius, plt= plotter.plt, grid_size=grid_size)
-    Astar_path_cost = path_cost(Astar_path)
-    
-    # save image for verification or display purposes
-    plotter.clear()
-    plotter.show_visited_sights(robot.visited_sights, robot.vision_range)
-    plotter.show_map(obstacles=obstacles)
-    plotter.robot(robot=robot)
-    if robot.next_point is not None:
-        plotter.point(robot.next_point, ls_nextpt)
-    plotter.path(Astar_path, "-r")
-    if save_image:
-        plotter.save_figure(f"case{case_count}_Astar", file_extension=".pdf")
+    if enable_compare_AStar: 
+        ''' ASTAR '''
+        radius = robot.vision_range
+        obstacles_Astar = []
+        grid_size = 1
+        
+        visited_area = robot.visibility_graph.get_all_non_leaf()
+        for x,y in visited_area:
+            for i in range (int(x- radius - 3), int(x + radius + 3)):
+                for j in range (int(y- radius - 3),int(y + radius + 3)):
+                    pt = (i,j)
+                    if not inside_visited_sights(pt, radius +1, robot.visited_sights):
+                        if pt not in obstacles_Astar:
+                            obstacles_Astar.append(pt)
+        obstacles_x_Astar = []
+        obstacles_y_Astar = []
+        for ob in obstacles_Astar:
+            obstacles_x_Astar.append(ob[0])
+            obstacles_y_Astar.append(ob[1])
+        Astar_path, Astar_time = A_star_planner(start=start, goal=goal, ox=obstacles_x_Astar, 
+            oy=obstacles_y_Astar, robot_radius=robot.radius, plt= plotter.plt, grid_size=grid_size)
+        Astar_path_cost = path_cost(Astar_path)
+        
+        # save image for verification or display purposes
+        plotter.clear()
+        plotter.show_visited_sights(robot.visited_sights, radius)
+        plotter.show_map(obstacles=obstacles)
+        plotter.robot(robot=robot)
+        if robot.next_point is not None:
+            plotter.point(robot.next_point, ls_nextpt)
+        plotter.path(Astar_path, "-r")
+        if save_image:
+            plotter.save_figure(f"case{case_count}_Astar", file_extension=".pdf")
 
 
-    
-    ''' RRT '''
-    # boundary_area = ([x_min, y_min], [x_max, y_max])
-    boundary_area = ((x_min-robot.vision_range, y_min-robot.vision_range),((x_max+robot.vision_range, y_max+robot.vision_range)))
-    start_node = Node(coords=robot.start, cost=0)            # initial root node, cost to root = 0
-    RRT_star = RRTree_star(root=start_node, step_size=3, radius=5, 
-                    #random_area=boundary_area, sample_size=20000)
-                    random_area=boundary_area, sample_size=20000)
-    
-    RRT_star.build(goal_coordinate=robot.skeleton_path[-1], plotter=plotter, obstacles=obstacles, robot=robot) 
-    new_node, _, _ = RRT_star.add_node_RRTstar(accepted_coordinate=start)
-    if new_node is None:
-        print ("FAILED TO ADD _______________________________________________________-")
-    all_posible_RRTStar = Graph()
-    all_posible_RRTStar_all_nodes = RRT_star.all_nodes()
-    for node in all_posible_RRTStar_all_nodes:
-        for neighbour in node.neighbours:
-            all_posible_RRTStar.graph_create_edge(node.coords, neighbour.coords)
-    
-    start_time = time.time()
-    RRTstar_path = all_posible_RRTStar.BFS_skeleton_path(start=start, goal=goal)
-    RRTstar_time = time.time()-start_time    
+    if enable_compare_RRTStar:    
+        ''' RRT '''
+        new_node, _, _ = RRT_star.add_node_RRTstar(accepted_coordinate=start)
+        if new_node is None:
+            print ("FAILED TO ADD START_______________________________________________________")
 
-    RRTstar_path_cost = path_cost(RRTstar_path)
+        new_node, _, _ = RRT_star.add_node_RRTstar(accepted_coordinate=goal)
+        if new_node is None:
+            print ("FAILED TO ADD GOAL_______________________________________________________")
 
-    # save image for verification or display purposes
-    plotter.clear()
-    plotter.show_visited_sights(robot.visited_sights, robot.vision_range)
-    plotter.show_map(obstacles=obstacles)
-    plotter.robot(robot=robot)
-    if robot.next_point is not None:
-        plotter.point(robot.next_point, ls_nextpt)
-    plotter.RRTree(tree=RRT_star, neighbour_en=True)
-    plotter.path(RRTstar_path, "-.r")
-    
-    if save_image:
-        plotter.save_figure(f"case{case_count}_RRTstar", file_extension=".pdf")
+        all_posible_RRTStar = Graph()
+        all_posible_RRTStar_all_nodes = RRT_star.all_nodes()
+        for node in all_posible_RRTStar_all_nodes:
+            for neighbour in node.neighbours:
+                all_posible_RRTStar.graph_create_edge(node.coords, neighbour.coords)
+        
+        start_time = time.time()
+        RRTstar_path = all_posible_RRTStar.BFS_skeleton_path(start=start, goal=goal)
+        RRTstar_time = time.time()-start_time    
+
+        RRTstar_path_cost = path_cost(RRTstar_path)
+
+        # save image for verification or display purposes
+        plotter.clear()
+        plotter.show_visited_sights(robot.visited_sights, robot.vision_range)
+        plotter.show_map(obstacles=obstacles)
+        plotter.robot(robot=robot)
+        if robot.next_point is not None:
+            plotter.point(robot.next_point, ls_nextpt)
+        plotter.RRTree(tree=RRT_star, neighbour_en=True)
+        print ("RRTstar_path: ", RRTstar_path)
+        plotter.path(RRTstar_path, "-.r")
+        
+        if save_image:
+            plotter.save_figure(f"case{case_count}_RRTstar", file_extension=".pdf")
  
     return (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time)
 
@@ -162,7 +183,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
     obstacles.line_segments()
     #obstacles.find_configuration_space(robot.radius)
  
-    time_stamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    #time_stamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     
     csv_head_time = []
     csv_head_cost = []
@@ -185,9 +206,9 @@ def robot_main( start, goal, map_name, world_name, num_iter,
     result_cost = Result_Log(header_csv=csv_head_cost)
     result_turn = Result_Log(header_csv=csv_head_turn)
 
-    result_time.set_file_name(f"result_ASP_AStar_RRTStar_time_{time_stamp}.csv")
-    result_cost.set_file_name(f"result_ASP_AStar_RRTStar_path_cost_{time_stamp}.csv")
-    result_turn.set_file_name(f"result_ASP_AStar_RRTStar_path_turn_{time_stamp}.csv")
+    result_time.set_file_name(f"result_ASP_AStar_RRTStar_time_improve{enable_improve}_s{start}_g{goal}.csv")
+    result_cost.set_file_name(f"result_ASP_AStar_RRTStar_path_cost_improve{enable_improve}_s{start}_g{goal}.csv")
+    result_turn.set_file_name(f"result_ASP_AStar_RRTStar_path_turn_improve{enable_improve}_s{start}_g{goal}.csv")
 
     ''' generate a RRTree_star if ranking type is RRTree_Star_ranking '''
     if ranking_type == Ranking_type.RRTstar:
@@ -225,7 +246,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
 
         # clean old data
         robot.clear_local()
-        print(f"______iteration {iter_count}, robot coordinate {robot.coordinate}")
+        print(f"_____iteration {iter_count}, robot coordinate {robot.coordinate}")
         
 
         # scan to get sights at local
@@ -248,9 +269,6 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         
         # record the path and sight
         robot.add_visited_sights(closed_sights, open_sights)
-        if platform.system() == 'Linux':
-            if enable_improve:
-                robot.bridge_visibility_graph(robot.coordinate, open_sights)
 
         # pick next point to make a move
         robot.next_point = robot.pick_next_point(goal, picking_strategy=picking_strategy)
@@ -264,21 +282,31 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             robot.skeleton_path = []
             robot.is_no_way_to_goal(True)
 
-        robot.asp, robot.ls, l_stime, a_time = approximately_shortest_path(robot.skeleton_path, robot.visited_sights, robot.vision_range)
-        asp_path_cost = path_cost(robot.asp)
+        if iter_count == 1:
+            RRTstar = RRTStar_initial_build(robot=robot, obstacles=obstacles, plotter=plotter)
+        else:
+            RRTstar = RRTStar_expand(RRTstar=RRTstar, robot=robot, plotter=plotter, obstacles=obstacles, goal=robot.goal)
+
         if platform.system() == 'Linux':
-            asp_old, ls_old, l_stime_old, a_time_old = approximately_shortest_path_old(robot.skeleton_path, robot.visited_sights, robot.vision_range)
-            asp_path_cost_old = path_cost(asp_old)
-            ASP_jagged_path_old = get_path_turn(asp_old)
+            if enable_improve:
+                robot.bridge_visibility_graph(robot.coordinate, open_sights)
+
+        robot.asp, robot.ls, l_stime_v2, a_time_v2 = approximately_shortest_path(robot.skeleton_path, robot.visited_sights, robot.vision_range)
+        asp_path_cost_v2 = path_cost(robot.asp)
+        if platform.system() == 'Linux':
+            asp_old, ls_old, l_stime_v1, a_time_v1 = approximately_shortest_path_old(robot.skeleton_path, robot.visited_sights, robot.vision_range)
+            asp_path_cost_v1 = path_cost(asp_old)
+            ASP_path_turn_v1 = get_path_turn(asp_old)
 
         if len(robot.skeleton_path)>2:
             print ("back-ward path")
             case_count += 1
             (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time) =\
                                 compare_Astar_RRTstar(robot=robot,plotter=plotter, obstacles=obstacles, 
-                                                      save_image=save_image, case_count = case_count)
-            Astar_jagged_path = get_path_turn(Astar_path)
-            RRTstar_jagged_path = get_path_turn(RRTstar_path)
+                                                      save_image=save_image, case_count = case_count,
+                                                      iter_count=iter_count, RRT_star=RRTstar)
+            Astar_path_turn = get_path_turn(Astar_path)
+            RRTstar_path_turn = get_path_turn(RRTstar_path)
             if save_image:
                 # showing the final result (for save image and display as well)
                 plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
@@ -290,20 +318,20 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 save_name = f"case{case_count}_ASP"
                 if platform.system() == 'Linux' and enable_improve:
                         save_name = f"case{case_count}_ASP_improve"
-                        
+
                 plotter.save_figure(fig_name=save_name, file_extension=".pdf")
 
-            ASP_jagged_path = get_path_turn(robot.asp)
-            Astar_jagged_path = get_path_turn(Astar_path)
-            RRTstar_jagged_path = get_path_turn(RRTstar_path)
+            ASP_path_turn_v2 = get_path_turn(robot.asp)
+            Astar_path_turn = get_path_turn(Astar_path)
+            RRTstar_path_turn = get_path_turn(RRTstar_path)
             if platform.system() == 'Linux':
-                result_time.add_result([l_stime_old + a_time_old, l_stime + a_time])
-                result_cost.add_result([asp_path_cost_old, asp_path_cost])
-                result_turn.add_result([ASP_jagged_path_old, ASP_jagged_path])
+                result_time.add_result([l_stime_v1 + a_time_v1, l_stime_v2 + a_time_v2,Astar_time, RRTstar_time])
+                result_cost.add_result([asp_path_cost_v1, asp_path_cost_v2, Astar_path_cost, RRTstar_path_cost])
+                result_turn.add_result([ASP_path_turn_v1, ASP_path_turn_v2,Astar_path_turn, RRTstar_path_turn])
             else:
-                result_time.add_result([ l_stime + a_time, Astar_time, RRTstar_time])
-                result_cost.add_result([ asp_path_cost, Astar_path_cost, RRTstar_path_cost])
-                result_turn.add_result([ASP_jagged_path, Astar_jagged_path, RRTstar_jagged_path])
+                result_time.add_result([ l_stime_v2 + a_time_v2, Astar_time, RRTstar_time])
+                result_cost.add_result([ asp_path_cost_v2, Astar_path_cost, RRTstar_path_cost])
+                result_turn.add_result([ASP_path_turn_v2, Astar_path_turn, RRTstar_path_turn])
         # mark visited path
         robot.expand_visited_path(robot.asp)
 
@@ -318,11 +346,16 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             #plotter.tree_all_nodes(RRTx)
             if ranking_type == Ranking_type.RRTstar:
                 plotter.tree(RRT_star,color_mode=TreeColor.by_cost)
+        show_all = False
+        if show_all :
+            plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
+                                   obstacles=obstacles, easy_experiment=log_experiment)
+            plotter.show()
 
         # Run n times for debugging
         if  iter_count == num_iter or robot.finish():
             break
-    
+
     if not log_experiment and show_animation: 
         plotter.show()  # show animation for display
 
@@ -331,7 +364,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         result_cost.write_csv()
         result_turn.write_csv()
         print ("\nTo visualize the results, run:\n" +
-               f"Python Plotter.py -r result\*{time_stamp}.csv")
+               f"Python Plotter.py -r {result_repo}\*s{start}_g{goal}.csv")
     return robot
 
 if __name__ == '__main__':
