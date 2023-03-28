@@ -92,9 +92,9 @@ class Obstacles:
         return self.obstacles_line_segments
 
     ''' check collision: return true if the given point is inside obstracles '''
-    def check_point_collision(self, point, obstacles_line_segments):
+    def check_point_collision(self, point):
         lsA = (point, FAR_POINT)
-        for obstracle_lss in obstacles_line_segments:
+        for obstracle_lss in self.obstacles_line_segments:
             pt_is_count = 0
             for ls in obstracle_lss:
                 pt_is = line_across(ls, lsA)
@@ -104,11 +104,19 @@ class Obstacles:
                 return True
         return False
 
+    ''' check if a linesegment crosses obstacle'''
+    def check_linesegment_collision(self, line_segment):
+        for obstracle_lss in self.obstacles_line_segments:
+            for ls in obstracle_lss:
+                pt_is = line_across(ls, line_segment)
+                if pt_is is not None:
+                    return True
+        return False
     ''' get_closest_point_collision: return closest collision point if any'''
-    def get_closest_point_collision(self, start_pt, end_pt, obstacles_line_segments):
+    def get_closest_point_collision(self, start_pt, end_pt):
         lsA = (start_pt, end_pt)
         cc_points = []
-        for obstracle_lss in obstacles_line_segments:
+        for obstracle_lss in self.obstacles_line_segments:
             for ls in obstracle_lss:
                 pt_is = line_across(ls, lsA)
                 if pt_is is not None:

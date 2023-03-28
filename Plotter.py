@@ -451,4 +451,5 @@ if __name__ == '__main__':
         print(file)
         result_data = pd.read_csv(file)
         result_data.plot(kind="bar")
+        print (result_data.sum())
         plt.show()

@@ -250,11 +250,17 @@ class Tree:
         # find the neareset node (in distance) to random coordinate
         nearest_dist, nearest_node = self.nearest(rand_coordinate)
         
-        picked_coordinate = nearest_node.bring_closer_coordinate(rand_coordinate, nearest_dist, self.step_size)
-        conllision = obstacles.check_point_collision(point=picked_coordinate,\
-                            obstacles_line_segments=obstacles.obstacles_line_segments)
-        if conllision:
-            picked_coordinate = None
+        # get free closest point which no collision
+        pt = obstacles.get_closest_point_collision(nearest_node.coords, rand_coordinate)
+        nearest_dist = point_dist(nearest_node.coords, pt)
+        if nearest_dist < self.step_size: # skip if the node is too close obstacles
+            return None
+        _, endpt = scale_vector(nearest_node.coords, end=pt, scale=0.99)
+        
+        picked_coordinate = nearest_node.bring_closer_coordinate(endpt, nearest_dist, self.step_size)
+        #conllision = obstacles.check_point_collision(point=picked_coordinate)
+        #if conllision:
+        #    picked_coordinate = None
         return picked_coordinate
 
     ''' update lmc of given node '''

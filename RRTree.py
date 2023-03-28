@@ -69,7 +69,7 @@ class RRTree(Tree):
         prevent_recalculate = False
         for i in range(1, self.sampling_size):
             # orient to goal sometime :))
-            if i %30 == 0 and not self.reach_goal: # bias to goal sometime
+            if i %200 == 0 and not self.reach_goal: # bias to goal sometime
                 rand_coordinate = np.array(goal_coordinate)
             else:
                 rand_coordinate = self.random_coordinate()

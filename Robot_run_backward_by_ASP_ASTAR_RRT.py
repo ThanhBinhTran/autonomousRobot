@@ -34,7 +34,7 @@ from RRTree_star import RRTree_star
 from Graph import *
 
 enable_compare_AStar = False
-enable_compare_RRTStar = False
+enable_compare_RRTStar = True
 enable_improve = True
 sample_size_each_cell = 100
 
@@ -151,7 +151,11 @@ def compare_Astar_RRTstar(robot:Robot, plotter:Plotter, obstacles:Obstacles, RRT
             plotter.point(robot.next_point, ls_nextpt)
         plotter.RRTree(tree=RRT_star, neighbour_en=True)
         print ("RRTstar_path: ", RRTstar_path)
-        plotter.path(RRTstar_path, "-.r")
+        if len(RRTstar_path) > 0:
+            plotter.path(RRTstar_path, "-.r")
+        else:
+            RRTstar_path_cost = -10 # return invalid value
+            RRTstar_time = -10
         
         if save_image:
             plotter.save_figure(f"case{case_count}_RRTstar", file_extension=".pdf")
@@ -300,7 +304,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
 
         if len(robot.skeleton_path)>2:
             print ("back-ward path")
-            case_count += 1
+            
             (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time) =\
                                 compare_Astar_RRTstar(robot=robot,plotter=plotter, obstacles=obstacles, 
                                                       save_image=save_image, case_count = case_count,
@@ -332,6 +336,10 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 result_time.add_result([ l_stime_v2 + a_time_v2, Astar_time, RRTstar_time])
                 result_cost.add_result([ asp_path_cost_v2, Astar_path_cost, RRTstar_path_cost])
                 result_turn.add_result([ASP_path_turn_v2, Astar_path_turn, RRTstar_path_turn])
+            
+            case_count += 1
+        
+        
         # mark visited path
         robot.expand_visited_path(robot.asp)
 

@@ -107,8 +107,7 @@ class RRTree_x(RRTree):
     def local_obstacle_nodes(self, nodes, obstacles: Obstacles):
         obstacle_nodes = []
         for node in nodes:
-            conllision = obstacles.check_point_collision(point=node.coords,\
-                            obstacles_line_segments=obstacles.obstacles_line_segments)
+            conllision = obstacles.check_point_collision(point=node.coords)
             if conllision:
                 obstacle_nodes.append(node)
                 node.set_inactive()
