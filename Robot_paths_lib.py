@@ -22,6 +22,7 @@ def all_remaining_point_same_side(a, b, c, obstacle_list):
         return True
     return False
 
+#@profile
 def approximately_shortest_path(skeleton_path, visited_sights, robot_vision):
     lstime = 0.0
     atime = 0.0
@@ -38,6 +39,7 @@ def approximately_shortest_path(skeleton_path, visited_sights, robot_vision):
         atime = time.time()- stime
     return asp, critical_ls, lstime, atime
 
+@profile
 def approximately_shortest_path_old(skeleton_path, visited_sights, robot_vision):
     lstime = 0.0
     atime = 0.0
@@ -109,6 +111,7 @@ def create_fake_linesegment(center, pre_pt, post_pt, vision_range):
         return midpt, center
     
 ''' closed sighed is sorted in anti-clockwise direction '''
+#@profile
 def get_sorted_local_linesegments(closed_sights, center, pre_pt, post_pt, vision_range, safe_radius):
     result = []
     root = center
@@ -212,7 +215,8 @@ def get_sorted_local_linesegments(closed_sights, center, pre_pt, post_pt, vision
         result.append((safe_pt, disjont_root))
     #print ("len result", len(result))
     return result
-    
+
+#@profile
 def get_critical_linesegments(skeleton_path, visited_sights:Sight, robot_vision):
     critical_linesegments = []
     # get safe radius to avoid disjoint among line segments
@@ -232,6 +236,7 @@ def get_critical_linesegments(skeleton_path, visited_sights:Sight, robot_vision)
         critical_linesegments.extend(local_ls)
     return critical_linesegments
 
+@profile
 def get_critical_linesegments_old(skeleton_path, visited_sights:Sight, robot_vision):
     critical_linesegments = []
     # get safe radius to avoid disjoint among line segments
@@ -296,10 +301,12 @@ def get_critical_linesegments_old(skeleton_path, visited_sights:Sight, robot_vis
             ls[2] = disjoint_root
         critical_linesegments.extend(local_ls)
     return critical_linesegments
+
 def total_length(path_length):
     temp = np.array(path_length)
     return temp.sum()
 
+#@profile
 def approximately_sp_ls(critical_ls, spt, gpt):
     #print ("critical_ls", critical_ls)
     path = []  # list of points
@@ -341,7 +348,7 @@ def approximately_sp_ls(critical_ls, spt, gpt):
                 break
             pre_total_dist = total_dist
     return path
-
+@profile
 def approximately_sp_ls_old(critical_ls, spt, gpt):
     #print ("critical_ls", critical_ls)
     path = []  # list of points

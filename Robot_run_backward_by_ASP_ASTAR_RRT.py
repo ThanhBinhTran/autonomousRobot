@@ -34,7 +34,7 @@ from RRTree_star import RRTree_star
 from Graph import *
 
 enable_compare_AStar = False
-enable_compare_RRTStar = True
+enable_compare_RRTStar = False
 enable_improve = True
 sample_size_each_cell = 100
 
@@ -294,13 +294,13 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         if platform.system() == 'Linux':
             if enable_improve:
                 robot.bridge_visibility_graph(robot.coordinate, open_sights)
+        l_stime_v2, a_time_v2 = 0.0 , 0.0
+        #robot.asp, robot.ls, l_stime_v2, a_time_v2 = approximately_shortest_path(robot.skeleton_path, robot.visited_sights, robot.vision_range)
 
-        robot.asp, robot.ls, l_stime_v2, a_time_v2 = approximately_shortest_path(robot.skeleton_path, robot.visited_sights, robot.vision_range)
         asp_path_cost_v2 = path_cost(robot.asp)
-        if platform.system() == 'Linux':
-            asp_old, ls_old, l_stime_v1, a_time_v1 = approximately_shortest_path_old(robot.skeleton_path, robot.visited_sights, robot.vision_range)
-            asp_path_cost_v1 = path_cost(asp_old)
-            ASP_path_turn_v1 = get_path_turn(asp_old)
+        asp_old, ls_old, l_stime_v1, a_time_v1 = approximately_shortest_path_old(robot.skeleton_path, robot.visited_sights, robot.vision_range)
+        asp_path_cost_v1 = path_cost(asp_old)
+        ASP_path_turn_v1 = get_path_turn(asp_old)
 
         if len(robot.skeleton_path)>2:
             print ("back-ward path")

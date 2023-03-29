@@ -13,3 +13,4 @@ Paper_plot/*
 .idea/inspectionProfiles/profiles_settings.xml
 .idea/autonomousRobot.iml
 .idea/.gitignore
+*.lprof
