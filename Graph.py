@@ -1,5 +1,5 @@
 from collections import defaultdict
-from queue import PriorityQueue
+import heapq
 from Robot_math_lib import point_dist
 class Graph:
     def __init__(self):
@@ -79,27 +79,20 @@ class Graph:
         return []
 
     def BFS_skeleton_path(self, start, goal):
-        visited = set()
         distances = {node: float('inf') for node in self.graph}
         distances[start] = 0
         previous_nodes = {node: None for node in self.graph}
-        queue = PriorityQueue()
-        queue.put((0, start))
-        while not queue.empty():
-            current_distance, current_node = queue.get()
-            if current_node == goal:
-                break
-            if current_node not in visited:
-                visited.add(current_node)
-                for neighbor in self.graph[current_node]:
-                    weight = point_dist(current_node, neighbor)
-                    weight_ng = point_dist(neighbor, goal)
-                    weight_cg = point_dist(current_node, goal)
-                    distance = current_distance + weight + weight_ng - weight_cg
-                    if distance < distances[neighbor]:
-                        distances[neighbor] = distance
-                        previous_nodes[neighbor] = current_node
-                        queue.put((distance, neighbor))
+        queue = [(0, start)]
+        while queue:
+            current_distance, current_node = heapq.heappop(queue)
+            if current_distance > distances[current_node]:
+                continue
+            for neighbor in self.graph[current_node]:
+                distance = current_distance + point_dist(neighbor, current_node)
+                if distance < distances[neighbor]:
+                    distances[neighbor] = distance
+                    previous_nodes[neighbor] = current_node
+                    heapq.heappush(queue, (distance, neighbor))
         path = []
         current_node = goal
         while current_node is not None:
