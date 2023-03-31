@@ -1,5 +1,6 @@
 from collections import defaultdict
-
+from queue import PriorityQueue
+from Robot_math_lib import point_dist
 class Graph:
     def __init__(self):
         self.graph = defaultdict(list)
@@ -76,3 +77,24 @@ class Graph:
         # are not connected 
         print("So sorry, but a connecting path doesn't exist :(")
         return []
+    
+
+
+    def best_first_search(graph, start, goal):
+        visited = set()
+        queue = PriorityQueue()
+        queue.put((0, [start]))
+        while not queue.empty():
+            cost, path = queue.get()
+            current = path[-1]
+            if current == goal:
+                return path
+            if current not in visited:
+                visited.add(current)
+                for neighbor in graph[current]:
+                    
+                    if neighbor not in visited:
+                        weight = point_dist(current, neighbor)
+                        new_path = path + [neighbor]
+                        queue.put((weight, new_path))
+        return None
