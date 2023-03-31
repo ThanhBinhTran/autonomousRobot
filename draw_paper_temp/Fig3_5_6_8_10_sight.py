@@ -5,6 +5,7 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.
 """
 import sys
 import os
+import platform
 # hide/display animation
 from Program_config import *
 # input from user
@@ -37,6 +38,8 @@ figure5_ranking_tree= False
 figure6_local_sight = False
 figure8_step_by_step = False
 figure10_connect_visibility_graph = True
+
+enable_improve = True
 
 def robot_main( start, goal, map_name, world_name, num_iter, 
                 robot_vision, robot_type, robot_radius, 
@@ -133,7 +136,9 @@ def robot_main( start, goal, map_name, world_name, num_iter,
 
         # record the path and sight
         robot.add_visited_sights(closed_sights, open_sights)
-
+        if platform.system() == 'Linux':
+            if enable_improve:
+                robot.bridge_visibility_graph(robot.coordinate, open_sights)
         robot.asp, robot.ls, l_stime, a_time = approximately_shortest_path(robot.skeleton_path, robot.visited_sights, robot.vision_range)
         asp_path_cost = path_cost(robot.asp)
         #robot.asp, robot.ls, l_stime_old, a_time_old = approximately_shortest_path_old(robot.skeleton_path, robot.visited_sights, robot.vision_range)
@@ -165,7 +170,8 @@ def robot_main( start, goal, map_name, world_name, num_iter,
     if figure6_local_sight or figure10_connect_visibility_graph:
         all_centers = robot.visited_sights.all_coordinate()
         for idx, cpt in enumerate(all_centers):
-            plotter.text(cpt, f"$C_{idx}$")
+            text = "$C_{" + str(idx) + "}$"
+            plotter.text(cpt, text)
     plotter.show()
         
     return robot
