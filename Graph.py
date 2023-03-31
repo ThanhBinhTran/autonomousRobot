@@ -80,21 +80,30 @@ class Graph:
 
     def BFS_skeleton_path(self, start, goal):
         visited = set()
+        distances = {node: float('inf') for node in self.graph}
+        distances[start] = 0
+        previous_nodes = {node: None for node in self.graph}
         queue = PriorityQueue()
-        queue.put((0, [start]))
+        queue.put((0, start))
         while not queue.empty():
-            cost, path = queue.get()
-            current = path[-1]
-            if current == goal:
-                return path
-            if current not in visited:
-                visited.add(current)
-                for neighbor in self.graph[current]:
-                    if neighbor not in visited:
-                        weight = point_dist(current, neighbor)
-                        weight_gn = point_dist(goal, neighbor)
-                        weight_gc = point_dist(goal, current)
-                        new_cost = cost + weight + weight_gn - weight_gc
-                        new_path = path + [neighbor]
-                        queue.put((new_cost, new_path))
-        return None
+            current_distance, current_node = queue.get()
+            if current_node == goal:
+                break
+            if current_distance > distances[current_node]:
+                continue
+            for neighbor, weight in self.graph[current_node]:
+                weight = point_dist(current_node, neighbor)
+                weight_ng = point_dist(neighbor, goal)
+                weight_cg = point_dist(current_node, goal)
+                distance = current_distance + weight + weight_ng - weight_cg
+                if distance < distances[neighbor]:
+                    distances[neighbor] = distance
+                    previous_nodes[neighbor] = current_node
+                    queue.put((distance, neighbor))
+        path = []
+        current_node = goal
+        while current_node is not None:
+            path.append(current_node)
+            current_node = previous_nodes[current_node]
+        path.reverse()
+        return path
