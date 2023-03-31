@@ -77,8 +77,6 @@ class Graph:
         # are not connected 
         print("So sorry, but a connecting path doesn't exist :(")
         return []
-    
-
 
     def BFS_skeleton_path(self, start, goal):
         visited = set()
