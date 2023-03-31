@@ -89,17 +89,17 @@ class Graph:
             current_distance, current_node = queue.get()
             if current_node == goal:
                 break
-            if current_distance > distances[current_node]:
-                continue
-            for neighbor, weight in self.graph[current_node]:
-                weight = point_dist(current_node, neighbor)
-                weight_ng = point_dist(neighbor, goal)
-                weight_cg = point_dist(current_node, goal)
-                distance = current_distance + weight + weight_ng - weight_cg
-                if distance < distances[neighbor]:
-                    distances[neighbor] = distance
-                    previous_nodes[neighbor] = current_node
-                    queue.put((distance, neighbor))
+            if current_node not in visited:
+                visited.add(current_node)
+                for neighbor in self.graph[current_node]:
+                    weight = point_dist(current_node, neighbor)
+                    weight_ng = point_dist(neighbor, goal)
+                    weight_cg = point_dist(current_node, goal)
+                    distance = current_distance + weight + weight_ng - weight_cg
+                    if distance < distances[neighbor]:
+                        distances[neighbor] = distance
+                        previous_nodes[neighbor] = current_node
+                        queue.put((distance, neighbor))
         path = []
         current_node = goal
         while current_node is not None:
