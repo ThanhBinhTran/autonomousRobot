@@ -50,7 +50,7 @@ class RRTree(Tree):
 
     def add_coordinate_to_RRT(self, robot, coordinate, obstacles, goal_coordinate, compare_ASP=False):
         # bring closer random coordinate to tree 
-        accepted_coordinate = self.bring_closer_avoid_obstacles(rand_coordinate=coordinate, obstacles=obstacles)
+        accepted_coordinate = self.bring_closer(rand_coordinate=coordinate, obstacles=obstacles)
         if accepted_coordinate is None or (not robot.inside_explored_area(pt=accepted_coordinate)and compare_ASP):
             return None, None, None 
             

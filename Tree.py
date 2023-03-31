@@ -236,31 +236,31 @@ class Tree:
     def all_distances(self, node_coords):
         return [point_dist(node_coords, n_coords) for n_coords in self.all_nodes_coordinate()]
     
-    ''' bring random coordinate closer to nearest node in tree '''
-    def bring_closer(self, rand_coordinate ):
-        # find the neareset node (in distance) to random coordinate
-        nearest_dist, nearest_node = self.nearest(rand_coordinate)
+#    ''' bring random coordinate closer to nearest node in tree '''
+#    def bring_closer(self, rand_coordinate ):
+#        # find the neareset node (in distance) to random coordinate
+#        nearest_dist, nearest_node = self.nearest(rand_coordinate)
+#
+#        # bring random coordinate closer to nearest node
+#        picked_coordinate = nearest_node.bring_closer_coordinate(rand_coordinate, nearest_dist, self.step_size)
+#        return picked_coordinate
 
-        # bring random coordinate closer to nearest node
-        picked_coordinate = nearest_node.bring_closer_coordinate(rand_coordinate, nearest_dist, self.step_size)
-        return picked_coordinate
-
     ''' bring random coordinate closer to nearest node in tree '''
-    def bring_closer_avoid_obstacles(self, rand_coordinate, obstacles:Obstacles ):
+    def bring_closer(self, rand_coordinate, obstacles:Obstacles, ignore_obstacles=False):
+        pt_coordinate = rand_coordinate
         # find the neareset node (in distance) to random coordinate
         nearest_dist, nearest_node = self.nearest(rand_coordinate)
         
-        # get free closest point which no collision
-        pt = obstacles.get_closest_point_collision(nearest_node.coords, rand_coordinate)
-        nearest_dist = point_dist(nearest_node.coords, pt)
-        if nearest_dist < self.step_size: # skip if the node is too close obstacles
-            return None
-        _, endpt = scale_vector(nearest_node.coords, end=pt, scale=0.99)
+        if not ignore_obstacles:
+            # get free closest point which no collision
+            pt = obstacles.get_closest_point_collision(nearest_node.coords, rand_coordinate)
+            nearest_dist = point_dist(nearest_node.coords, pt)
+            if nearest_dist < self.step_size: # skip if the node is too close obstacles
+                return None
+            _, pt_coordinate = scale_vector(nearest_node.coords, end=pt, scale=0.99)
         
-        picked_coordinate = nearest_node.bring_closer_coordinate(endpt, nearest_dist, self.step_size)
-        #conllision = obstacles.check_point_collision(point=picked_coordinate)
-        #if conllision:
-        #    picked_coordinate = None
+        picked_coordinate = nearest_node.bring_closer_coordinate(pt_coordinate, nearest_dist, self.step_size)
+
         return picked_coordinate
 
     ''' update lmc of given node '''

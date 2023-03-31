@@ -11,14 +11,10 @@ from Program_config import *
 import os
 
 class Plot_base:
-    def __init__(self, size=(7,7), title="Autonomous Robot"):
+    def __init__(self, size=(6,6), title="Autonomous Robot"):
         self.plt   = plt
         self.fig, self.ax = plt.subplots(figsize=size)
-        #self.plt.figure(title)
         self.fig.canvas.manager.set_window_title(title)
-        #self.fig.canvas.set_window_title(title)
-        #self.plt.xlim(0, 100)
-        #self.plt.ylim(0, 100)
 
     show = lambda self: self.plt.show()
     pause = lambda self, x: self.plt.pause(x)
@@ -106,7 +102,7 @@ class Plot_base:
             elif s_goal:
                 self.text(goal, "saw goal!")
             else:
-                self.text(goal, "goal")
+                self.text(goal, "g")
     ''' Start '''
     def start(self, start):
         self.point_text(start, ls_start, "start!")
@@ -162,9 +158,12 @@ class Plot_base:
         elif robot.robot_type == RobotType.circle:
             circle = plt.Circle((x, y), robot.radius, color="b")
             plt.gcf().gca().add_artist(circle)
-            out_x, out_y = (np.array([x, y]) +
-                            np.array([np.cos(yaw), np.sin(yaw)]) * robot.radius)
-            plt.plot([x, out_x], [y, out_y], "-k")
+            
+            show_yaw = False
+            if show_yaw:
+                out_x, out_y = (np.array([x, y]) +
+                                np.array([np.cos(yaw), np.sin(yaw)]) * robot.radius)
+                plt.plot([x, out_x], [y, out_y], "-k")
     
     ''' save plot as image/pdf/svg/eps'''
     def save_figure(self, fig_name = "image",  file_extension = ".png", dpi=150, bbox_inches ="tight"):

@@ -39,7 +39,7 @@ def approximately_shortest_path(skeleton_path, visited_sights, robot_vision):
         atime = time.time()- stime
     return asp, critical_ls, lstime, atime
 
-@profile
+#@profile
 def approximately_shortest_path_old(skeleton_path, visited_sights, robot_vision):
     lstime = 0.0
     atime = 0.0
@@ -226,7 +226,7 @@ def get_critical_linesegments(skeleton_path, visited_sights:Sight, robot_vision)
     for i in range(1, len(skeleton_path) - 1):
         pre_pt = skeleton_path[i - 1]  # pre point
         post_pt = skeleton_path[i + 1]  # post point
-        center_pt = skeleton_path[i]  # center point
+        center_pt = tuple(skeleton_path[i])  # center point
 
         # get closed sights according to its center
         closed_sights = visited_sights.get_closed_sights(center_pt)
@@ -236,7 +236,7 @@ def get_critical_linesegments(skeleton_path, visited_sights:Sight, robot_vision)
         critical_linesegments.extend(local_ls)
     return critical_linesegments
 
-@profile
+#@profile
 def get_critical_linesegments_old(skeleton_path, visited_sights:Sight, robot_vision):
     critical_linesegments = []
     # get safe radius to avoid disjoint among line segments
@@ -348,7 +348,7 @@ def approximately_sp_ls(critical_ls, spt, gpt):
                 break
             pre_total_dist = total_dist
     return path
-@profile
+#@profile
 def approximately_sp_ls_old(critical_ls, spt, gpt):
     #print ("critical_ls", critical_ls)
     path = []  # list of points

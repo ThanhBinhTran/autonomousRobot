@@ -10,10 +10,10 @@ class Map:
 
         return plt.ginput(MAX_VERTICES, show_clicks=True, timeout=-1)  # no timeout
 
-    def display(self, plt, title, obstacles, alpha: float = 0.4, hatch: str = '//////'):
+    def display(self, plt, title, obstacles, alpha: float = 0.4, hatch: str = '//'):
         
         # displaying the title 
-        plt.title(title)
+        #plt.title(title)
         for obstacle in obstacles:
             x = [point[0] for point in obstacle]
             y = [point[1] for point in obstacle]

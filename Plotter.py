@@ -97,7 +97,8 @@ class Plotter(Plot_base):
             osights=visited_sights.open_sights[center]
             self.vision(center, vision_range, csights, osights)
 
-    def animation(self, Robot:Robot, world_name, iter_count, obstacles:Obstacles, easy_experiment= False):
+    def animation(self, Robot:Robot, world_name, iter_count, obstacles:Obstacles, 
+                  show_grid=True, hide_axis=False, set_equal= True, easy_experiment= False):
         # clear plot
         self.clear()
 
@@ -160,8 +161,10 @@ class Plotter(Plot_base):
                 self.point(Robot.next_point, ls_nextpt)
         
         # to set equal make sure x y axises are same resolution 
-        self.set_equal()
-        self.show_grid()
+        
+        if set_equal: self.set_equal()
+        if show_grid: self.show_grid()
+        if hide_axis: self.plt.axis("off")   # turns off axes
         if not easy_experiment:
             self.plt.pause(0.001)
 
@@ -442,14 +445,20 @@ for file in glob.glob(os.path.join(path, '*.py')):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Code for Autonomous Robot.')
     parser.add_argument('-r', metavar="result file",  help='result file', default="result.csv")
+    parser.add_argument('-x', type=tuple, metavar="lim x",  help='result file', default=(0,15))
+    parser.add_argument('-y', type=tuple, metavar="lim y",  help='result file', default=(0, 5))
     menu_result = parser.parse_args()
     # get user input
     result_files = menu_result.r
+    xlim = menu_result.x
+    ylim = menu_result.y
     path = ''
     print (result_files)
     for file in glob.glob(os.path.join(path, result_files)):
         print(file)
         result_data = pd.read_csv(file)
-        result_data.plot(kind="bar")
+        result_data.plot(kind="bar", figsize=(10, 4))
         print (result_data.sum())
+
+        # Show the plot
         plt.show()

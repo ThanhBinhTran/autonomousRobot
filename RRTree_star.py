@@ -39,13 +39,14 @@ class RRTree_star(RRTree):
             return new_node, neighbour_nodes, nearest_neighbour_node
         return None, None, None        
 
-    def add_coordinate_to_RRTstar(self, robot, coordinate, obstacles, goal_coordinate, compare_ASP=False):
+    def add_coordinate_to_RRTstar(self, robot, coordinate, obstacles, goal_coordinate, ignore_obstacles=False):
         
         # bring closer random coordinate to tree 
-        accepted_coordinate = self.bring_closer_avoid_obstacles(rand_coordinate=coordinate, obstacles=obstacles)
+        accepted_coordinate = self.bring_closer(rand_coordinate=coordinate, obstacles=obstacles, ignore_obstacles=ignore_obstacles)
 
-        if accepted_coordinate is None or (not robot.inside_explored_area(pt=accepted_coordinate) and compare_ASP):
-            return None, None, None 
+        if not ignore_obstacles:
+            if accepted_coordinate is None or not robot.inside_explored_area(pt=accepted_coordinate):
+                return None, None, None 
 
         # if tree first saw given goal , instead of adding new random , add goal
         if not self.reach_goal:
@@ -64,7 +65,7 @@ class RRTree_star(RRTree):
         
         return new_node, neighbour_nodes, nearest_neighbour_node 
 
-    def build(self,  goal_coordinate, plotter: Plotter=None, obstacles=None, robot:Robot=None, compare_ASP=False):
+    def build(self,  goal_coordinate, plotter: Plotter=None, obstacles=None, robot:Robot=None, ignore_obstacles=False):
         for i in range(1, self.sampling_size):
             # orient to goal sometime :))
             if i %50 == 0 and not self.reach_goal: # bias to goal sometime
@@ -72,10 +73,9 @@ class RRTree_star(RRTree):
             else:
                 # generate random coordinate in sampling area = [min, max]
                 rand_coordinate = self.random_coordinate()
-
             new_node, neighbour_nodes, nearest_neighbour_node  = \
                     self.add_coordinate_to_RRTstar(coordinate=rand_coordinate, obstacles=obstacles, 
-                                                compare_ASP=compare_ASP, robot=robot, goal_coordinate=goal_coordinate)
+                                                ignore_obstacles=ignore_obstacles, robot=robot, goal_coordinate=goal_coordinate)
             ''' for display '''
 
             # update path to goal

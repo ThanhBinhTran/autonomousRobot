@@ -298,7 +298,7 @@ class Robot(Robot_base):
 
             active_open_nodes = np.array(neighbour_nodes)
             # remove local_point which is inside explored area
-            if len(self.visited_sights) > 0:
+            if self.visited_sights.size() > 0:
                 inside_status = [inside_visited_sights(node.coords, self.vision_range, self.visited_sights) for node in neighbour_nodes]
                 active_open_nodes = active_open_nodes[np.logical_not(inside_status)]
 
