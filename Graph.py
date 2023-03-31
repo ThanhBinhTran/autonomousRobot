@@ -32,7 +32,7 @@ class Graph:
         return self.graph[tuple(node)]
     
     # path between two nodes of a graph
-    def BFS_skeleton_path(self, start, goal):
+    def BFS_skeleton_path_old(self, start, goal):
 
         #print("BFS_skeleton_path: Current {0}, Next {1}".format(start, goal))
         explored = []
@@ -80,7 +80,7 @@ class Graph:
     
 
 
-    def best_first_search(graph, start, goal):
+    def BFS_skeleton_path(self, start, goal):
         visited = set()
         queue = PriorityQueue()
         queue.put((0, [start]))
@@ -91,10 +91,12 @@ class Graph:
                 return path
             if current not in visited:
                 visited.add(current)
-                for neighbor in graph[current]:
-                    
+                for neighbor in self.graph[current]:
                     if neighbor not in visited:
                         weight = point_dist(current, neighbor)
+                        weight_gn = point_dist(goal, neighbor)
+                        weight_gc = point_dist(goal, current)
+                        new_cost = cost + weight + weight_gn - weight_gc
                         new_path = path + [neighbor]
-                        queue.put((weight, new_path))
+                        queue.put((new_cost, new_path))
         return None
