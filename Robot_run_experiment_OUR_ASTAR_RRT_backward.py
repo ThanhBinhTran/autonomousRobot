@@ -404,16 +404,23 @@ if __name__ == '__main__':
 
     start = 0, 0
     num_iter = 100  # max
-    for i in range (2,3):
-        for j in range (0,20):
-            goal = 5*i, 5*j
+    istart, iend = 10, 101
+    jstart, jend = 10, 101
+    istep, jstep = 5,5
+    for i in range (istart, iend, istep):
+        for j in range (jstart, jend, jstep):
+            goal = i , j
             # run robot
             #check if robot is reachable or not
             robotA = robot_check_reachable( start=start, goal=goal, map_name=map_name, num_iter=num_iter, robot_vision=robot_vision,  
                                     open_points_type = Robot_base.Open_points_type.Open_Arcs, 
                                     picking_strategy= Robot_base.Picking_strategy.global_first, sample_size=sample_size,
                                     experiment=True,save_image=False)
-            if robotA.reach_goal:
-                robot_main( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, robot_vision=robot_vision,
+            if robotA is None:
+                continue
+            if not robotA.reach_goal:
+                continue
+
+            robot_main( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, robot_vision=robot_vision,
                         ranking_type = open_pts_type, picking_strategy= picking_strategy, sample_size=sample_size)
     print ("DONE!")
