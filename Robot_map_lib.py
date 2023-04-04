@@ -1,17 +1,21 @@
 win_size = 100
 from Program_config import show_plot_title
+
+
 class Map:
-    
-    def generate(self, plt, i, part, MAX_VERTICES):
+
+    @staticmethod
+    def generate(plt, i, part, MAX_VERTICES):
         # displaying the title 
         plt.title("Obstacle part[{0}/{1}]: left click to input point, right click to undo (1 step)\n".format(i, part) +
-            "middle click to turn to next obstacle, MAX_VERTICES={0}".format(MAX_VERTICES))
+                  "middle click to turn to next obstacle, MAX_VERTICES={0}".format(MAX_VERTICES))
         plt.axis([0, win_size, 0, win_size])
 
         return plt.ginput(MAX_VERTICES, show_clicks=True, timeout=-1)  # no timeout
 
-    def display(self, plt, title, obstacles, alpha: float = 0.4, hatch: str = '//'):
-        
+    @staticmethod
+    def display(plt, title, obstacles, alpha: float = 0.4, hatch: str = '//'):
+
         # displaying the title 
         if show_plot_title:
             plt.title(title)

@@ -10,9 +10,10 @@ from Program_config import *
 
 import os
 
+
 class Plot_base:
-    def __init__(self, size=(6,6), title="Autonomous Robot"):
-        self.plt   = plt
+    def __init__(self, size=(6, 6), title="Autonomous Robot"):
+        self.plt = plt
         self.fig, self.ax = plt.subplots(figsize=size)
         self.fig.canvas.manager.set_window_title(title)
         self.set_equal()
@@ -25,43 +26,49 @@ class Plot_base:
     set_axis = lambda self, x0, y0, x1, y1: self.plt.axis([x0, x1, y0, y1])
 
     ''' plot point(s)'''
-    point  = lambda self, point,  ls=".r": self.plt.plot(point[0], point[1], ls)
+    point = lambda self, point, ls=".r": self.plt.plot(point[0], point[1], ls)
     points = lambda self, points, ls=".r": self.plt.plot(points[:, 0], points[:, 1], ls)
-    
+
     '''
     plot points with color map
     visit https://www.w3schools.com/python/matplotlib_scatter.asp to see more color map
     '''
-    def point_colors(self, points, colors, colormap = 'winter_r', marker='.'):
-        #max_range = int(max(colors)) + 1
+
+    def point_colors(self, points, colors, colormap='winter_r', marker='.'):
+        # max_range = int(max(colors)) + 1
         self.plt.scatter(points[:, 0], points[:, 1], c=colors, cmap=colormap, marker=marker)
-        #self.plt.colorbar().remove() # remove old one
-        #self.plt.colorbar()          # update new one
-        #cbar = plt.colorbar(ticks=[])   # dont show ticks number
-        #self.plt.clim(0, max_range)
+        # self.plt.colorbar().remove() # remove old one
+        # self.plt.colorbar()          # update new one
+        # cbar = plt.colorbar(ticks=[])   # dont show ticks number
+        # self.plt.clim(0, max_range)
 
     ''' plot text at near point coordinate '''
-    text = lambda self, point, str: self.plt.text(point[0], point[1] + 2, str)
+    text = lambda self, point, txt: self.plt.text(point[0], point[1] + 2, txt)
 
     ''' plot text and point'''
+
     def point_text(self, point, ls, text):
         self.point(point, ls)
         self.text(point, text)
 
     ''' plot line segment connecting 2 points'''
-    line_segment = lambda self, line, ls="-.k", lw=0.8: self.plt.plot((line[0][0], line[1][0]), (line[0][1], line[1][1]),\
-         ls,linewidth=lw)
-    
+    line_segment = lambda self, line, ls="-.k", lw=0.8: self.plt.plot((line[0][0], line[1][0]),
+                                                                      (line[0][1], line[1][1]),
+                                                                      ls, linewidth=lw)
+
     ''' plot path containing list of points '''
+
     def path(self, points, ls="-xr"):
         self.points(points=np.array(points), ls=ls)
 
     ''' plot path color containing list of points '''
+
     def path_color(self, points, color):
         new_point = np.array(points)
-        plt.plot(new_point[:, 0], new_point[:, 1], c=color)
+        self.plt.plot(new_point[:, 0], new_point[:, 1], c=color)
 
     ''' plot path with color '''
+
     def paths_color(self, paths, directions):
         cmap = plt.get_cmap('jet_r')
         c_forward = cmap(float(0.1))
@@ -69,105 +76,115 @@ class Plot_base:
         # draw paths with 2 colors, red if direction = forward(true)
         # dark read if direction = backward (false)
         for path, direction in zip(paths, directions):
-            if direction:   
+            if direction:
                 self.path_color(path, c_forward)
             else:
                 self.path_color(path, c_backward)
 
-    def polygon(self, polygon: list, ls= "-r"):
+    def polygon(self, polygon: list, ls="-r"):
         new_points = polygon.copy()
         new_points.append(new_points[0])
-        self.path(points= new_points, ls=ls)
-    
-    def polygons(self, polygons: list, ls= "-r"):   # polygons is list of polygon
+        self.path(points=new_points, ls=ls)
+
+    def polygons(self, polygons: list, ls="-r"):  # polygons is list of polygon
         for polygon in polygons:
-            self.polygon(polygon=polygon, ls = ls)
+            self.polygon(polygon=polygon, ls=ls)
 
     ''' plot triangle (out fill) '''
+
     def plot_triangle(self, triangle, ls=":c"):
         self.line_segment((triangle[0], triangle[1]), ls)
         self.line_segment((triangle[1], triangle[2]), ls)
         self.line_segment((triangle[2], triangle[0]), ls)
 
     ''' plot triangle ( within fill) '''
+
     def plot_triangle_fill(self, triangle, cl="g", alpha=transparent, linestyle=":"):
         new_triangle = np.array(triangle)
         self.plt.fill(new_triangle[:, 0], new_triangle[:, 1], color=cl, alpha=alpha, linestyle=linestyle)
-    
+
     ''' Goal'''
+
     def goal(self, goal, r_goal=False, s_goal=False):
         self.point(goal, ls_goal)
         if show_text_goal:
-            if r_goal: 
+            if r_goal:
                 self.text(goal, "reached goal!")
             elif s_goal:
                 self.text(goal, "saw goal!")
             else:
                 self.text(goal, "g")
+
     ''' Start '''
+
     def start(self, start):
         self.point_text(start, ls_start, "start!")
 
     ''' Obstacles'''
+
     def show_map(self, world_name=None, obstacles=None, plot_title=None):
         # draw world and map
         if show_world and world_name is not None:
             World().display(self.plt, mpimg, world_name)
-            
+
         # draw map obstacles 
         if show_map:
             Map().display(self.plt, plot_title, obstacles.obstacles)
-    
+
     ''' set plot's title'''
     title = lambda self, x: self.plt.title(x)
-    
+
     ''' prepare title for display'''
-    def prepare_title(self, iter_count, path_cost):
+
+    @staticmethod
+    def prepare_title(iter_count, path_cost):
         plot_title = "Number of iterations: {0}".format(iter_count)
         if path_cost > 0 and path_cost != float('inf'):
-            plot_title += ", path len: {:.2f}".format (path_cost)
+            plot_title += ", path len: {:.2f}".format(path_cost)
         else:
             plot_title += ", not reached goal yet."
         return plot_title
 
-
     ''' vision libs'''
 
     ''' vision circle'''
+
     def vision_area(self, center, vision_radius, ls=":"):
         """ draw a circle that limits the vision of robot """
         vision = plt.Circle(center, vision_radius, color="red", linestyle=ls, fill=False)
         plt.gcf().gca().add_artist(vision)
 
     ''' Robot '''
+
     def robot(self, robot, yaw=0):  # pragma: no cover
-        x,y = robot.coordinate
+        x, y = robot.coordinate
         if robot.robot_type == Robot_base.RobotType.rectangle:
             outline = np.array([[-robot.length / 2, robot.length / 2,
-                                (robot.length / 2), -robot.length / 2,
-                                -robot.length / 2],
+                                 (robot.length / 2), -robot.length / 2,
+                                 -robot.length / 2],
                                 [robot.width / 2, robot.width / 2,
-                                - robot.width / 2, -robot.width / 2,
-                                robot.width / 2]])
+                                 - robot.width / 2, -robot.width / 2,
+                                 robot.width / 2]])
             Rot1 = np.array([[math.cos(yaw), math.sin(yaw)],
-                            [-math.sin(yaw), math.cos(yaw)]])
+                             [-math.sin(yaw), math.cos(yaw)]])
             outline = (outline.T.dot(Rot1)).T
             outline[0, :] += x
             outline[1, :] += y
-            plt.plot(np.array(outline[0, :]).flatten(),
-                    np.array(outline[1, :]).flatten(), "-k")
+            self.plt.plot(np.array(outline[0, :]).flatten(),
+                          np.array(outline[1, :]).flatten(), "-k")
         elif robot.robot_type == Robot_base.RobotType.circle:
             circle = plt.Circle((x, y), robot.radius, color="b")
-            plt.gcf().gca().add_artist(circle)
-            
+            self.plt.gcf().gca().add_artist(circle)
+
             show_yaw = False
             if show_yaw:
                 out_x, out_y = (np.array([x, y]) +
                                 np.array([np.cos(yaw), np.sin(yaw)]) * robot.radius)
                 plt.plot([x, out_x], [y, out_y], "-k")
-    
+
     ''' save plot as image/pdf/svg/eps'''
-    def save_figure(self, fig_name = "image",  file_extension = ".png", dpi=150, bbox_inches ="tight"):
+
+    def save_figure(self, fig_name="image", file_extension=".png", dpi=150):
 
         isExist = os.path.exists(result_repo)
         if not isExist:
@@ -175,7 +192,7 @@ class Plot_base:
 
         # Join various path components
         full_path = os.path.join(result_repo, fig_name + file_extension)
-        #self.plt.axis("off")   # turns off axes
-        #self.plt.axis("tight")  # gets rid of white border
-        self.plt.savefig(full_path, bbox_inches ="tight", dpi=dpi)
-        print (f"saved: {full_path}")
+        # self.plt.axis("off")   # turns off axes
+        # self.plt.axis("tight")  # gets rid of white border
+        self.plt.savefig(full_path, bbox_inches="tight", dpi=dpi)
+        print(f"saved: {full_path}")

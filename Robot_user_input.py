@@ -4,8 +4,8 @@ import argparse
 get user inputs
 """
 
-def menu_Robot():
 
+def robot_user_input():
     parser = argparse.ArgumentParser(description='Code for Autonomous Robot.')
     parser.add_argument('-n', metavar="number of iteration", type=int, help='number of iteration', default=50)
     parser.add_argument('-m', metavar="data_map", help='map data', default='_MuchMoreFun.csv')
@@ -17,11 +17,11 @@ def menu_Robot():
     parser.add_argument('-gx', metavar="goal_x", type=float, help='goal point x', default=75.0)
     parser.add_argument('-gy', metavar="goal_y", type=float, help='goal point y', default=50.0)
     parser.add_argument('-ss', metavar="sample_size", type=int, help='sample size', default=2000)
-    
-    parser.add_argument('-p', metavar="picking strategy", type=str, \
-                help='input : (g) for global first, (n) for neighbor first', default='g')
 
-    parser.add_argument('-open_pts_type', metavar="open points type ", type=str,\
-                help='input: (r) for get open points from RRTreeStar; (o) for get from open arcs', default='o')
+    parser.add_argument('-p', metavar="picking strategy", type=str,
+                        help='input : (g) for global first, (n) for neighbor first', default='g')
+
+    parser.add_argument('-open_pts_type', metavar="open points type ", type=str,
+                        help='input: (r) for get open points from RRTreeStar; (o) for get from open arcs', default='r')
     args = parser.parse_args()
     return args

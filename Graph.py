@@ -1,6 +1,8 @@
 from collections import defaultdict
 import heapq
 from Robot_math_lib import point_dist
+
+
 class Graph:
     def __init__(self):
         self.graph = defaultdict(list)
@@ -9,14 +11,14 @@ class Graph:
     def add_local_open_points(self, center, lActive_OpenPts):
         if len(lActive_OpenPts) > 0:
             self.graph_insert(center, lActive_OpenPts)
-    
+
     def graph_create_edge(self, nodeA, nodeB):
         self.graph[tuple(nodeA)].append(tuple(nodeB))
         self.graph[tuple(nodeB)].append(tuple(nodeA))
 
     # Function to insert edges into graph
     def graph_insert(self, pnode, leafs):
-        #print ("__pnode: {0}, ___leafs{1}".format (pnode, leafs))
+        # print ("__pnode: {0}, ___leafs{1}".format (pnode, leafs))
         if len(leafs) > 0:
             for leaf in leafs:
                 self.graph_create_edge(pnode, leaf)
@@ -27,14 +29,14 @@ class Graph:
             if len(self.graph[pnode]) > 1:
                 non_leaves.append(pnode)
         return non_leaves
-    
+
     def get_neighbor_nodes(self, node):
         return self.graph[tuple(node)]
-    
+
     # path between two nodes of a graph
     def BFS_skeleton_path(self, start, goal):
 
-        #print("BFS_skeleton_path: Current {0}, Next {1}".format(start, goal))
+        # print("BFS_skeleton_path: Current {0}, Next {1}".format(start, goal))
         explored = []
 
         # Queue for traversing the  
@@ -69,7 +71,7 @@ class Graph:
                     # Condition to check if the  
                     # neighbour node is the goal 
                     if neighbour == goal:
-                        #print("BFS_skeleton_path = ", new_path)
+                        # print("BFS_skeleton_path = ", new_path)
                         return new_path
                 explored.append(node)
 

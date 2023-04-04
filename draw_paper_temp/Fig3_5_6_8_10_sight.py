@@ -89,7 +89,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                             obstacles=obstacles, ignore_obstacles=True)
 
             # save ranking tree
-            rank_logger.save_tree(RRTree_star=RRT_star, file_name=r_logger_filename)
+            rank_logger.save_tree(rrtree_star=RRT_star, file_name=r_logger_filename)
     else:
         RRT_star = None
 

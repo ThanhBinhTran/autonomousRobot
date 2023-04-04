@@ -31,7 +31,7 @@ show_text_goal = True
 
 show_plot_title = False
 ################################################
-# LINE STYPE for Assumption of Hoai An Theory.
+# LINE STYLE for Assumption of Hoai An Theory.
 ################################################
 show_active_openpt_HA_Assumption = False         # active open points (HA Assumption)
 show_activeArc_HA_Assumption = False             # arc points (HA Assumption)
@@ -47,7 +47,7 @@ ls_pap_HA = "go"    # parent arc points (HA Assumption)
 transparent = 0.1   # closed sights
 
 ################################################
-# parementers to hide/show information
+# parameters to hide/show information
 ################################################
 print_closed_sights = False
 print_open_sights = False
@@ -77,7 +77,7 @@ ls_cspace = "-r"    # configuration space
 result_repo = "result"
 
 ################################################
-# LINE STYPE for RRTree family
+# LINE STYLE for RRTree family
 ################################################
 ls_tree_node_active = ".b"      # tree's node (active)
 ls_tree_node_inactive = ".r"    # tree's node (inactive)
@@ -87,7 +87,7 @@ ls_goal_path_edge = "-g"        # path to goal edge
 ls_goal_path_node = "or"        # path to goal node
 ls_rand_coordinates = '.g'      # random coordinates
 ls_ls_to_nn = ':k'              # line segment from random coordinates to the nearest node.
-ls_random_node = '.r'           # the acpected random node 
+ls_random_node = '.r'           # the accepted random node
 ls_nearest_n_node = '.b'        # the nearest neighbour node
 ls_neighbour_node = '1c'        # the neighbour nodes
 ls_visited_path = 'r'           # visited path
@@ -99,9 +99,9 @@ class TreeColor(Enum):
     no = 0
     by_cost = 1
     by_lmc = 2
-    
+
 ################################################
-# Note: in case there is no obstracles:
+# Note: in case there is no obstacles:
 # the system will create 6 open points if divide_6 = True
 # if divide_6 = True, 3 open points will be created
 divide_6 = True

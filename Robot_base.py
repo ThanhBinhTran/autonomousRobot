@@ -1,8 +1,8 @@
 import math
 from enum import Enum
 
-class Robot_base:
 
+class Robot_base:
     class RobotType(Enum):
         circle = 0
         rectangle = 1
@@ -16,29 +16,30 @@ class Robot_base:
         RRTstar = 1
 
     def __init__(self, vision_range=20, robot_type=RobotType.circle, robot_radius=0.5):
-        self.max_speed = 100.0                              # [m/s]
-        self.min_speed = -100.0                             # [m/s]
-        self.max_yaw_rate = 40.0 * math.pi / 180.0          # [rad/s]
-        self.max_accel = 0.2                                # [m/ss]
-        self.max_delta_yaw_rate = 40.0 * math.pi / 180.0    # [rad/ss]
-        self.v_resolution = 0.01                            # [m/s]
-        self.yaw_rate_resolution = 0.1 * math.pi / 180.0    # [rad/s]
-        self.dt = 0.1                                       # [s] Time tick for motion prediction
-        self.predict_time = 0.1                             # [s]
+        self.max_speed = 100.0  # [m/s]
+        self.min_speed = -100.0  # [m/s]
+        self.max_yaw_rate = 40.0 * math.pi / 180.0  # [rad/s]
+        self.max_accel = 0.2  # [m/ss]
+        self.max_delta_yaw_rate = 40.0 * math.pi / 180.0  # [rad/ss]
+        self.v_resolution = 0.01  # [m/s]
+        self.yaw_rate_resolution = 0.1 * math.pi / 180.0  # [rad/s]
+        self.dt = 0.1  # [s] Time tick for motion prediction
+        self.predict_time = 0.1  # [s]
         self.to_goal_cost_gain = 0.15
         self.speed_cost_gain = 1.0
         self.obstacle_cost_gain = 1.0
-        self.robot_stuck_flag_cons = 0.001                  # constant to prevent robot stucked
+        self.robot_stuck_flag_cons = 0.001  # constant to prevent robot stucked
         self.robot_type = robot_type
-        self.vision_range = vision_range                    # the range of input vision
-        
+        self.vision_range = vision_range  # the range of input vision
+
         # if robot_type == RobotType.circle
         # Also used to check if goal is reached in both types
-        self.radius = robot_radius                          # [m] for collision check
+        self.radius = robot_radius  # [m] for collision check
 
         # if robot_type == RobotType.rectangle
-        self.width = 0.1                              # [m] for collision check
-        self.length = 0.1                             # [m] for collision check
+        self.width = 0.1  # [m] for collision check
+        self.length = 0.1  # [m] for collision check
+
     @property
     def robot_type(self):
         return self._robot_type

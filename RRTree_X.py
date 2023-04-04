@@ -1,40 +1,38 @@
-'''
+"""
 autonomousRobot
 reimplementing an algorithm which has been written from the following paper:
 https://pdfs.semanticscholar.org/0cac/84962d0f1176c43b3319d379a6bf478d50fd.pdf
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.com
-'''
+"""
 
-from matplotlib.pyplot import title
-import numpy as np
-
-from Tree import Node
-from RRTree import RRTree
-from Plotter import Plotter
-from Robot_math_lib import *
-
-from RRT_user_input import menu_RRT
-from Program_config import *
 from Obstacles import Obstacles
+from Plotter import Plotter
+from Program_config import *
 from Queue_class import Priority_queue
-from Robot_class import Robot
+from RRT_user_input import RRTree_user_input
+from RRTree import RRTree
 # get result log for experiment
 from Result_log import Result_Log
+from Robot_class import Robot
+from Robot_math_lib import *
+from Tree import Node
+
 
 class RRTree_x(RRTree):
+    """ RRTree class from Tree class """
 
-    ''' RRTree class from Tree class '''
-    def __init__(self, root:Node, step_size = 5, radius=5, random_area=([0, 100],[0,100]), sample_size = 100):
+    def __init__(self, root: Node, step_size=5, radius=5, random_area=([0, 100], [0, 100]), sample_size=100):
         super().__init__(root, step_size, radius, random_area, sample_size)
 
-    ''' add node to RRTreeX , return new_node and its neighbour_node(s), update lmc, weight'''
+    """ add node to RRTreeX , return new_node and its neighbour_node(s), update lmc, weight"""
+
     def add_node_RRTx(self, accepted_coordinate):
-        
+
         # find all neighbours of node_coordinate
         neighbour_nodes = self.neighbour_nodes(accepted_coordinate, self.radius)
         # pick nearest neighbour as new_node's parent
         nearest_neighbour_node = self.neighbours_smallest_lmc(accepted_coordinate, neighbour_nodes)
-        if nearest_neighbour_node is not None: # found a neighbour to link to 
+        if nearest_neighbour_node is not None:  # found a neighbour to link to
             # allocate new node then link to RRTree
             new_node = Node(accepted_coordinate)
             new_node.add_neighbours(neighbours=neighbour_nodes)
@@ -43,33 +41,34 @@ class RRTree_x(RRTree):
             return new_node, neighbour_nodes, nearest_neighbour_node
         return None, None, None
 
-    def build(self,  goal_coordinate, plotter: Plotter=None, obstacles=None, rrt_queue=Priority_queue):
-        print ("builing Graph with {0} sampples".format(self.sampling_size))
+    def build(self, goal_coordinate, plotter: Plotter = None, obstacles=None, rrt_queue=Priority_queue):
+        print("builing Graph with {0} sampples".format(self.sampling_size))
         first_saw_goal = False
 
         for i in range(1, self.sampling_size):
 
             # generate random coordinate in sampling area = [min, max]
             rand_coordinate = self.random_coordinate()
-            
+
             # orient to goal sometime :))
-            if i %100 == 0 and not self.reach_goal: # bias to goal sometime
+            if i % 100 == 0 and not self.reach_goal:  # bias to goal sometime
                 rand_coordinate = np.array(goal_coordinate)
 
             # bring closer random coordinate to tree 
-            accepted_coordinate = self.bring_closer(rand_coordinate=rand_coordinate, obstacles=obstacles, ignore_obstacles=True)
+            accepted_coordinate = self.bring_closer(rand_coordinate=rand_coordinate, obstacles=obstacles,
+                                                    ignore_obstacles=True)
 
             # if tree first saw given goal , instead of adding new random , add goal
             if not first_saw_goal:
-                nn_goal = self.saw_goal(goal_coordinate)    # return nearst neighbour node of goal
-                if nn_goal is not None: # existing a node nearby goal
+                nn_goal = self.saw_goal(goal_coordinate)  # return nearst neighbour node of goal
+                if nn_goal is not None:  # existing a node nearby goal
                     first_saw_goal = True
                     self.reach_goal = True
                     accepted_coordinate = goal_coordinate
 
             # add and link node to tree
-            new_node, neighbour_nodes, nearest_neighbour_node  = self.add_node_RRTx(accepted_coordinate)
-            
+            new_node, neighbour_nodes, nearest_neighbour_node = self.add_node_RRTx(accepted_coordinate)
+
             # rewire and inconsistency for RRTX
             self.rewire_RRTx(node=new_node, rrt_queue=rrt_queue)
             self.reduce_inconsistency(rrt_queue=rrt_queue)
@@ -78,15 +77,15 @@ class RRTree_x(RRTree):
                 goal_node = self.get_node_by_coords(goal_coordinate)
                 self.path_to_goal = self.path_to_root(goal_node)
                 self.total_goal_cost = goal_node.cost
-               
-            
-            show_animation = False
-            ''' for display '''
-            if show_animation:
-                plotter.build_tree_animation(num_iter= i, Tree= self, obstacles=None,  goal_coords= self.root.coords,\
-                    start_coords=goal_coordinate, rand_coordinate= rand_coordinate, rand_node=new_node, \
-                        neighbour_nodes=neighbour_nodes, nearest_neighbour_node=nearest_neighbour_node)
 
+            show_animation = False
+            """ for display """
+            if show_animation:
+                plotter.build_tree_animation(num_iter=i, Tree=self, obstacles=None, goal_coords=self.root.coords,
+                                             start_coords=goal_coordinate, rand_coordinate=rand_coordinate,
+                                             rand_node=new_node,
+                                             neighbour_nodes=neighbour_nodes,
+                                             nearest_neighbour_node=nearest_neighbour_node)
 
     def local_obstacle_nodes(self, nodes, obstacles: Obstacles):
         obstacle_nodes = []
@@ -106,7 +105,7 @@ class RRTree_x(RRTree):
         sql_nodes = []
         for orphan_node in all_children:
             n_orphan_nodes = orphan_node.neighbours
-            
+
             orphan_node.set_cost(float("inf"))
             orphan_node.set_lmc(float("inf"))
             for n_orphan_node in n_orphan_nodes:
@@ -123,7 +122,7 @@ class RRTree_x(RRTree):
                         orphan_parent.remove_child(child)
             orphan_node.remove_parent()
 
-        #for orphan_node in all_children:
+        # for orphan_node in all_children:
         #    orphan_node_parent = orphan_node.parent
         #    if orphan_node_parent is not None:
         #        self.remove_edge(parent_node=orphan_node_parent, node=orphan_node)
@@ -137,16 +136,17 @@ class RRTree_x(RRTree):
         all_children = []
         sql_nodes = []
         obstacle_nodes = self.local_obstacle_nodes(nodes=neighbour_nodes, obstacles=obstacles)
-        if len(obstacle_nodes) > 0: # found obstacle ahead, then rerouting tree
+        if len(obstacle_nodes) > 0:  # found obstacle ahead, then rerouting tree
             # get discovered_obstacle_nodes witch are orphan nodes and theirs parent are obstacle_nodes
             discovered_obstacle_nodes = self.add_new_obstacle(obstacle_nodes, rrtx_queue=rrtx_queue)
-            all_children, sql_nodes = self.propogate_descendants(discovered_obstacle_nodes, obstacle_nodes, rrtx_queue=rrtx_queue)
+            all_children, sql_nodes = self.propogate_descendants(discovered_obstacle_nodes, obstacle_nodes,
+                                                                 rrtx_queue=rrtx_queue)
 
             rrtx_queue.verify_queue(node=currnode)
             self.reduce_inconsistency_v2(rrtx_queue=rrtx_queue, currnode=currnode)
         return obstacle_nodes, discovered_obstacle_nodes, all_children, sql_nodes
 
-    def add_new_obstacle(self, obstacle_nodes, rrtx_queue:Priority_queue):
+    def add_new_obstacle(self, obstacle_nodes, rrtx_queue: Priority_queue):
         discovered_obstacle_nodes = []
         for node in obstacle_nodes:
             orphan_nodes = node.neighbours
@@ -157,17 +157,17 @@ class RRTree_x(RRTree):
                     discovered_obstacle_nodes.append(n_orphan_node)
         return discovered_obstacle_nodes
 
-def robot_RRTX( start_cooridinate=(0,0), goal_coordinate=(0,1), map_name=None, world_name=None,\
-                num_iter = 1, robot_vision = 20, RRT_radius = 20,
-                RRT_step_size = 5, RRT_sample_size = 2000, \
-                experiment = False, save_image = True):
-    
-    ''' variable declaration '''
+
+def robot_RRTX(start_cooridinate=(0, 0), goal_coordinate=(0, 1), map_name=None, world_name=None,
+               num_iter=1, robot_vision=20, RRT_radius=20,
+               RRT_step_size=5, RRT_sample_size=2000,
+               experiment=False, save_image=True):
+    """ variable declaration """
     robot = Robot(start=start_cooridinate, goal=goal_coordinate, vision_range=robot_vision)
     # set same window size to capture pictures
     plotter = Plotter(title="Rapidly-exploring Random Tree X (RRT_X)")
 
-    ''' get obstacles data whether from world (if indicated) or map (by default)'''
+    """ get obstacles data whether from world (if indicated) or map (by default)"""
     obstacles = Obstacles()
     obstacles.read(world_name, map_name)
     obstacles.line_segments()
@@ -176,19 +176,19 @@ def robot_RRTX( start_cooridinate=(0,0), goal_coordinate=(0,1), map_name=None, w
     # find working space boundary
     boundary_area = robot.find_working_space_boundaries(obstacles=obstacles)
 
-    ''' build tree '''
-    goal_node = Node(goal_coordinate, lmc=0, cost=0)    # initial goal node, rsh to goal =0, cost to goal = 0
-    RRTx = RRTree_x(root=goal_node, step_size=RRT_step_size, radius=RRT_radius, 
+    """ build tree """
+    goal_node = Node(goal_coordinate, lmc=0, cost=0)  # initial goal node, rsh to goal =0, cost to goal = 0
+    RRTx = RRTree_x(root=goal_node, step_size=RRT_step_size, radius=RRT_radius,
                     random_area=boundary_area, sample_size=RRT_sample_size)
-    RRTx.build(goal_coordinate=start_cooridinate, plotter=plotter,obstacles=obstacles, rrt_queue=rrt_queue)
-    
-    log_name = Result_Log.prepare_name(map_name=map_name, start=start_cooridinate, goal=goal_coordinate,\
+    RRTx.build(goal_coordinate=start_cooridinate, plotter=plotter, obstacles=obstacles, rrt_queue=rrt_queue)
+
+    log_name = Result_Log.prepare_name(start=start_cooridinate, goal=goal_coordinate,
                                        range=robot_vision)
     #############################################################
     # initial variables
     #############################################################
     iter_count = 0
-    if RRTx.reach_goal:     # generated tree reached to start from goal
+    if RRTx.reach_goal:  # generated tree reached to start from goal
         start_node = RRTx.dict[start_cooridinate]
         curr_node = start_node
         while curr_node is not goal_node:
@@ -198,16 +198,15 @@ def robot_RRTX( start_cooridinate=(0,0), goal_coordinate=(0,1), map_name=None, w
             in_range_nodes = RRTx.neighbour_nodes(curr_node.coords, robot.vision_range)
             if in_range_nodes is not None:
                 obstacle_nodes, discovered_obstacle_nodes, all_children, sql_nodes = \
-                    RRTx.update_obstacles(neighbour_nodes=in_range_nodes, currnode=curr_node,\
-                    obstacles=obstacles, rrtx_queue=rrt_queue)
+                    RRTx.update_obstacles(neighbour_nodes=in_range_nodes, currnode=curr_node,
+                                          obstacles=obstacles, rrtx_queue=rrt_queue)
 
-            
             next_node = RRTx.pick_next(curr_node)
             if next_node is not None:
                 path_look_ahead_to_goal = RRTx.path_to_root(curr_node)
-                robot.set_look_ahead_to_goal(path=path_look_ahead_to_goal)            
+                robot.set_look_ahead_to_goal(path=path_look_ahead_to_goal)
             else:
-                robot.set_look_ahead_to_goal(path=[]) 
+                robot.set_look_ahead_to_goal(path=[])
 
             if next_node == goal_node:
                 robot.reach_goal = True
@@ -216,27 +215,27 @@ def robot_RRTX( start_cooridinate=(0,0), goal_coordinate=(0,1), map_name=None, w
                 robot.expand_visited_path(path=path)
                 curr_node = next_node
             else:
-                print ("No parent found")
+                print("No parent found")
                 break
 
             if len(robot.path_look_ahead_to_goal) == 0:
-                print ("No look ahead found")
+                print("No look ahead found")
                 break
 
             if show_animation and not experiment:
                 plotter.RRTX_animation(Tree=RRTx, obstacles=obstacles, robot=robot, experiment=experiment)
 
-            #print ("from: {0} to {1}".format(robot.coordinate, curr_node.coords))
+            # print ("from: {0} to {1}".format(robot.coordinate, curr_node.coords))
 
             # Run n times for debugging
-            if  iter_count == num_iter:
+            if iter_count == num_iter:
                 break
 
-    else: # need rerun the tree
-        print ("No path from goal to start belongs to generated tree")
+    else:  # need rerun the tree
+        print("No path from goal to start belongs to generated tree")
         plotter.tree(RRTx, color_mode=TreeColor.by_lmc)
 
-    if not experiment: # skip printing and showing animation if running easy experiment
+    if not experiment:  # skip printing and showing animation if running easy experiment
         print("Done")
         if show_animation:
             plotter.show()
@@ -245,13 +244,13 @@ def robot_RRTX( start_cooridinate=(0,0), goal_coordinate=(0,1), map_name=None, w
         # showing the final result (for save image and display as well)
         plotter.RRTX_animation(Tree=RRTx, obstacles=obstacles, robot=robot, experiment=experiment)
         plotter.save_figure(fig_name=log_name + "RRTx")
-        
+
     return robot
-            
+
 
 if __name__ == '__main__':
     # get user input
-    menu_result = menu_RRT()
+    menu_result = RRTree_user_input()
     # get start_cooridinate and goal_coordinate
     start_cooridinate = menu_result.sx, menu_result.sy
     goal_coordinate = menu_result.gx, menu_result.gy
@@ -264,9 +263,7 @@ if __name__ == '__main__':
     num_iter = menu_result.n
     world_name = menu_result.w
 
-    robot_RRTX(start_cooridinate = start_cooridinate, goal_coordinate= goal_coordinate, map_name= map_name, world_name=world_name,\
-        num_iter=num_iter, robot_vision=vision_range, 
-        RRT_radius=radius, RRT_step_size=step_size, RRT_sample_size=sample_size)
-
-    
-    
+    robot_RRTX(start_cooridinate=start_cooridinate, goal_coordinate=goal_coordinate, map_name=map_name,
+               world_name=world_name,
+               num_iter=num_iter, robot_vision=vision_range,
+               RRT_radius=radius, RRT_step_size=step_size, RRT_sample_size=sample_size)

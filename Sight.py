@@ -1,6 +1,7 @@
 from collections import defaultdict
-import numpy as np
-from Robot_math_lib  import point_dist
+
+from Robot_math_lib import point_dist
+
 
 class Sight:
     def __init__(self):

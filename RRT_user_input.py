@@ -4,7 +4,8 @@ import argparse
 get user inputs
 """
 
-def menu_RRT():
+
+def RRTree_user_input():
     parser = argparse.ArgumentParser(description='RRT animation.')
     parser.add_argument('-n', metavar="number of iteration", type=int, help='number of iteration', default=0)
     parser.add_argument('-m', metavar="map name", help='map name', default='_map_blocks_1.csv')
@@ -17,7 +18,7 @@ def menu_RRT():
     parser.add_argument('-sy', metavar="start_y", type=float, help='start point y', default=0.0)
     parser.add_argument('-gx', metavar="goal_x", type=float, help='goal point x', default=99.0)
     parser.add_argument('-gy', metavar="goal_y", type=float, help='goal point y', default=99.0)
-    
+
     args = parser.parse_args()
 
     return args

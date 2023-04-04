@@ -4,33 +4,28 @@ This project is to simulate an autonomousRobot that try to find a way to reach a
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.com
 """
 
-import numpy as np
-from sklearn.metrics import top_k_accuracy_score
-from Robot_base import Picking_strategy
-
-from Robot_math_lib import *
-from Robot_paths_lib import *
-from Plotter import Plotter
-from Robot_sight_lib import *
-from Robot_map_lib import Map
-from Obstacles import *
-from Program_config import *
-from Robot_class import Robot, RobotType
-from Robot_ranking import Ranker
 import argparse
 
+from Obstacles import *
+from Plotter import Plotter
+from Program_config import *
+from Robot_base import Picking_strategy
+from Robot_class import Robot, RobotType
+from Robot_paths_lib import *
+from Robot_ranking import Ranker
+from Robot_sight_lib import *
 
-def robot_main( start, goal, map_name, world_name, num_iter, 
-                robot_vision, robot_type, robot_radius):
-    
-    robot = Robot(start=start, goal=goal, vision_range= robot_vision, \
-                    robot_type=robot_type, robot_radius=robot_radius)
 
-    ranker = Ranker(alpha=0.9, beta= 0.1)
+def robot_main(start, goal, map_name, world_name, num_iter,
+               robot_vision, robot_type, robot_radius):
+    robot = Robot(start=start, goal=goal, vision_range=robot_vision,
+                  robot_type=robot_type, robot_radius=robot_radius)
+
+    ranker = Ranker(alpha=0.9, beta=0.1)
 
     # declare potter within window size
     plotter = Plotter(title="Path Planning for Autonomous Robot: {0}".format(map_name))
-    
+
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
     obstacles.read(world_name, map_name)
@@ -43,36 +38,37 @@ def robot_main( start, goal, map_name, world_name, num_iter,
     while True:
         iter_count += 1
         print("\n_number of iteration:{0}, current robot coordinate{1}".format(iter_count, robot.coordinate))
-        
+
         robot.update_coordinate(robot.next_coordinate)
 
         # clean old data
         next_point = []
 
         # scan to get sights at local
-        #closed_sights, open_sights = scan_around(robot, obstacles.data(), goal)
+        # closed_sights, open_sights = scan_around(robot, obstacles.data(), goal)
         # get boundary points, which is intersection between circle and linesegments
         boundary_pts = get_boudary_points_theory(robot.coordinate, robot.vision_range, obstacles.obstacles, goal)
 
         # get arc points in active arc which is limited by parent_arc
         arc_pts, parent_arc = is_inside_active_arc(boundary_pts, robot.vision_range, robot.coordinate, goal)
-        
+
         # get local open sights
-        open_sights, arc_pts = get_open_sights_in_active_arc_theory(arc_pts, parent_arc, robot.vision_range, obstacles.obstacles, robot.coordinate)
+        open_sights, arc_pts = get_open_sights_in_active_arc_theory(arc_pts, parent_arc, robot.vision_range,
+                                                                    obstacles.obstacles, robot.coordinate)
         # closed sights
         closed_sights = []
 
         # check whether the robot saw or reach the given goal
         robot.check_goal(goal, closed_sights)
-        #Robot.show_status()
+        # Robot.show_status()
 
-        #robot.show_status()
+        # robot.show_status()
         if not robot.saw_goal and not robot.reach_goal:
             # get local active point and its ranking
             robot.get_local_active_open_ranking_points(open_sights=open_sights, ranker=ranker, goal=goal)
             # stack local active open point to global set
             robot.expand_global_open_ranking_points(robot.local_active_open_rank_pts)
-            
+
             # add new active open points to graph_insert
             robot.visibility_graph.add_local_open_points(robot.coordinate, robot.local_active_open_pts)
         # pick next point to make a move
@@ -102,18 +98,18 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         if show_animation:
             # clear plot
             plotter.clear()
-            
+
             # for stopping simulation with the esc key.
             plotter.plt.gcf().canvas.mpl_connect(
                 'key_release_event',
                 lambda event: [exit(0) if event.key == 'escape' else None])
-                      
-            '''draw map obstacles/world '''            
+
+            '''draw map obstacles/world '''
             # prepare title
             cost = robot.cost
             status_title = plotter.prepare_title(iter_count, cost)
             plotter.show_map(world_name=None, obstacles=obstacles, plot_title=status_title)
-            
+
             ########################################################
             # active point (Assumptions of Hoai_An's theory)
             #########################################################
@@ -122,66 +118,65 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                     pdist_cg = point_dist(robot.coordinate, goal)
                     plotter.vision_area(goal, pdist_cg)
                 if show_boundaryPts_HA_Assumption and len(boundary_pts) > 0:
-                    plotter.points(boundary_pts, ls = ls_bp_HA)
+                    plotter.points(boundary_pts, ls=ls_bp_HA)
                 if show_parentArc_HA_Assumption and parent_arc is not None:
-                    plotter.points(parent_arc, ls = ls_pap_HA)
+                    plotter.points(parent_arc, ls=ls_pap_HA)
                 if show_activeArc_HA_Assumption and arc_pts is not None:
-                    plotter.points(arc_pts, ls = ls_aap_HA)
+                    plotter.points(arc_pts, ls=ls_aap_HA)
                     if show_activeArcPts_order_HA_Assumption:
-                        for i in range(len(arc_pts)):                            
+                        for i in range(len(arc_pts)):
                             plotter.text(arc_pts[i], "{0}".format(i))
 
             # show_traversalSights
             if show_visitedSights:
                 plotter.show_visited_sights(robot.visited_sights, robot.vision_range)
-            
+
             if show_robot:
                 plotter.robot(robot)
-            
+
             if show_goal:
                 plotter.goal(goal, robot.reach_goal, robot.saw_goal)
-            
+
             # plot robot's vision at local (center)
             plotter.vision(robot.coordinate, robot.vision_range, closed_sights, open_sights)
-            
+
             if show_local_openpt and len(robot.local_open_pts) > 0:
                 plotter.points(robot.local_open_pts, ls_lopt)
-            
+
             if show_active_openpt and len(robot.global_active_open_rank_pts) > 0:
                 plotter.points(robot.global_active_open_rank_pts, ls_aopt)
-            
+
             if show_visibilityGraph:
                 plotter.visibility_graph(robot.visibility_graph, ls_vg)
-            
+
             if show_visitedPath:
                 plotter.paths(robot.visited_paths, ls_vp, ls_goingp)
-            
+
             if show_sketelonPath:
                 plotter.RRT_path(skeleton_path, ls_sp)
-            
+
             if show_approximately_shortest_path:
                 plotter.RRT_path(asp, ls_asp)
-            
+
             if show_critical_line_segments:
                 plotter.critical_line_segments(critical_ls, ls_cls)
-            
+
                 # display next point if existing
             if show_next_point:
                 if len(next_point) > 0:
                     plotter.point(next_point, ls_nextpt)
-            
+
             # to set equal make sure x y axises are same resolution 
             plotter.set_equal()
             plotter.show_grid()
             plotter.plt.pause(1)
 
-
         robot.print_infomation()
 
         # Run n times for debugging
-        if  iter_count == num_iter:
+        if iter_count == num_iter:
             break
-        
+
         if robot.finish():
             break
 
@@ -190,8 +185,6 @@ def robot_main( start, goal, map_name, world_name, num_iter,
 
 
 if __name__ == '__main__':
-    
-    
     parser = argparse.ArgumentParser(description='Code for Autonomous Robot.')
     parser.add_argument('-n', metavar="number of iteration", type=int, help='number of iteration', default=0)
     parser.add_argument('-m', metavar="data_map", help='map data', default='_forest.csv')
@@ -212,9 +205,9 @@ if __name__ == '__main__':
     start = menu_result.sx, menu_result.sy
     goal = menu_result.gx, menu_result.gy
     robot_radius = menu_result.radius
-    robot_vision = menu_result.r 
-    robot_type=RobotType.circle
+    robot_vision = menu_result.r
+    robot_type = RobotType.circle
 
     # run robot
-    robot_main( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
-                robot_vision=robot_vision, robot_type=robot_type, robot_radius=robot_radius)
+    robot_main(start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter,
+               robot_vision=robot_vision, robot_type=robot_type, robot_radius=robot_radius)

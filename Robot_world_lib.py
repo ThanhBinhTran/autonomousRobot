@@ -8,6 +8,7 @@ from __future__ import print_function
 import cv2 as cv
 import csv
 
+
 class World:
     def __init__(self) -> None:
         pass
@@ -22,15 +23,14 @@ class World:
         f = open(file_name, 'w', newline='')
         writer = csv.writer(f, delimiter=",")
         # only keep parents in list, remove its child(ren)
-        for i in range (len(contours)):
-            
-            if hierarchy[0][i][3] == -1:   # this contour is parent
+        for i in range(len(contours)):
+
+            if hierarchy[0][i][3] == -1:  # this contour is parent
                 part = contours[i]
                 writer.writerow(data_header)
                 for pt in part:
                     writer.writerow([pt[0][0], pt[0][1]])
         f.close()
-
 
     # Load source image
     def read_map_from_world(self, world_name):
@@ -46,7 +46,7 @@ class World:
         thresh = 100  # initial threshold
         self.thresh_callback(thresh, src_gray, world_name)
 
-
-    def display(self, plt, mpimg, world_name):
+    @staticmethod
+    def display(plt, mpimg, world_name):
         img = mpimg.imread(world_name)
         plt.imshow(img)
