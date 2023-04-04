@@ -172,17 +172,17 @@ def compare_Astar_RRTstar(robot:Robot, plotter:Plotter, obstacles:Obstacles, RRT
 
 def robot_main( start=(0,0), goal=(0, 1), map_name=None, world_name=None, num_iter=1, 
                 robot_vision=20, robot_type= Robot_base.RobotType.circle, robot_radius=0.5,
-                ranking_type = Robot_base.Open_points_type.Open_Arcs,
+                open_points_type = Robot_base.Open_points_type.Open_Arcs,
                 ranking_function =Ranking_function.Angular_similarity,
                 picking_strategy= Robot_base.Picking_strategy.neighbor_first,
-                sample_size = 2000, log_experiment=True, save_image=True):
+                sample_size = 2000, experiment=True, save_image=True):
     
     # robot ojbect
     robot = Robot(start=start, goal=goal, vision_range= robot_vision, \
                     robot_type=robot_type, robot_radius=robot_radius)
     
     # set alpha and beta only for distance and angle formula
-    if ranking_type == Robot_base.Open_points_type.Open_Arcs and ranking_function == Ranking_function.RHS_RRT_base:
+    if open_points_type == Robot_base.Open_points_type.Open_Arcs and ranking_function == Ranking_function.RHS_RRT_base:
         ranking_function = Ranking_function.Angular_similarity
     ranker = Ranker(alpha=0.9, beta= 0.1, ranking_function=ranking_function)
 
@@ -225,7 +225,7 @@ def robot_main( start=(0,0), goal=(0, 1), map_name=None, world_name=None, num_it
     result_turn.set_file_name(f"{m_s_g}_ASP_AStar_RRTStar_path_turn_improve{enable_improve}.csv")
 
     ''' generate a RRTree_star if ranking type is RRTree_Star_ranking '''
-    if ranking_type == Robot_base.Open_points_type.RRTstar:
+    if open_points_type == Robot_base.Open_points_type.RRTstar:
             # RRT start for ranking scores
         step_size = robot.vision_range
         
@@ -272,7 +272,7 @@ def robot_main( start=(0,0), goal=(0, 1), map_name=None, world_name=None, num_it
         if not robot.saw_goal and not robot.reach_goal:
             # get local active point and its ranking
             robot.get_local_active_open_ranking_points(open_sights=open_sights, ranker=ranker, goal=goal,\
-                                                        RRT_star=RRT_star, open_points_type=ranking_type)
+                                                        RRT_star=RRT_star, open_points_type=open_points_type)
             # stack local active open point to global set
             robot.expand_global_open_ranking_points(robot.local_active_open_rank_pts)
             
@@ -320,7 +320,7 @@ def robot_main( start=(0,0), goal=(0, 1), map_name=None, world_name=None, num_it
             if save_image:
                 # showing the final result (for save image and display as well)
                 plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
-                                    obstacles=obstacles, experiment=log_experiment)
+                                    obstacles=obstacles, experiment=experiment)
                 
                 # draw some fig for paper
                 
@@ -350,26 +350,26 @@ def robot_main( start=(0,0), goal=(0, 1), map_name=None, world_name=None, num_it
             #robot.next_coordinate = motion(robot.coordinate, next_point)  # make smoother path
             robot.next_coordinate = tuple(robot.next_point)
 
-        if show_animation and not log_experiment:
+        if show_animation and not experiment:
             plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
-                                   obstacles=obstacles, experiment=log_experiment)
+                                   obstacles=obstacles, experiment=experiment)
             #plotter.tree_all_nodes(RRTx)
-            if ranking_type == Robot_base.Open_points_type.RRTstar:
+            if open_points_type == Robot_base.Open_points_type.RRTstar:
                 plotter.tree(RRT_star,color_mode=TreeColor.by_cost)
         show_all = False
         if show_all :
             plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
-                                   obstacles=obstacles, experiment=log_experiment)
+                                   obstacles=obstacles, experiment=experiment)
             plotter.show()
 
         # Run n times for debugging
         if  iter_count == num_iter or robot.finish():
             break
 
-    if not log_experiment and show_animation: 
+    if not experiment and show_animation: 
         plotter.show()  # show animation for display
 
-    if log_experiment:
+    if experiment:
         result_time.write_csv()
         result_cost.write_csv()
         result_turn.write_csv()
@@ -407,20 +407,21 @@ if __name__ == '__main__':
     istart, iend = 10, 101
     jstart, jend = 10, 101
     istep, jstep = 5,5
+    
+    obstacles_check = Obstacles()
+    obstacles_check.read(map_name=map_name)
+    obstacles_check.line_segments()
+
     for i in range (istart, iend, istep):
         for j in range (jstart, jend, jstep):
             goal = i , j
-            # run robot
-            #check if robot is reachable or not
-            robotA = robot_check_reachable( start=start, goal=goal, map_name=map_name, num_iter=num_iter, robot_vision=robot_vision,  
-                                    open_points_type = Robot_base.Open_points_type.Open_Arcs, 
-                                    picking_strategy= Robot_base.Picking_strategy.global_first, sample_size=sample_size,
-                                    experiment=True,save_image=False)
-            if robotA is None:
-                continue
-            if not robotA.reach_goal:
+            print (f"goal {goal}")
+            #check if robot is goal reachable or not
+            if not obstacles_check.valid_start_goal(start=start, goal=goal):
+                print (f"invalid start {start} or goal {goal}")
                 continue
 
-            robot_main( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, robot_vision=robot_vision,
-                        ranking_type = open_pts_type, picking_strategy= picking_strategy, sample_size=sample_size)
+            robot_main( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
+                       robot_vision=robot_vision, open_points_type = open_pts_type,
+                        picking_strategy= picking_strategy, sample_size=sample_size)
     print ("DONE!")

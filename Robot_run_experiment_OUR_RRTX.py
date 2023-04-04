@@ -75,16 +75,16 @@ if __name__ == '__main__':
     num_iter = 100
     map_name = "_MuchMoreFun.csv"
     #map_name = "_map_u_liked_shape.csv"
-    obstacles_check.read(world_name, map_name)
+    obstacles_check.read(map_name=map_name)
     obstacles_check.line_segments()
 
 
     result = Result_Log(header_csv=csv_head)
     nm = map_name.replace('.csv','')
         
-    istart, iend = 10, 16
+    istart, iend = 20, 101
     jstart, jend = 10, 101
-    step = 5
+    step = 10
     for i in range ( istart, iend, step):
         for j in range (jstart, jend, step):
             
