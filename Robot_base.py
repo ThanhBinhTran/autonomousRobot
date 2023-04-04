@@ -1,21 +1,21 @@
 import math
 from enum import Enum
 
-class RobotType(Enum):
-    circle = 0
-    rectangle = 1
-
-class Picking_strategy(Enum):
-    global_first = 0
-    local_first = 1
-
-class Ranking_type(Enum):
-    Distance_Angle = 0
-    RRTstar = 1
-
-
 class Robot_base:
-    def __init__(self, vision_range=20, robot_type=RobotType.circle, robot_radius=0.2):
+
+    class RobotType(Enum):
+        circle = 0
+        rectangle = 1
+
+    class Picking_strategy(Enum):
+        global_first = 0
+        neighbor_first = 1
+
+    class Open_points_type(Enum):
+        Open_Arcs = 0
+        RRTstar = 1
+
+    def __init__(self, vision_range=20, robot_type=RobotType.circle, robot_radius=0.5):
         self.max_speed = 100.0                              # [m/s]
         self.min_speed = -100.0                             # [m/s]
         self.max_yaw_rate = 40.0 * math.pi / 180.0          # [rad/s]
@@ -45,6 +45,6 @@ class Robot_base:
 
     @robot_type.setter
     def robot_type(self, value):
-        if not isinstance(value, RobotType):
+        if not isinstance(value, Robot_base.RobotType):
             raise TypeError("robot_type must be an instance of RobotType")
         self._robot_type = value

@@ -45,7 +45,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                 robot_vision, robot_type, robot_radius, 
                 ranking_type = Ranking_type.Distance_Angle,
                 ranking_function =Ranking_function.Angular_similarity,
-                picking_strategy= Picking_strategy.local_first,
+                picking_strategy= Picking_strategy.neighbor_first,
                 sample_size = 2000, log_experiment=False, save_image=False):
     
     # robot ojbect
@@ -115,7 +115,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         if not robot.saw_goal and not robot.reach_goal:
             # get local active point and its ranking
             robot.get_local_active_open_ranking_points(open_sights=open_sights, ranker=ranker, goal=goal,\
-                                                        RRT_star=RRT_star, ranking_type=ranking_type)
+                                                        RRT_star=RRT_star, open_points_type=ranking_type)
             # stack local active open point to global set
             robot.expand_global_open_ranking_points(robot.local_active_open_rank_pts)
             
@@ -161,7 +161,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         hide_axis = False
         show_grid = False
     plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
-                               obstacles=obstacles, easy_experiment=log_experiment,
+                               obstacles=obstacles, experiment=log_experiment,
                                show_grid=show_grid, hide_axis=hide_axis)
     #plotter.tree_all_nodes(RRTx)
     if ranking_type == Ranking_type.RRTstar and figure5_ranking_tree:
@@ -192,18 +192,18 @@ if __name__ == '__main__':
     robot_radius = menu_result.radius
     robot_vision = menu_result.r
     sample_size = 700
-    ranking_type = menu_result.rank_type
-    if 'da' in ranking_type:
-        ranking_type = Ranking_type.Distance_Angle
-    elif 'r' in ranking_type:
-        ranking_type = Ranking_type.RRTstar
+    open_points_type = menu_result.rank_type
+    if 'da' in open_points_type:
+        open_points_type = Ranking_type.Distance_Angle
+    elif 'r' in open_points_type:
+        open_points_type = Ranking_type.RRTstar
     
 
     picking_strategy = menu_result.p
     if 'g' in picking_strategy:
         picking_strategy = Picking_strategy.global_first
     elif 'l' in picking_strategy:
-        picking_strategy = Picking_strategy.local_first
+        picking_strategy = Picking_strategy.neighbor_first
 
     robot_type = RobotType.circle
 
@@ -211,18 +211,18 @@ if __name__ == '__main__':
     if figure5_ranking_tree:
         num_iter = 1
         start = 0, 0
-        ranking_type = Ranking_type.RRTstar
+        open_points_type = Ranking_type.RRTstar
         picking_strategy = menu_result.p
     elif figure6_local_sight:
         num_iter = 6
         start = 0, 0
-        ranking_type = Ranking_type.RRTstar
+        open_points_type = Ranking_type.RRTstar
         picking_strategy = menu_result.p
     elif figure8_step_by_step:
         #num_iter = 1
         start = 0, 0
         goal = 40, 90
-        ranking_type = Ranking_type.RRTstar
+        open_points_type = Ranking_type.RRTstar
         picking_strategy = menu_result.p
     if figure10_connect_visibility_graph:
         map_name = "_paper_connect_visibility_graph.csv"
@@ -230,10 +230,10 @@ if __name__ == '__main__':
         goal = 48, 19
         num_iter = 7
         robot_vision = 7
-        picking_strategy = Picking_strategy.local_first
+        picking_strategy = Picking_strategy.neighbor_first
 
     # run robot
     robot_main( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
                 robot_vision=robot_vision, robot_type=robot_type, robot_radius=robot_radius, 
-                ranking_type = ranking_type, ranking_function =ranking_function, 
+                ranking_type = open_points_type, ranking_function =ranking_function, 
                 picking_strategy= picking_strategy, sample_size=sample_size)

@@ -1,5 +1,5 @@
 win_size = 100
-
+from Program_config import show_plot_title
 class Map:
     
     def generate(self, plt, i, part, MAX_VERTICES):
@@ -13,7 +13,8 @@ class Map:
     def display(self, plt, title, obstacles, alpha: float = 0.4, hatch: str = '//'):
         
         # displaying the title 
-        #plt.title(title)
+        if show_plot_title:
+            plt.title(title)
         for obstacle in obstacles:
             x = [point[0] for point in obstacle]
             y = [point[1] for point in obstacle]

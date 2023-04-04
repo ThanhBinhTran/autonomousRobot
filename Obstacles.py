@@ -8,7 +8,7 @@ import csv
 from Robot_world_lib import World
 from Robot_math_lib import *
 
-FAR_POINT = (10000, 10000)
+FAR_POINT = (0, 20000)
 class Obstacles:
     def __init__(self):
         self.obstacles = []     # list of obstacles (in poins format)
@@ -91,6 +91,17 @@ class Obstacles:
             self.obstacles_line_segments.append(line_segments)
         return self.obstacles_line_segments
 
+    ''' check if both start and goal are valid '''
+    def valid_start_goal(self, start=(0,0), goal= (0,0)):
+        # check if goal and start is inside obstacles , if then skip
+        if self.check_point_collision(start):
+            print (f"invalid start {start}")
+            return False
+        if self.check_point_collision(goal):
+            print (f"invalid goal {goal}")
+            return False
+        return True
+    
     ''' check collision: return true if the given point is inside obstracles '''
     def check_point_collision(self, point):
         lsA = (point, FAR_POINT)

@@ -1,7 +1,7 @@
 from Robot_paths_lib import *
 from Robot_math_lib import *
 from Robot_sight_lib import *
-from Robot_base import Picking_strategy, Ranking_type, Robot_base, RobotType
+from Robot_base import Robot_base
 from Program_config import *
 from Graph import Graph
 from Sight import Sight
@@ -24,7 +24,7 @@ if platform.system() == 'Linux':
 
 #from RRTree_star import RRTree_star
 class Robot(Robot_base):
-    def __init__(self, start, goal, vision_range=20, robot_type= RobotType.circle, robot_radius= 0.2):
+    def __init__(self, start, goal, vision_range=20, robot_type= Robot_base.RobotType.circle, robot_radius= 0.2):
 
         super().__init__(vision_range=vision_range, robot_type=robot_type, robot_radius=robot_radius)
 
@@ -321,8 +321,9 @@ class Robot(Robot_base):
                 self.local_active_open_rank_pts = np.concatenate((self.local_active_open_pts, self.rank_score), axis=1)
 
     ''' check whether local open_points are active '''
-    def get_local_active_open_ranking_points(self, open_sights, ranker, goal, RRT_star=None, ranking_type= Ranking_type.Distance_Angle):
-        if ranking_type == Ranking_type.Distance_Angle:
+    def get_local_active_open_ranking_points(self, open_sights, ranker, goal, RRT_star=None, \
+                                             open_points_type= Robot_base.Open_points_type.Open_Arcs):
+        if open_points_type == Robot_base.Open_points_type.Open_Arcs:
             # get all local points from open sights
             self.get_local_open_points(open_sights)
 
@@ -331,7 +332,7 @@ class Robot(Robot_base):
 
             # ranking and store it to local active open ranking points
             self.ranking_active_open_point(ranker=ranker, goal=goal)
-        elif ranking_type == Ranking_type.RRTstar:
+        elif open_points_type == Robot_base.Open_points_type.RRTstar:
             self.ranking_by_RRTree(open_sights, ranker, goal, RRT_star)
 
     ''' the active_open_rank_pts has to not empty '''
@@ -342,7 +343,7 @@ class Robot(Robot_base):
         return next_point, next_pt_idx
 
     ''' pick next point, where its ranking is heighest, in given list '''
-    def pick_next_point(self, goal, picking_strategy = Picking_strategy.global_first):
+    def pick_next_point(self, goal, picking_strategy = Robot_base.Picking_strategy.global_first):
         next_point, next_pt_idx = None, -1  # default (none, idx = -1)
 
         global_len = len(self.global_active_open_rank_pts)  # Note: global set already get current local
@@ -354,13 +355,13 @@ class Robot(Robot_base):
             
         else:   # pick next one in waiting set.
             # pop the next point in global set first
-            if picking_strategy == Picking_strategy.global_first:     # picking global first
+            if picking_strategy == Robot_base.Picking_strategy.global_first:     # picking global first
                 if global_len > 0:
                     next_point, next_pt_idx = self.pick_max_ranking(self.global_active_open_rank_pts)
             
             # pop the next point in local set first, if the next local point is not exist then pick
             # in global set.
-            elif picking_strategy == Picking_strategy.local_first:     # picking local first
+            elif picking_strategy == Robot_base.Picking_strategy.neighbor_first:     # picking local first
                 if local_len > 0:
                     next_point, next_pt_idx = self.pick_max_ranking(self.local_active_open_rank_pts)
                     # global index 

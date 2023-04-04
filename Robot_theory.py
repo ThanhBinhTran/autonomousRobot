@@ -76,7 +76,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             # add new active open points to graph_insert
             robot.visibility_graph.add_local_open_points(robot.coordinate, robot.local_active_open_pts)
         # pick next point to make a move
-        next_point = robot.pick_next_point(goal, picking_strategy=Picking_strategy.local_first)
+        next_point = robot.pick_next_point(goal, picking_strategy=Picking_strategy.neighbor_first)
         if next_point is not None:
             # find the shortest skeleton path from current position (center) to next point
             if tuple(next_point) == tuple(goal):

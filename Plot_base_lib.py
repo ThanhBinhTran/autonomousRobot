@@ -5,7 +5,7 @@ import math
 
 from Robot_map_lib import Map
 from Robot_world_lib import World
-from Robot_base import RobotType
+from Robot_base import Robot_base
 from Program_config import *
 
 import os
@@ -15,6 +15,7 @@ class Plot_base:
         self.plt   = plt
         self.fig, self.ax = plt.subplots(figsize=size)
         self.fig.canvas.manager.set_window_title(title)
+        self.set_equal()
 
     show = lambda self: self.plt.show()
     pause = lambda self, x: self.plt.pause(x)
@@ -141,7 +142,7 @@ class Plot_base:
     ''' Robot '''
     def robot(self, robot, yaw=0):  # pragma: no cover
         x,y = robot.coordinate
-        if robot.robot_type == RobotType.rectangle:
+        if robot.robot_type == Robot_base.RobotType.rectangle:
             outline = np.array([[-robot.length / 2, robot.length / 2,
                                 (robot.length / 2), -robot.length / 2,
                                 -robot.length / 2],
@@ -155,7 +156,7 @@ class Plot_base:
             outline[1, :] += y
             plt.plot(np.array(outline[0, :]).flatten(),
                     np.array(outline[1, :]).flatten(), "-k")
-        elif robot.robot_type == RobotType.circle:
+        elif robot.robot_type == Robot_base.RobotType.circle:
             circle = plt.Circle((x, y), robot.radius, color="b")
             plt.gcf().gca().add_artist(circle)
             

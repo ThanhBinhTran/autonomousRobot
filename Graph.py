@@ -32,7 +32,7 @@ class Graph:
         return self.graph[tuple(node)]
     
     # path between two nodes of a graph
-    def BFS_skeleton_path_old(self, start, goal):
+    def BFS_skeleton_path(self, start, goal):
 
         #print("BFS_skeleton_path: Current {0}, Next {1}".format(start, goal))
         explored = []
@@ -78,7 +78,7 @@ class Graph:
         print("So sorry, but a connecting path doesn't exist :(")
         return []
 
-    def BFS_skeleton_path(self, start, goal):
+    def BFS_skeleton_path_new(self, start, goal):
         distances = {node: float('inf') for node in self.graph}
         distances[start] = 0
         previous_nodes = {node: None for node in self.graph}

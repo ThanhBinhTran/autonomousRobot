@@ -9,19 +9,38 @@ import os
 from Program_config import result_repo
 
 class Result_Log:
-    def __init__(self, header_csv = ["header1","header2"]):
+    def __init__(self, header_csv = ["header1"]):
         self.results_data = []
         self.header_csv = header_csv
+        self.result_repo = result_repo
     
+    def set_result_repo(self, repo):
+        self.result_repo = repo
+
+    ''' clear data'''
+    def clear_data(self):
+        self.results_data = []
+
     ''' save result in to list '''
     def add_result(self, result):
         self.results_data.append (result)
 
+    def prepare_name(map_name=None, start=(0,0), goal=(0,0), pick=None, range=20, open_points_type=None):
+        m = map_name.replace('.csv','')
+        fname = f"{m}_s({start[0]}_{start[1]})_g({goal[0]}_{goal[1]})_range{range}"
+        
+        if pick is not None:
+            fname += f'_{pick}'
+
+        if open_points_type is not None:
+            fname += f'_{open_points_type}'
+        return fname
+    
     def set_file_name(self, name):
-        isExist = os.path.exists(result_repo)
+        isExist = os.path.exists(self.result_repo)
         if not isExist:
-            os.mkdir(result_repo)
-        self.file_name = os.path.join(result_repo, name)
+            os.mkdir(self.result_repo)
+        self.file_name = os.path.join(self.result_repo, name)
 
     ''' set header '''
     def set_header (self, header_csv):
@@ -29,8 +48,8 @@ class Result_Log:
 
     ''' write result to csv file '''
     def write_csv(self):
-        if len(self.results_data) <0:
-            print ("No date was recorded")
+        if len(self.results_data) <= 0:
+            print ("No data was recorded")
             return
         
         f = open(self.file_name, 'w', newline='', encoding="utf-8")

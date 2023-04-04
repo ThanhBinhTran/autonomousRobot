@@ -98,7 +98,7 @@ class Plotter(Plot_base):
             self.vision(center, vision_range, csights, osights)
 
     def animation(self, Robot:Robot, world_name, iter_count, obstacles:Obstacles, 
-                  show_grid=True, hide_axis=False, set_equal= True, easy_experiment= False):
+                  show_grid=True, hide_axis=False, set_equal= True, experiment= False):
         # clear plot
         self.clear()
 
@@ -143,7 +143,6 @@ class Plotter(Plot_base):
         
         if show_visitedPath:
             #self.paths(Robot.visited_path, ls_vp, ls_goingp)
-            print ("Robot.visited_paths", Robot.visited_paths)
             self.paths_color(Robot.visited_paths, Robot.visited_path_directions)
         
         if show_sketelonPath and len(Robot.skeleton_path) > 0:
@@ -165,7 +164,7 @@ class Plotter(Plot_base):
         if set_equal: self.set_equal()
         if show_grid: self.show_grid()
         if hide_axis: self.plt.axis("off")   # turns off axes
-        if not easy_experiment:
+        if not experiment:
             self.plt.pause(0.001)
 
     ''' plot connection between 2 nodes'''
@@ -373,9 +372,7 @@ class Plotter(Plot_base):
         self.RRT_path(Tree.path_to_goal, ls_edge=ls_ahead_path, ls_node=ls_path_node, lw=lw_path)
         self.pause(0.001)
     
-    def RRTX_animation(self, Tree=Tree, obstacles=Obstacles, robot=Robot, obstacle_nodes=[],\
-                    discovered_obstacle_nodes = [], all_children= [], rrt_queue=Priority_queue,\
-                    sql_nodes= [], easy_experiment=False):
+    def RRTX_animation(self, Tree=Tree, obstacles=Obstacles, robot=Robot, experiment=False):
         
         # clear plot
         self.clear()
@@ -400,33 +397,12 @@ class Plotter(Plot_base):
         self.start(robot.start)
         self.robot(robot=robot)
         self.vision_area(robot.coordinate, robot.vision_range)
-        self.point_text(robot.coordinate, "1r", "bot")
+        #self.point_text(robot.coordinate, "1r", "bot")
 
         self.RRT_path(path=robot.path_look_ahead_to_goal, ls_edge=ls_ahead_path, ls_node=ls_path_node, lw=lw_path)
         self.paths_coords(paths=robot.visited_paths,ls_edge=ls_visited_path, ls_node=ls_path_node, lw=lw_path)
         
-        # debug 
-        debug = False
-        if debug:
-            for pt in obstacle_nodes:
-                self.point(pt.coords, "ok")
-                #self.point_text(pt.coords, "ok", "o")
-            for pt in discovered_obstacle_nodes:
-                self.point(pt.coords, "og")
-                #self.point_text(pt.coords, "og", '_')
-            for pt in all_children:
-                self.point(pt.coords, ".b")
-                #self.point_text(pt.coords, "^b", 'c')
-
-            for pt in sql_nodes:
-                #self.point(pt.coords, "^b")
-                self.point_text(pt.coords, ".m", '_')
-            
-            queue_node = rrt_queue.get_all_values()
-            for pt in queue_node:
-                #self.point(pt.coords, "Pr")
-                self.point_text(pt.coords, "1r", 'q')
-        if not easy_experiment:
+        if not experiment:
             self.pause(0.001)
 
 ########################################################################################################

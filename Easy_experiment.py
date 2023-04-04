@@ -11,7 +11,7 @@ from Robot_ranking import Ranking_function
 
 from Robot_run import robot_main
 from Robot_run import robot_main as robot_RRTstar_ranking
-from RRTree_X import robot_main as robot_RRTX
+from RRTree_X import robot_RRTX as robot_RRTX
 from RRT_user_input import *
 from Easy_experiment_lib import Experimental_Result, Experiment_type
 
@@ -83,8 +83,8 @@ if __name__ == '__main__':
     
     # picking strategies
     pickingA_strategy = Picking_strategy.global_first
-    pickingB_strategy = Picking_strategy.local_first
-    pickingC_strategy = Picking_strategy.local_first
+    pickingB_strategy = Picking_strategy.neighbor_first
+    pickingC_strategy = Picking_strategy.neighbor_first
 
     range_step = 5
     range_max = 105
@@ -129,19 +129,19 @@ if __name__ == '__main__':
                 elif experiment_type == Experiment_type.COMPARE_OUR_VS_RRTX_ALGORITHM:   # compare our vs RRtree X
                     robotA = robot_RRTstar_ranking( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
                                         robot_vision=vision_range, robot_type=robot_type, robot_radius=robot_radius, 
-                                        ranking_type = Ranking_type.RRTstar, ranking_function =robotA_ranking_function,
+                                        open_points_type = Ranking_type.RRTstar, ranking_function =robotA_ranking_function,
                                         picking_strategy= Picking_strategy.global_first, sample_size=sample_size,
-                                        log_experiment=True,save_image=True)
+                                        experiment=True,save_image=True)
                     robotB = robot_RRTstar_ranking( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
                                         robot_vision=vision_range, robot_type=robot_type, robot_radius=robot_radius, 
-                                        ranking_type = Ranking_type.RRTstar, ranking_function =robotA_ranking_function,
-                                        picking_strategy= Picking_strategy.local_first, sample_size=sample_size,
-                                        log_experiment=True,save_image=True)
+                                        open_points_type = Ranking_type.RRTstar, ranking_function =robotA_ranking_function,
+                                        picking_strategy= Picking_strategy.neighbor_first, sample_size=sample_size,
+                                        experiment=True,save_image=True)
                     robotC = robot_RRTX( start_cooridinate=start, goal_coordinate=goal, map_name=map_name, world_name=world_name,\
                                         num_iter=num_iter, robot_vision=vision_range, robot_type=robot_type, robot_radius=robot_radius, \
                                         ranking_function=robotB_ranking_function, RRT_radius=5,\
                                         RRT_step_size=5, RRT_sample_size=sample_size,
-                                        easy_experiment=True,save_image=True)
+                                        experiment=True,save_image=True)
                 # Log the result, careful with the data order (start, goal, vision....)
                 result.add_result([start, goal, vision_range, 
                         robotA.reach_goal, robotA.cost, 

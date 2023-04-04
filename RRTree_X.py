@@ -7,7 +7,6 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.
 
 from matplotlib.pyplot import title
 import numpy as np
-from Robot_base import Picking_strategy
 
 from Tree import Node
 from RRTree import RRTree
@@ -18,24 +17,9 @@ from RRT_user_input import menu_RRT
 from Program_config import *
 from Obstacles import Obstacles
 from Queue_class import Priority_queue
-from Robot_class import Robot, RobotType
-
-class Debug_data:
-    def __init__(self) -> None:
-        self.p = False
-    def set_p(self, number):
-        self.p = True
-        self.queue_number = number
-    def queue_at_start(self, number):
-        self.start_queue = number
-
-    def queue_at_first_obstacle(self, number):
-        self.first_obstacle = number
-
-    def print (self):
-        print ("start at t0: ", self.start_queue)
-        print ("start first obstacle: ", self.first_obstacle)
-        print ("end first obstacle: ", self.queue_number)
+from Robot_class import Robot
+# get result log for experiment
+from Result_log import Result_Log
 
 class RRTree_x(RRTree):
 
@@ -73,7 +57,7 @@ class RRTree_x(RRTree):
                 rand_coordinate = np.array(goal_coordinate)
 
             # bring closer random coordinate to tree 
-            accepted_coordinate = self.bring_closer(rand_coordinate=rand_coordinate)
+            accepted_coordinate = self.bring_closer(rand_coordinate=rand_coordinate, obstacles=obstacles, ignore_obstacles=True)
 
             # if tree first saw given goal , instead of adding new random , add goal
             if not first_saw_goal:
@@ -173,16 +157,15 @@ class RRTree_x(RRTree):
                     discovered_obstacle_nodes.append(n_orphan_node)
         return discovered_obstacle_nodes
 
-def robot_main( start_cooridinate, goal_coordinate, map_name, world_name, num_iter, robot_vision, \
-            robot_type, robot_radius, ranking_function, RRT_radius,RRT_step_size, RRT_sample_size, \
-            easy_experiment = False, save_image = True):
+def robot_RRTX( start_cooridinate=(0,0), goal_coordinate=(0,1), map_name=None, world_name=None,\
+                num_iter = 1, robot_vision = 20, RRT_radius = 20,
+                RRT_step_size = 5, RRT_sample_size = 2000, \
+                experiment = False, save_image = True):
     
     ''' variable declaration '''
     robot = Robot(start=start_cooridinate, goal=goal_coordinate, vision_range=robot_vision)
     # set same window size to capture pictures
     plotter = Plotter(title="Rapidly-exploring Random Tree X (RRT_X)")
-    plotter.set_equal()
-
 
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
@@ -198,11 +181,12 @@ def robot_main( start_cooridinate, goal_coordinate, map_name, world_name, num_it
     RRTx = RRTree_x(root=goal_node, step_size=RRT_step_size, radius=RRT_radius, 
                     random_area=boundary_area, sample_size=RRT_sample_size)
     RRTx.build(goal_coordinate=start_cooridinate, plotter=plotter,obstacles=obstacles, rrt_queue=rrt_queue)
-
+    
+    log_name = Result_Log.prepare_name(map_name=map_name, start=start_cooridinate, goal=goal_coordinate,\
+                                       range=robot_vision)
     #############################################################
     # initial variables
     #############################################################
-    obstacle_nodes = None
     iter_count = 0
     if RRTx.reach_goal:     # generated tree reached to start from goal
         start_node = RRTx.dict[start_cooridinate]
@@ -239,10 +223,10 @@ def robot_main( start_cooridinate, goal_coordinate, map_name, world_name, num_it
                 print ("No look ahead found")
                 break
 
-            if show_animation and not easy_experiment:
-                plotter.RRTX_animation(Tree=RRTx, obstacles=obstacles, robot=robot, easy_experiment=easy_experiment)
+            if show_animation and not experiment:
+                plotter.RRTX_animation(Tree=RRTx, obstacles=obstacles, robot=robot, experiment=experiment)
 
-            print ("from: {0} to {1}".format(robot.coordinate, curr_node.coords))
+            #print ("from: {0} to {1}".format(robot.coordinate, curr_node.coords))
 
             # Run n times for debugging
             if  iter_count == num_iter:
@@ -252,16 +236,15 @@ def robot_main( start_cooridinate, goal_coordinate, map_name, world_name, num_it
         print ("No path from goal to start belongs to generated tree")
         plotter.tree(RRTx, color_mode=TreeColor.by_lmc)
 
-    if not easy_experiment: # skip printing and showing animation if running easy experiment
+    if not experiment: # skip printing and showing animation if running easy experiment
         print("Done")
         if show_animation:
             plotter.show()
 
     elif save_image:
         # showing the final result (for save image and display as well)
-        plotter.RRTX_animation(Tree=RRTx, obstacles=obstacles, robot=robot, easy_experiment=easy_experiment)
-        save_figure(map_name=map_name, range=robot.vision_range, start=start_cooridinate, goal=goal_coordinate, \
-            picking_strategy=None, ranking_function=None, RRTx=True, plotter=plotter)
+        plotter.RRTX_animation(Tree=RRTx, obstacles=obstacles, robot=robot, experiment=experiment)
+        plotter.save_figure(fig_name=log_name + "RRTx")
         
     return robot
             
@@ -281,9 +264,9 @@ if __name__ == '__main__':
     num_iter = menu_result.n
     world_name = menu_result.w
 
-    robot_main(start_cooridinate = start_cooridinate, goal_coordinate= goal_coordinate, map_name= map_name, world_name=world_name,\
-        num_iter=num_iter, robot_vision=vision_range, robot_type=RobotType.circle, robot_radius=0.5, 
-                ranking_function =None, RRT_radius=radius, RRT_step_size=step_size, RRT_sample_size=sample_size)
+    robot_RRTX(start_cooridinate = start_cooridinate, goal_coordinate= goal_coordinate, map_name= map_name, world_name=world_name,\
+        num_iter=num_iter, robot_vision=vision_range, 
+        RRT_radius=radius, RRT_step_size=step_size, RRT_sample_size=sample_size)
 
     
     

@@ -10,12 +10,12 @@ from Robot_paths_lib import *
 from Robot_sight_lib import *
 
 from Robot_ranking import Ranker, Ranking_function
-from Robot_class import Robot
-from Robot_base import Picking_strategy, Ranking_type, RobotType
+from Robot_class import Robot, Robot_base
 from logging_ranking import Logging_ranking
 from Tree import Node
 from RRTree_star import RRTree_star
 
+from Robot_run import robot_main as robot_check_reachable
 # hide/display animation
 from Program_config import *
 # obstacles class
@@ -33,9 +33,9 @@ from a_star import main as A_star_planner
 from RRTree_star import RRTree_star
 from Graph import *
 
-enable_compare_AStar = False
-enable_compare_RRTStar = False
-enable_improve = True
+enable_compare_AStar = True
+enable_compare_RRTStar = True
+enable_improve = False
 sample_size_each_cell = 100
 
 ''' return number of turn actions times '''
@@ -71,8 +71,13 @@ def RRTStar_expand(RRTstar:RRTree_star, robot:Robot, plotter:Plotter, obstacles:
     RRTstar.build(goal_coordinate=goal, plotter=plotter, obstacles=obstacles, robot=robot) 
     return RRTstar
 
+def m_s_g_name_file(star, goal, map_name):
+    mn = map_name.replace('.csv','')
+    return f"{map_name}_s({star[0]}_{star[1]})_g({goal[0]}_{goal[1]})"
+
 def compare_Astar_RRTstar(robot:Robot, plotter:Plotter, obstacles:Obstacles, RRT_star=RRTree_star,
-                          case_count=int, save_image=False, iter_count=int):
+                          case_count=int, save_image=False, iter_count=int,
+                          map_name=str):
 
     start=robot.skeleton_path[0]
     goal=robot.skeleton_path[-1]
@@ -116,8 +121,10 @@ def compare_Astar_RRTstar(robot:Robot, plotter:Plotter, obstacles:Obstacles, RRT
         if robot.next_point is not None:
             plotter.point(robot.next_point, ls_nextpt)
         plotter.path(Astar_path, "-r")
+        plotter.goal(robot.goal)
         if save_image:
-            plotter.save_figure(f"case{case_count}_Astar", file_extension=".pdf")
+            m_s_g = m_s_g_name_file(map_name=map_name,star=robot.start, goal=robot.goal)
+            plotter.save_figure(f"{m_s_g}_case{case_count}_Astar", file_extension=".png")
 
 
     if enable_compare_RRTStar:    
@@ -150,23 +157,24 @@ def compare_Astar_RRTstar(robot:Robot, plotter:Plotter, obstacles:Obstacles, RRT
         if robot.next_point is not None:
             plotter.point(robot.next_point, ls_nextpt)
         plotter.RRTree(tree=RRT_star, neighbour_en=True)
-        print ("RRTstar_path: ", RRTstar_path)
+        #print ("RRTstar_path: ", RRTstar_path)
         if len(RRTstar_path) > 0:
             plotter.path(RRTstar_path, "-.r")
         else:
             RRTstar_path_cost = -10 # return invalid value
             RRTstar_time = -10
-        
+        plotter.goal(robot.goal)
         if save_image:
-            plotter.save_figure(f"case{case_count}_RRTstar", file_extension=".pdf")
+            m_s_g = m_s_g_name_file(map_name=map_name,star=robot.start, goal=robot.goal)
+            plotter.save_figure(f"{m_s_g}_case{case_count}_RRTstar", file_extension=".png")
  
     return (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time)
 
-def robot_main( start, goal, map_name, world_name, num_iter, 
-                robot_vision, robot_type, robot_radius, 
-                ranking_type = Ranking_type.Distance_Angle,
+def robot_main( start=(0,0), goal=(0, 1), map_name=None, world_name=None, num_iter=1, 
+                robot_vision=20, robot_type= Robot_base.RobotType.circle, robot_radius=0.5,
+                ranking_type = Robot_base.Open_points_type.Open_Arcs,
                 ranking_function =Ranking_function.Angular_similarity,
-                picking_strategy= Picking_strategy.local_first,
+                picking_strategy= Robot_base.Picking_strategy.neighbor_first,
                 sample_size = 2000, log_experiment=True, save_image=True):
     
     # robot ojbect
@@ -174,7 +182,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
                     robot_type=robot_type, robot_radius=robot_radius)
     
     # set alpha and beta only for distance and angle formula
-    if ranking_type == Ranking_type.Distance_Angle and ranking_function == Ranking_function.RHS_RRT_base:
+    if ranking_type == Robot_base.Open_points_type.Open_Arcs and ranking_function == Ranking_function.RHS_RRT_base:
         ranking_function = Ranking_function.Angular_similarity
     ranker = Ranker(alpha=0.9, beta= 0.1, ranking_function=ranking_function)
 
@@ -186,21 +194,22 @@ def robot_main( start, goal, map_name, world_name, num_iter,
     obstacles.read(world_name, map_name)
     obstacles.line_segments()
     #obstacles.find_configuration_space(robot.radius)
- 
-    #time_stamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+
+    if not obstacles.valid_start_goal(start=start, goal=goal):
+        return None
     
     csv_head_time = []
     csv_head_cost = []
     csv_head_turn = []
     if platform.system() == 'Linux':
         if enable_improve:
-            csv_head_time = ["ASP_improve_time_v01","ASP_improve_time_v02", "Astar_time", "RRTStar_time"]
-            csv_head_cost = ["ASP_improve_path_cost_v01","ASP_improve_path_cost_v02", "Astar_path_cost", "RRTStar_path_cost"]
-            csv_head_turn = ["ASP_improve_path_turn_v01", "ASP_improve_path_turn_v02","Astar_path_turn", "RRTStar_path_turn"]
+            csv_head_time = ["ASP_improve_time","ASP_improve_time", "Astar_time", "RRTStar_time"]
+            csv_head_cost = ["ASP_improve_path_cost","ASP_improve_path_cost", "Astar_path_cost", "RRTStar_path_cost"]
+            csv_head_turn = ["ASP_improve_path_turn", "ASP_improve_path_turn","Astar_path_turn", "RRTStar_path_turn"]
         else:
-            csv_head_time = ["ASP_time_v01","ASP_time_v02", "Astar_time", "RRTStar_time"]
-            csv_head_cost = ["ASP_path_cost_v01","ASP_path_cost_v02", "Astar_path_cost", "RRTStar_path_cost"]
-            csv_head_turn = ["ASP_path_turn_v01", "ASP_path_turn_v02","Astar_path_turn", "RRTStar_path_turn"]
+            csv_head_time = ["ASP_time","ASP_time", "Astar_time", "RRTStar_time"]
+            csv_head_cost = ["ASP_path_cost","ASP_path_cost", "Astar_path_cost", "RRTStar_path_cost"]
+            csv_head_turn = ["ASP_path_turn", "ASP_path_turn","Astar_path_turn", "RRTStar_path_turn"]
     else:
         csv_head_time = ["ASP_time", "Astar_time", "RRTStar_time"]
         csv_head_cost = ["ASP_path_cost", "Astar_path_cost", "RRTStar_path_cost"]
@@ -210,12 +219,13 @@ def robot_main( start, goal, map_name, world_name, num_iter,
     result_cost = Result_Log(header_csv=csv_head_cost)
     result_turn = Result_Log(header_csv=csv_head_turn)
 
-    result_time.set_file_name(f"result_ASP_AStar_RRTStar_time_improve{enable_improve}_s{start}_g{goal}.csv")
-    result_cost.set_file_name(f"result_ASP_AStar_RRTStar_path_cost_improve{enable_improve}_s{start}_g{goal}.csv")
-    result_turn.set_file_name(f"result_ASP_AStar_RRTStar_path_turn_improve{enable_improve}_s{start}_g{goal}.csv")
+    m_s_g = m_s_g_name_file(map_name=map_name,star=robot.start, goal=robot.goal)
+    result_time.set_file_name(f"{m_s_g}_ASP_AStar_RRTStar_time_improve{enable_improve}.csv")
+    result_cost.set_file_name(f"{m_s_g}_ASP_AStar_RRTStar_path_cost_improve{enable_improve}.csv")
+    result_turn.set_file_name(f"{m_s_g}_ASP_AStar_RRTStar_path_turn_improve{enable_improve}.csv")
 
     ''' generate a RRTree_star if ranking type is RRTree_Star_ranking '''
-    if ranking_type == Ranking_type.RRTstar:
+    if ranking_type == Robot_base.Open_points_type.RRTstar:
             # RRT start for ranking scores
         step_size = robot.vision_range
         
@@ -255,8 +265,6 @@ def robot_main( start, goal, map_name, world_name, num_iter,
 
         # scan to get sights at local
         closed_sights, open_sights = scan_around(robot, obstacles, goal)
-        #print ("\n\nclosed sights : ", closed_sights)
-        #print ("\n\nopen sights : ", open_sights)
 
         # check whether the robot saw or reach the given goal
         robot.check_goal(goal, closed_sights)
@@ -264,7 +272,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         if not robot.saw_goal and not robot.reach_goal:
             # get local active point and its ranking
             robot.get_local_active_open_ranking_points(open_sights=open_sights, ranker=ranker, goal=goal,\
-                                                        RRT_star=RRT_star, ranking_type=ranking_type)
+                                                        RRT_star=RRT_star, open_points_type=ranking_type)
             # stack local active open point to global set
             robot.expand_global_open_ranking_points(robot.local_active_open_rank_pts)
             
@@ -294,13 +302,10 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         if platform.system() == 'Linux':
             if enable_improve:
                 robot.bridge_visibility_graph(robot.coordinate, open_sights)
-        l_stime_v2, a_time_v2 = 0.0 , 0.0
-        #robot.asp, robot.ls, l_stime_v2, a_time_v2 = approximately_shortest_path(robot.skeleton_path, robot.visited_sights, robot.vision_range)
 
-        asp_path_cost_v2 = path_cost(robot.asp)
-        asp_old, ls_old, l_stime_v1, a_time_v1 = approximately_shortest_path_old(robot.skeleton_path, robot.visited_sights, robot.vision_range)
-        asp_path_cost_v1 = path_cost(asp_old)
-        ASP_path_turn_v1 = get_path_turn(asp_old)
+        #robot.asp, robot.ls, l_stime, a_time = approximately_shortest_path(robot.skeleton_path, robot.visited_sights, robot.vision_range)
+        robot.asp, robot.ls, l_stime, a_time = approximately_shortest_path_old(robot.skeleton_path, robot.visited_sights, robot.vision_range)
+        asp_path_cost = path_cost(robot.asp)
 
         if len(robot.skeleton_path)>2:
             print ("back-ward path")
@@ -308,34 +313,31 @@ def robot_main( start, goal, map_name, world_name, num_iter,
             (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time) =\
                                 compare_Astar_RRTstar(robot=robot,plotter=plotter, obstacles=obstacles, 
                                                       save_image=save_image, case_count = case_count,
-                                                      iter_count=iter_count, RRT_star=RRTstar)
+                                                      iter_count=iter_count, RRT_star=RRTstar,
+                                                      map_name=map_name)
             Astar_path_turn = get_path_turn(Astar_path)
             RRTstar_path_turn = get_path_turn(RRTstar_path)
             if save_image:
                 # showing the final result (for save image and display as well)
                 plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
-                                    obstacles=obstacles, easy_experiment=log_experiment)
+                                    obstacles=obstacles, experiment=log_experiment)
                 
                 # draw some fig for paper
                 
                 #plotter.show()
-                save_name = f"case{case_count}_ASP"
+                save_name = f"{m_s_g}_case{case_count}_APS"
                 if platform.system() == 'Linux' and enable_improve:
-                        save_name = f"case{case_count}_ASP_improve"
+                        save_name += "_improve"
 
-                plotter.save_figure(fig_name=save_name, file_extension=".pdf")
+                plotter.save_figure(fig_name=save_name, file_extension=".png")
 
-            ASP_path_turn_v2 = get_path_turn(robot.asp)
+            ASP_path_turn = get_path_turn(robot.asp)
             Astar_path_turn = get_path_turn(Astar_path)
             RRTstar_path_turn = get_path_turn(RRTstar_path)
-            if platform.system() == 'Linux':
-                result_time.add_result([l_stime_v1 + a_time_v1, l_stime_v2 + a_time_v2,Astar_time, RRTstar_time])
-                result_cost.add_result([asp_path_cost_v1, asp_path_cost_v2, Astar_path_cost, RRTstar_path_cost])
-                result_turn.add_result([ASP_path_turn_v1, ASP_path_turn_v2,Astar_path_turn, RRTstar_path_turn])
-            else:
-                result_time.add_result([ l_stime_v2 + a_time_v2, Astar_time, RRTstar_time])
-                result_cost.add_result([ asp_path_cost_v2, Astar_path_cost, RRTstar_path_cost])
-                result_turn.add_result([ASP_path_turn_v2, Astar_path_turn, RRTstar_path_turn])
+            
+            result_time.add_result([l_stime + a_time, Astar_time, RRTstar_time])
+            result_cost.add_result([asp_path_cost, Astar_path_cost, RRTstar_path_cost])
+            result_turn.add_result([ASP_path_turn, Astar_path_turn, RRTstar_path_turn])
             
             case_count += 1
         
@@ -350,14 +352,14 @@ def robot_main( start, goal, map_name, world_name, num_iter,
 
         if show_animation and not log_experiment:
             plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
-                                   obstacles=obstacles, easy_experiment=log_experiment)
+                                   obstacles=obstacles, experiment=log_experiment)
             #plotter.tree_all_nodes(RRTx)
-            if ranking_type == Ranking_type.RRTstar:
+            if ranking_type == Robot_base.Open_points_type.RRTstar:
                 plotter.tree(RRT_star,color_mode=TreeColor.by_cost)
         show_all = False
         if show_all :
             plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count, 
-                                   obstacles=obstacles, easy_experiment=log_experiment)
+                                   obstacles=obstacles, experiment=log_experiment)
             plotter.show()
 
         # Run n times for debugging
@@ -372,7 +374,7 @@ def robot_main( start, goal, map_name, world_name, num_iter,
         result_cost.write_csv()
         result_turn.write_csv()
         print ("\nTo visualize the results, run:\n" +
-               f"Python Plotter.py -r {result_repo}\*s{start}_g{goal}.csv")
+               f"Python Plotter.py -r {result_repo}\{m_s_g}*.csv")
     return robot
 
 if __name__ == '__main__':
@@ -380,36 +382,38 @@ if __name__ == '__main__':
     # get user input
     menu_result = menu_Robot()
     num_iter = menu_result.n
-    
     map_name = menu_result.m
-    
     world_name = menu_result.w
     start = menu_result.sx, menu_result.sy
     goal = menu_result.gx, menu_result.gy
-    
-    robot_radius = menu_result.radius
     robot_vision = menu_result.r
-
     sample_size = menu_result.ss
-    ranking_type = menu_result.rank_type
-    if 'da' in ranking_type:
-        ranking_type = Ranking_type.Distance_Angle
-    elif 'r' in ranking_type:
-        ranking_type = Ranking_type.RRTstar
+    open_pts_type = menu_result.open_pts_type
+    if 'da' in open_pts_type:
+        open_pts_type = Robot_base.Open_points_type.Open_Arcs
+    elif 'r' in open_pts_type:
+        open_pts_type = Robot_base.Open_points_type.RRTstar
 
     picking_strategy = menu_result.p
     if 'g' in picking_strategy:
-        picking_strategy = Picking_strategy.global_first
-    elif 'l' in picking_strategy:
-        picking_strategy = Picking_strategy.local_first
+        picking_strategy = Robot_base.Picking_strategy.global_first
+    elif 'n' in picking_strategy:
+        picking_strategy = Robot_base.Picking_strategy.neighbor_first
 
-    picking_strategy = Picking_strategy.global_first
-    robot_type = RobotType.circle
+    map_name = "_MuchMoreFun.csv"
 
-    ranking_function =Ranking_function.RHS_RRT_base
-
-    # run robot
-    robot_main( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, 
-                robot_vision=robot_vision, robot_type=robot_type, robot_radius=robot_radius, 
-                ranking_type = ranking_type, ranking_function =ranking_function, 
-                picking_strategy= picking_strategy, sample_size=sample_size)
+    start = 0, 0
+    num_iter = 100  # max
+    for i in range (2,3):
+        for j in range (0,20):
+            goal = 5*i, 5*j
+            # run robot
+            #check if robot is reachable or not
+            robotA = robot_check_reachable( start=start, goal=goal, map_name=map_name, num_iter=num_iter, robot_vision=robot_vision,  
+                                    open_points_type = Robot_base.Open_points_type.Open_Arcs, 
+                                    picking_strategy= Robot_base.Picking_strategy.global_first, sample_size=sample_size,
+                                    experiment=True,save_image=False)
+            if robotA.reach_goal:
+                robot_main( start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter, robot_vision=robot_vision,
+                        ranking_type = open_pts_type, picking_strategy= picking_strategy, sample_size=sample_size)
+    print ("DONE!")

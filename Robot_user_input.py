@@ -19,9 +19,9 @@ def menu_Robot():
     parser.add_argument('-ss', metavar="sample_size", type=int, help='sample size', default=2000)
     
     parser.add_argument('-p', metavar="picking strategy", type=str, \
-                help='input : (g) for global first, (l) for local first', default='l')
+                help='input : (g) for global first, (n) for neighbor first', default='g')
 
-    parser.add_argument('-rank_type', metavar="ranking by tree or distance_and_angle formula", type=str,\
-                help='input: (r) for ranking by  RRTreeStar; (da) for  ranking by distance_and_angle formula', default='da')
+    parser.add_argument('-open_pts_type', metavar="open points type ", type=str,\
+                help='input: (r) for get open points from RRTreeStar; (o) for get from open arcs', default='o')
     args = parser.parse_args()
     return args

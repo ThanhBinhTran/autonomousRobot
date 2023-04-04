@@ -1,8 +1,9 @@
 from pathlib import Path
 from RRTree_star import RRTree_star
 import csv
-from Robot_math_lib import approximately_num
 from Tree import Node
+from Program_config import result_repo
+import os
 
 class Logging_ranking:
     def __init__(self) -> None:
@@ -14,13 +15,14 @@ class Logging_ranking:
         self.neighbours_key = "neighbours"
         self.neighbours_weight_key = "neighbours_weight"
 
-    def set_logging_name(self, map_name, goal, radius=10, step_size=5, sample_size=10):
-        return "log_ranking_tree_map{0}_goal_{1}_{2}_radius{3}_step_size{4}_sample_size{5}.csv".format(\
-            map_name, int(goal[0]), int(goal[1]), radius, step_size, sample_size)
+    def set_logging_name(self, map_name, start, goal, radius=10, step_size=5, sample_size=10):
+        
+        return f"tree_data_{map_name}_s({start[0]}_{start[1]})_g({goal[0]}_{goal[1]})" + \
+            f"_radius{radius}_step{step_size}_sample{sample_size}.csv"
     
     def is_existed_log_file(self, file_name):
-        path = Path(file_name)
-        return path.is_file()
+        full_path = os.path.join(result_repo, file_name)
+        return os.path.exists(full_path)
 
     def write_nodes_info(self, node:Node, file_writer):
         result_items = []
@@ -39,10 +41,14 @@ class Logging_ranking:
         
     ''' logging tree as json format '''
     def save_tree(self, RRTree_star:RRTree_star, file_name):
-        #f = open(file_name, "w")
-        #self.write_nodes_info(node=RRTree_star.root,file_writer=f)
-        #f.close()
-        f = open(file_name, 'w', newline='', encoding="utf-8")
+        isExist = os.path.exists(result_repo)
+        if not isExist:
+            os.mkdir(result_repo)
+
+        # Join various path components
+        full_path = os.path.join(result_repo, file_name)
+    
+        f = open(full_path, 'w', newline='', encoding="utf-8")
         writer = csv.writer(f, delimiter=",")
         writer.writerow(["coordinate_x","coordinate_y","cost",\
             "parent_coordinate_x","parent_coordinate_y"])
@@ -57,7 +63,14 @@ class Logging_ranking:
         first_tree = True
         new_node = None
         RRtree_star = None
-        with open(file_name, newline='') as f:
+        isExist = os.path.exists(result_repo)
+        if not isExist:
+            os.mkdir(result_repo)
+
+        # Join various path components
+        full_path = os.path.join(result_repo, file_name)
+    
+        with open(full_path, newline='') as f:
             reader = csv.reader(f, delimiter=',', quoting=csv.QUOTE_NONE)
             for row in reader:
                 if first_line:
