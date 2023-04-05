@@ -424,18 +424,36 @@ if __name__ == '__main__':
     parser.add_argument('-r', metavar="result file", help='result file', default="result.csv")
     parser.add_argument('-x', type=tuple, metavar="lim x", help='result file', default=(0, 15))
     parser.add_argument('-y', type=tuple, metavar="lim y", help='result file', default=(0, 5))
+    parser.add_argument('-id', metavar="experiment number", help='experiment number', default=2)
     menu_result = parser.parse_args()
     # get user input
     result_files = menu_result.r
     xlim = menu_result.x
     ylim = menu_result.y
+    experimentID = menu_result.id
     path = ''
     print(result_files)
     for file in glob.glob(os.path.join(path, result_files)):
         print(file)
+        
         result_data = pd.read_csv(file)
-        result_data.plot(kind="bar", figsize=(10, 4))
-        print(result_data.sum())
+        
+        if experimentID == 2:
+            #get unique vaule of start and goal
+            goal_unique_values = result_data["goal"].unique()
+            start_unique_values = result_data["start"].unique()
+            for s_value in start_unique_values:
+                for g_value in goal_unique_values:
+                    rdata = result_data[result_data["goal"] == g_value]
+                    rdata = rdata[rdata["start"] == s_value ]
+                    rdata.set_index('range', inplace=True)
+
+                    #df = df.iloc[:, 1:].plot(kind='bar', figsize=(10,4))
+                    title = f'{rdata.sum()}'
+                    rdata.plot(kind="bar", figsize=(10, 4), title=title)
+        else:
+            rdata = result_data
+        print(rdata.sum())
 
         # Show the plot
         plt.show()

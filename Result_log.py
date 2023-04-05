@@ -6,7 +6,7 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.
 import csv
 import pandas as pd
 import os
-from Program_config import result_repo
+import Program_config
 
 
 class Result_Log:
@@ -15,10 +15,6 @@ class Result_Log:
             header_csv = ["header1"]
         self.results_data = []
         self.header_csv = header_csv
-        self.result_repo = result_repo
-
-    def set_result_repo(self, repo):
-        self.result_repo = repo
 
     ''' clear data'''
 
@@ -31,25 +27,31 @@ class Result_Log:
         self.results_data.append(result)
 
     @staticmethod
-    def prepare_name(map_name=None, start=(0, 0), goal=(0, 0), pick=None, range=20, open_points_type=None):
-        if map_name is not None:
-            m = map_name.replace('.csv', '')
+    def prepare_name(experiment_title=None, map_name=None, start=(0, 0), goal=(0, 0), pick=None, range=20, open_points_type=None):
+        if map_name is None:
+            return None
+        mn = map_name.replace('.csv', '')
+
+        if experiment_title is None:
+            paths = os.path.join(Program_config.result_repo)
+            fname = f"{mn}_s({start[0]}_{start[1]})_g({goal[0]}_{goal[1]})_range{range}"
         else:
-            m = ''
-        fname = f"{m}_s({start[0]}_{start[1]})_g({goal[0]}_{goal[1]})_range{range}"
+            paths = os.path.join(Program_config.result_repo, experiment_title, mn)
+            fname = f"s({start[0]}_{start[1]})_g({goal[0]}_{goal[1]})_range{range}"
+        if not os.path.exists(paths):
+            os.makedirs(paths)     
 
         if pick is not None:
             fname += f'_{pick}'
 
         if open_points_type is not None:
             fname += f'_{open_points_type}'
-        return fname
 
+        return os.path.join(paths, fname)
+    
+    
     def set_file_name(self, name):
-        is_exist = os.path.exists(self.result_repo)
-        if not is_exist:
-            os.mkdir(self.result_repo)
-        self.file_name = os.path.join(self.result_repo, name)
+        self.file_name = name
 
     ''' set header '''
 
@@ -69,6 +71,7 @@ class Result_Log:
         for result_items in self.results_data:
             writer.writerow(result_items)
         f.close()
+        print (f"saved :{self.file_name}")
 
     ''' read csv as dataframe '''
 

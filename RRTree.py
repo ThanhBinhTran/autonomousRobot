@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
     step_size = menu_result.step_size
     radius = menu_result.radius
-    sample_size = menu_result.ss
+    node_density = menu_result.d
     map_name = menu_result.m
     vision_range = menu_result.r
     world_name = None
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     robot = Robot(start=start_cooridinate, goal=goal_coordinate, vision_range=vision_range)
     # find working space boundary
     boundary_area = robot.find_working_space_boundaries(obstacles=obstacles)
-
+    sample_size = robot.calculate_RRTnode_samplenumber(boundary=boundary_area, density=node_density)
     ''' build tree '''
     start_node = Node(start_cooridinate, cost=0)  # initial root node, cost to root = 0
     RRT = RRTree(root=start_node, step_size=step_size, radius=radius,

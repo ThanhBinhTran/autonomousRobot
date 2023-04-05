@@ -4,6 +4,7 @@ This project is to simulate an autonomousRobot that try to find a way to reach a
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.com
 """
 import platform
+import os
 
 from Graph import *
 # obstacles class
@@ -26,7 +27,13 @@ from logging_ranking import Logging_ranking
 enable_compare_AStar = True
 enable_compare_RRTStar = True
 enable_improve = False
+if platform.system() == 'Linux':
+    enable_compare_AStar = False
+    enable_compare_RRTStar = False
+    enable_improve = True
+
 sample_size_each_cell = 100
+experiment_title = "experiment1"
 
 ''' return number of turn actions times '''
 
@@ -65,15 +72,9 @@ def RRTStar_expand(RRTstar: RRTree_star, robot: Robot, plotter: Plotter, obstacl
     RRTstar.build(goal_coordinate=goal, plotter=plotter, obstacles=obstacles, robot=robot)
     return RRTstar
 
-
-def m_s_g_name_file(star, goal, map_name):
-    mn = map_name.replace('.csv', '')
-    return f"{mn}_s({star[0]}_{star[1]})_g({goal[0]}_{goal[1]})"
-
-
 def compare_Astar_RRTstar(robot: Robot, plotter: Plotter, obstacles: Obstacles, RRT_star=RRTree_star,
                           case_count=int, save_image=False, iter_count=int,
-                          map_name=str):
+                          result_fname = None):
     start = robot.skeleton_path[0]
     goal = robot.skeleton_path[-1]
 
@@ -119,8 +120,7 @@ def compare_Astar_RRTstar(robot: Robot, plotter: Plotter, obstacles: Obstacles, 
         plotter.path(Astar_path, "-r")
         plotter.goal(robot.goal)
         if save_image:
-            m_s_g = m_s_g_name_file(map_name=map_name, star=robot.start, goal=robot.goal)
-            plotter.save_figure(f"{m_s_g}_case{case_count}_Astar", file_extension=".png")
+            plotter.save_figure(f"{result_fname}_case{case_count}_Astar", file_extension=".png")
 
     if enable_compare_RRTStar:
         ''' RRT '''
@@ -160,8 +160,7 @@ def compare_Astar_RRTstar(robot: Robot, plotter: Plotter, obstacles: Obstacles, 
             RRTstar_time = -10
         plotter.goal(robot.goal)
         if save_image:
-            m_s_g = m_s_g_name_file(map_name=map_name, star=robot.start, goal=robot.goal)
-            plotter.save_figure(f"{m_s_g}_case{case_count}_RRTstar", file_extension=".png")
+            plotter.save_figure(f"{result_fname}_case{case_count}_RRTstar", file_extension=".png")
 
     return (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time)
 
@@ -171,7 +170,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
                open_points_type=Robot_base.Open_points_type.Open_Arcs,
                ranking_function=Ranking_function.Angular_similarity,
                picking_strategy=Robot_base.Picking_strategy.neighbor_first,
-               sample_size=2000, experiment=True, save_image=True):
+               sample_size=2000, experiment=True, save_image=True, experiment_title=None):
     # robot ojbect
     robot = Robot(start=start, goal=goal, vision_range=robot_vision,
                   robot_type=robot_type, robot_radius=robot_radius)
@@ -210,14 +209,15 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
         csv_head_cost = ["ASP_path_cost", "Astar_path_cost", "RRTStar_path_cost"]
         csv_head_turn = ["ASP_path_turn", "Astar_path_turn", "RRTStar_path_turn"]
 
+    result_fname = Result_Log.prepare_name(experiment_title=experiment_title, map_name=map_name,
+                                           start=start, goal=goal,range=robot_vision)
     result_time = Result_Log(header_csv=csv_head_time)
     result_cost = Result_Log(header_csv=csv_head_cost)
     result_turn = Result_Log(header_csv=csv_head_turn)
 
-    m_s_g = m_s_g_name_file(map_name=map_name, star=robot.start, goal=robot.goal)
-    result_time.set_file_name(f"{m_s_g}_ASP_AStar_RRTStar_time_improve{enable_improve}.csv")
-    result_cost.set_file_name(f"{m_s_g}_ASP_AStar_RRTStar_path_cost_improve{enable_improve}.csv")
-    result_turn.set_file_name(f"{m_s_g}_ASP_AStar_RRTStar_path_turn_improve{enable_improve}.csv")
+    result_time.set_file_name(f"{result_fname}_ASP_AStar_RRTStar_time_improve{enable_improve}.csv")
+    result_cost.set_file_name(f"{result_fname}_ASP_AStar_RRTStar_path_cost_improve{enable_improve}.csv")
+    result_turn.set_file_name(f"{result_fname}_ASP_AStar_RRTStar_path_turn_improve{enable_improve}.csv")
 
     ''' generate a RRTree_star if ranking type is RRTree_Star_ranking '''
     if open_points_type == Robot_base.Open_points_type.RRTstar:
@@ -255,7 +255,8 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
 
         # clean old data
         robot.clear_local()
-        print(f"_____iteration {iter_count}, robot coordinate {robot.coordinate}")
+        if not experiment:
+            print(f"__iteration {iter_count}, robot coordinate {robot.coordinate}")
 
         # scan to get sights at local
         closed_sights, open_sights = scan_around(robot, obstacles, goal)
@@ -306,13 +307,11 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
         asp_path_cost = path_cost(robot.asp)
 
         if len(robot.skeleton_path) > 2:
-            print("back-ward path")
-
             (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time) = \
                 compare_Astar_RRTstar(robot=robot, plotter=plotter, obstacles=obstacles,
                                       save_image=save_image, case_count=case_count,
                                       iter_count=iter_count, RRT_star=RRTstar,
-                                      map_name=map_name)
+                                      result_fname=result_fname)
             Astar_path_turn = get_path_turn(Astar_path)
             RRTstar_path_turn = get_path_turn(RRTstar_path)
             if save_image:
@@ -323,11 +322,10 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
                 # draw some fig for paper
 
                 # plotter.show()
-                save_name = f"{m_s_g}_case{case_count}_APS"
+                save_name = f"_case{case_count}_APS"
                 if platform.system() == 'Linux' and enable_improve:
                     save_name += "_improve"
-
-                plotter.save_figure(fig_name=save_name, file_extension=".png")
+                plotter.save_figure(fig_name=f"{result_fname}{save_name}", file_extension=".png")
 
             ASP_path_turn = get_path_turn(robot.asp)
             Astar_path_turn = get_path_turn(Astar_path)
@@ -371,7 +369,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
         result_cost.write_csv()
         result_turn.write_csv()
         print("\nTo visualize the results, run:\n" +
-              f"Python Plotter.py -r {result_repo}\{m_s_g}*.csv")
+              f"Python Plotter.py -r \'{result_fname}*.csv\'")
     return robot
 
 
@@ -403,8 +401,8 @@ if __name__ == '__main__':
 
     start = 0, 0
     num_iter = 100  # max
-    istart, iend = 10, 101
-    jstart, jend = 10, 101
+    istart, iend = 75, 76
+    jstart, jend = 50, 51
     istep, jstep = 5, 5
 
     obstacles_check = Obstacles()
@@ -422,5 +420,6 @@ if __name__ == '__main__':
 
             robot_main(start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter,
                        robot_vision=robot_vision, open_points_type=open_pts_type,
-                       picking_strategy=picking_strategy, sample_size=sample_size)
+                       picking_strategy=picking_strategy, sample_size=sample_size,
+                       experiment_title=experiment_title)
     print("DONE!")

@@ -3,6 +3,8 @@ autonomousRobot
 This project is to simulate an autonomousRobot that try to find a way to reach a goal (target)
 author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.com
 """
+import os
+import Program_config
 
 # hide/display animation
 # obstacles class
@@ -19,9 +21,17 @@ from Robot_user_input import robot_user_input
 
 # plot for animation
 
-def m_s_g_r_name_file(start, goal, map_name, range):
-    return f"{map_name}_s({start[0]}_{start[1]})_g({goal[0]}_{goal[1]})_r{range}"
+experiment_title = "experiment2"
 
+def result_logpath(start, goal, map_name, range):
+    if map_name is None:
+        return None
+        
+    mn = map_name.replace(".csv", '')
+    paths = os.path.join(Program_config.result_repo, experiment_title, mn)
+    if not os.path.exists(paths):
+        os.makedirs(paths)
+    return paths
 
 if __name__ == '__main__':
 
@@ -34,7 +44,7 @@ if __name__ == '__main__':
     goal = menu_result.gx, menu_result.gy
     robot_vision = menu_result.r
 
-    sample_size = menu_result.ss
+    node_density = menu_result.d
     open_pts_type = menu_result.open_pts_type
     if 'da' in open_pts_type:
         open_pts_type = Robot_base.Open_points_type.Open_Arcs
@@ -53,7 +63,7 @@ if __name__ == '__main__':
                 "our_global_reached", "our_global_cost",
                 "our_lobal_reached", "our_lobal_cost",
                 "RRTX_reached", "RRTX_cost", ]
-    m_s_g = m_s_g_r_name_file(map_name=map_name, start=start, goal=goal, range=robot_vision)
+    resultpath = result_logpath(map_name=map_name, start=start, goal=goal, range=robot_vision)
 
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
 
@@ -61,17 +71,23 @@ if __name__ == '__main__':
 
     start = 0, 0
     num_iter = 100
-    map_name = "_MuchMoreFun.csv"
-    # map_name = "_map_u_liked_shape.csv"
+    #map_name = '_map_forest.csv' # 500x500 size
+    node_density = 10
+    
+    map_name = '_map_deadend.csv' # 100x100 size
+    node_density = 5
+    istart, iend = 75, 76 
+    jstart, jend = 50, 51
+    step = 5
+    # map_name = '_map_bugtrap.csv' # 200x200 size
+    # map_name = '_map_blocks.csv' # 300X 350 size
     obstacles_check.read(map_name=map_name)
     obstacles_check.line_segments()
 
     result = Result_Log(header_csv=csv_head)
     nm = map_name.replace('.csv', '')
 
-    istart, iend = 20, 101
-    jstart, jend = 10, 101
-    step = 10
+
     for i in range(istart, iend, step):
         for j in range(jstart, jend, step):
 
@@ -79,28 +95,29 @@ if __name__ == '__main__':
 
             if not obstacles_check.valid_start_goal(start=start, goal=goal):
                 continue
-            for r in range(10, 36, 5):
+            for r in range(10, 35, 5):
                 robot_vision = r
                 robotA = robot_OUR(start=start, goal=goal, map_name=map_name, num_iter=num_iter,
                                    robot_vision=robot_vision,
                                    open_points_type=Robot_base.Open_points_type.RRTstar,
-                                   picking_strategy=Robot_base.Picking_strategy.global_first, sample_size=sample_size,
-                                   experiment=True, save_image=True)
+                                   picking_strategy=Robot_base.Picking_strategy.global_first, node_density=node_density,
+                                   experiment=True, save_image=True, experiment_title=experiment_title)
                 robotB = robot_OUR(start=start, goal=goal, map_name=map_name, num_iter=num_iter,
                                    robot_vision=robot_vision,
                                    open_points_type=Robot_base.Open_points_type.RRTstar,
-                                   picking_strategy=Robot_base.Picking_strategy.neighbor_first, sample_size=sample_size,
-                                   experiment=True, save_image=True)
+                                   picking_strategy=Robot_base.Picking_strategy.neighbor_first, node_density=node_density,
+                                   experiment=True, save_image=True, experiment_title=experiment_title)
                 robotC = robot_RRTX(start_cooridinate=start, goal_coordinate=goal, map_name=map_name,
                                     num_iter=num_iter, robot_vision=robot_vision,
-                                    RRT_radius=5, RRT_step_size=5, RRT_sample_size=sample_size,
-                                    experiment=True, save_image=True)
+                                    RRT_radius=5, RRT_step_size=5, RRT_node_density=node_density,
+                                    experiment=True, save_image=True, experiment_title=experiment_title)
                 # Log the result, careful with the data order (start, goal, vision....)
                 result.add_result([start, goal, robot_vision,
                                    robotA.reach_goal, robotA.cost,
                                    robotB.reach_goal, robotB.cost,
                                    robotC.reach_goal, robotC.cost])
-    result.set_file_name(f"{nm}_g({istart}-{iend}_{jstart}-{jend})OUR_RRTX.csv")
+    result_full_path = os.path.join(resultpath, f"_g({istart}-{iend}_{jstart}-{jend})_OUR_RRTX.csv")
+    result.set_file_name(result_full_path)
     result.write_csv()
 
     print("DONE!")

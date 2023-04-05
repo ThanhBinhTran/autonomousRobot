@@ -24,8 +24,8 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
                robot_vision=20, robot_type=Robot_base.RobotType.circle, robot_radius=0.5,
                open_points_type=Robot_base.Open_points_type.Open_Arcs,
                picking_strategy=Robot_base.Picking_strategy.neighbor_first,
-               sample_size=2000, experiment=False, save_image=False,
-               save_log=False):
+               node_density=4, experiment=False, save_image=False,
+               save_log=False, experiment_title=None):
     # robot ojbect
     robot = Robot(start=start, goal=goal, vision_range=robot_vision, robot_type=robot_type, robot_radius=robot_radius)
 
@@ -48,10 +48,11 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
     if not obstacles.valid_start_goal(start=start, goal=goal):
         return None
 
-    log_name = Result_Log.prepare_name(start=start, goal=goal, pick=picking_strategy,
-                                       range=robot_vision, open_points_type=open_points_type)
+    result_filename = Result_Log.prepare_name(start=start, goal=goal, pick=picking_strategy,
+                                       range=robot_vision, open_points_type=open_points_type,
+                                       map_name=map_name, experiment_title=experiment_title)
     result_log = Result_Log(header_csv=["asp_time", "asp_path_cost"])
-    result_log.set_file_name(log_name + '.csv')
+    result_log.set_file_name(result_filename + '.csv')
 
     l_stime = 0.0
     a_time = 0.0
@@ -60,15 +61,17 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
     if open_points_type == Robot_base.Open_points_type.RRTstar:
         # RRT start for ranking scores
         step_size = robot.vision_range
+        
+        # find working space boundary
+        boundary_area = robot.find_working_space_boundaries(obstacles=obstacles)
+        sample_size = robot.calculate_RRTnode_samplenumber(boundary=boundary_area, density=node_density)
+        start_node = Node(goal, cost=0)  # initial root node, cost to root = 0
 
         # logging ranking
         rank_logger = Logging_ranking()
         rrtx_fname = rank_logger.set_logging_name(map_name=map_name, goal=goal, start=start,
                                                   radius=robot_vision, step_size=step_size, sample_size=sample_size)
 
-        # find working space boundary
-        boundary_area = robot.find_working_space_boundaries(obstacles=obstacles)
-        start_node = Node(goal, cost=0)  # initial root node, cost to root = 0
         if rank_logger.is_existed_log_file(rrtx_fname):
             print("load existed-RRTreeStart_rank: ", rrtx_fname)
             RRT_star = rank_logger.load(rrtx_fname)
@@ -134,7 +137,6 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
         asp_path_cost = path_cost(robot.asp)
 
         if len(robot.skeleton_path) > 2:
-            print("back-ward path")
             result_log.add_result([asp_path_cost, l_stime + a_time])
 
         # mark visited path
@@ -168,7 +170,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
             # showing the final result (for save image and display as well)
             plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count,
                               obstacles=obstacles, experiment=experiment)
-            plotter.save_figure(fig_name=log_name)
+            plotter.save_figure(fig_name=result_filename)
 
     return robot
 

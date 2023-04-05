@@ -67,6 +67,10 @@ class Robot(Robot_base):
         y_max = max(obstacles.x_lim[1], obstacles.y_lim[1], self.start[1], self.goal[1]) + self.vision_range / 2
         return [x_min, y_min], [x_max, y_max]
 
+    @staticmethod
+    def calculate_RRTnode_samplenumber(boundary, density):
+        return int( (boundary[1][0]-boundary[0][0]) * (boundary[1][1]-boundary[0][1])/density)
+        
     def is_no_way_to_goal(self, noway):
         self.no_way_to_goal = noway
 

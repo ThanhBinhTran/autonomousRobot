@@ -160,8 +160,8 @@ class RRTree_x(RRTree):
 
 def robot_RRTX(start_cooridinate=(0, 0), goal_coordinate=(0, 1), map_name=None, world_name=None,
                num_iter=1, robot_vision=20, RRT_radius=20,
-               RRT_step_size=5, RRT_sample_size=2000,
-               experiment=False, save_image=True):
+               RRT_step_size=5, RRT_node_density=4,
+               experiment=False, save_image=True, experiment_title=None):
     """ variable declaration """
     robot = Robot(start=start_cooridinate, goal=goal_coordinate, vision_range=robot_vision)
     # set same window size to capture pictures
@@ -175,15 +175,15 @@ def robot_RRTX(start_cooridinate=(0, 0), goal_coordinate=(0, 1), map_name=None, 
 
     # find working space boundary
     boundary_area = robot.find_working_space_boundaries(obstacles=obstacles)
-
+    RRT_sample_size = robot.calculate_RRTnode_samplenumber(boundary=boundary_area, density=RRT_node_density)
     """ build tree """
     goal_node = Node(goal_coordinate, lmc=0, cost=0)  # initial goal node, rsh to goal =0, cost to goal = 0
     RRTx = RRTree_x(root=goal_node, step_size=RRT_step_size, radius=RRT_radius,
                     random_area=boundary_area, sample_size=RRT_sample_size)
     RRTx.build(goal_coordinate=start_cooridinate, plotter=plotter, obstacles=obstacles, rrt_queue=rrt_queue)
 
-    log_name = Result_Log.prepare_name(start=start_cooridinate, goal=goal_coordinate,
-                                       range=robot_vision)
+    result_filename = Result_Log.prepare_name(start=start_cooridinate, goal=goal_coordinate,
+                                              map_name=map_name, range=robot_vision, experiment_title=experiment_title)
     #############################################################
     # initial variables
     #############################################################
@@ -243,7 +243,7 @@ def robot_RRTX(start_cooridinate=(0, 0), goal_coordinate=(0, 1), map_name=None, 
     elif save_image:
         # showing the final result (for save image and display as well)
         plotter.RRTX_animation(Tree=RRTx, obstacles=obstacles, robot=robot, experiment=experiment)
-        plotter.save_figure(fig_name=log_name + "RRTx")
+        plotter.save_figure(fig_name=result_filename + "RRTx")
 
     return robot
 
@@ -258,7 +258,7 @@ if __name__ == '__main__':
     step_size = menu_result.step_size
     radius = menu_result.radius
     vision_range = menu_result.r
-    sample_size = menu_result.ss
+    node_density = menu_result.d
     map_name = menu_result.m
     num_iter = menu_result.n
     world_name = menu_result.w
@@ -266,4 +266,4 @@ if __name__ == '__main__':
     robot_RRTX(start_cooridinate=start_cooridinate, goal_coordinate=goal_coordinate, map_name=map_name,
                world_name=world_name,
                num_iter=num_iter, robot_vision=vision_range,
-               RRT_radius=radius, RRT_step_size=step_size, RRT_sample_size=sample_size)
+               RRT_radius=radius, RRT_step_size=step_size, RRT_node_density=node_density)
