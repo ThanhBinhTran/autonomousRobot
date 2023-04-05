@@ -23,7 +23,7 @@ from Robot_user_input import robot_user_input
 
 experiment_title = "experiment2"
 
-def result_logpath(start, goal, map_name, range):
+def result_logpath(map_name):
     if map_name is None:
         return None
         
@@ -63,22 +63,22 @@ if __name__ == '__main__':
                 "our_global_reached", "our_global_cost",
                 "our_lobal_reached", "our_lobal_cost",
                 "RRTX_reached", "RRTX_cost", ]
-    resultpath = result_logpath(map_name=map_name, start=start, goal=goal, range=robot_vision)
+    
 
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
 
     obstacles_check = Obstacles()
 
     start = 0, 0
-    num_iter = 100
+    num_iter = 150
     #map_name = '_map_forest.csv' # 500x500 size
     node_density = 10
     
     map_name = '_map_deadend.csv' # 100x100 size
     node_density = 5
-    istart, iend = 75, 76 
-    jstart, jend = 50, 51
-    step = 5
+    istart, iend = 20, 100 
+    jstart, jend = 20, 100
+    step = 10
     # map_name = '_map_bugtrap.csv' # 200x200 size
     # map_name = '_map_blocks.csv' # 300X 350 size
     obstacles_check.read(map_name=map_name)
@@ -116,6 +116,8 @@ if __name__ == '__main__':
                                    robotA.reach_goal, robotA.cost,
                                    robotB.reach_goal, robotB.cost,
                                    robotC.reach_goal, robotC.cost])
+    
+    resultpath = result_logpath(map_name=map_name)
     result_full_path = os.path.join(resultpath, f"_g({istart}-{iend}_{jstart}-{jend})_OUR_RRTX.csv")
     result.set_file_name(result_full_path)
     result.write_csv()

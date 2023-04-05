@@ -2,7 +2,7 @@ from enum import Enum
 ################################################
 # Parameters to show/hide element(s) of animation 
 ################################################
-show_animation = True
+show_animation = False
 show_map = True
 show_world = False
 
@@ -75,6 +75,7 @@ ls_cspace = "-r"    # configuration space
 # path for results
 ################################################
 result_repo = "result"
+treedata_repo = "treedata"
 
 ################################################
 # LINE STYLE for RRTree family

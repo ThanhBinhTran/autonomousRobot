@@ -385,7 +385,6 @@ if __name__ == '__main__':
     robot_vision = menu_result.r
     sample_size = menu_result.ss
     open_pts_type = menu_result.open_pts_type
-    open_pts_type = 'o'
     if 'o' in open_pts_type:
         open_pts_type = Robot_base.Open_points_type.Open_Arcs
     elif 'r' in open_pts_type:
@@ -397,8 +396,17 @@ if __name__ == '__main__':
     elif 'n' in picking_strategy:
         picking_strategy = Robot_base.Picking_strategy.neighbor_first
 
-    map_name = "_map_deadend.csv"
-
+    num_iter = 150
+    #map_name = '_map_forest.csv' # 500x500 size
+    node_density = 10
+    
+    map_name = '_map_deadend.csv' # 100x100 size
+    node_density = 5
+    istart, iend = 20, 100 
+    jstart, jend = 20, 100
+    step = 10
+    # map_name = '_map_bugtrap.csv' # 200x200 size
+    # map_name = '_map_blocks.csv' # 300X 350 size
     start = 0, 0
     num_iter = 100  # max
     istart, iend = 75, 76

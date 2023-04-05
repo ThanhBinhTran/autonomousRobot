@@ -22,7 +22,7 @@ class Logging_ranking:
             return None
         
         mn = map_name.replace(".csv", '')
-        paths = os.path.join(Program_config.result_repo, "treedata", mn)
+        paths = os.path.join(Program_config.result_repo, Program_config.treedata_repo, mn)
         if not os.path.exists(paths):
             os.makedirs(paths)
         

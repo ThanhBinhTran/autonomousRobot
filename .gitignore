@@ -2,7 +2,7 @@ __pycache__/*
 ROS_odom_imagePixel_converter/__pycache__/*
 *~
 venv/*
-test.*
+*test.*
 note.*
 result/*
 Paper_plot/*
