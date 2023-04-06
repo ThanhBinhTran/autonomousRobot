@@ -453,6 +453,7 @@ if __name__ == '__main__':
                     rdata.plot(kind="bar", figsize=(10, 4), title=title)
         else:
             rdata = result_data
+            rdata.plot(kind="bar", figsize=(10, 4))
         print(rdata.sum())
 
         # Show the plot

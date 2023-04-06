@@ -10,14 +10,14 @@ show_visitedSights = True
 
 show_openSight = True
 show_closedSight = True
-show_circleRange = True
+show_circleRange = False
 
 show_sketelonPath = False
 show_approximately_shortest_path = True
 show_critical_line_segments = False
 show_cls_orderednumber = False  # show ordered number of critical line segments
 
-show_visitedPath = True
+show_visitedPath = False
 show_visibilityGraph = True
 
 show_local_openpt = False

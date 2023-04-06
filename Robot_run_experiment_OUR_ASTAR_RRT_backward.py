@@ -168,6 +168,7 @@ def compare_Astar_RRTstar(robot: Robot, plotter: Plotter, obstacles: Obstacles, 
 def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_iter=1,
                robot_vision=20, robot_type=Robot_base.RobotType.circle, robot_radius=0.5,
                open_points_type=Robot_base.Open_points_type.Open_Arcs,
+               node_density=5,
                ranking_function=Ranking_function.Angular_similarity,
                picking_strategy=Robot_base.Picking_strategy.neighbor_first,
                sample_size=2000, experiment=True, save_image=True, experiment_title=None):
@@ -224,15 +225,17 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
         # RRT start for ranking scores
         step_size = robot.vision_range
 
+        # find working space boundary
+        boundary_area = robot.find_working_space_boundaries(obstacles=obstacles)
+        sample_size = robot.calculate_RRTnode_samplenumber(boundary=boundary_area, density=node_density)
+        start_node = Node(goal, cost=0)  # initial root node, cost to root = 0
+        
         # logging ranking
         rank_logger = Logging_ranking()
         r_logger_filename = rank_logger.set_logging_name(map_name=map_name, start=start, goal=goal,
                                                          radius=robot_vision, step_size=step_size,
                                                          sample_size=sample_size)
-
-        # find working space boundary
-        boundary_area = robot.find_working_space_boundaries(obstacles=obstacles)
-        start_node = Node(goal, cost=0)  # initial root node, cost to root = 0
+        
         if rank_logger.is_existed_log_file(r_logger_filename):
             print("load existed-RRTreeStart_rank: ", r_logger_filename)
             RRT_star = rank_logger.load(r_logger_filename)
@@ -383,7 +386,7 @@ if __name__ == '__main__':
     start = menu_result.sx, menu_result.sy
     goal = menu_result.gx, menu_result.gy
     robot_vision = menu_result.r
-    sample_size = menu_result.ss
+    node_density = menu_result.d
     open_pts_type = menu_result.open_pts_type
     if 'o' in open_pts_type:
         open_pts_type = Robot_base.Open_points_type.Open_Arcs
@@ -396,29 +399,48 @@ if __name__ == '__main__':
     elif 'n' in picking_strategy:
         picking_strategy = Robot_base.Picking_strategy.neighbor_first
 
-    num_iter = 150
-    #map_name = '_map_forest.csv' # 500x500 size
-    node_density = 10
-    
-    map_name = '_map_deadend.csv' # 100x100 size
-    node_density = 5
-    istart, iend = 20, 100 
-    jstart, jend = 20, 100
-    step = 10
-    # map_name = '_map_bugtrap.csv' # 200x200 size
-    # map_name = '_map_blocks.csv' # 300X 350 size
     start = 0, 0
-    num_iter = 100  # max
-    istart, iend = 75, 76
-    jstart, jend = 50, 51
-    istep, jstep = 5, 5
+    num_iter = 150
+
+    map_case = 1
+
+
+    if map_case == 0:
+        map_name = '_map_forest.csv' # 500x500 size
+        node_density = 50
+        istart, iend = 20, 500 
+        jstart, jend = 20, 500
+        step = 50
+    elif map_case == 1:
+        map_name = '_map_deadend.csv' # 100x100 size
+        node_density = 5
+        istart, iend = 20, 100 
+        jstart, jend = 20, 100
+        step = 10
+    elif map_case == 2:
+        map_name = '_map_bugtrap.csv' # 200x200 size
+        node_density = 5
+        istart, iend = 20, 200 
+        jstart, jend = 20, 200
+        step = 20
+    elif map_case == 3:
+        map_name = '_map_blocks.csv' # 300X 350 size
+        node_density = 5
+        istart, iend = 20, 100 
+        jstart, jend = 20, 100
+        step = 10
+    else:
+        node_density = 5
+        istart, iend = 0, 0 
+        jstart, jend = 0, 0
+        step = 0
 
     obstacles_check = Obstacles()
     obstacles_check.read(map_name=map_name)
     obstacles_check.line_segments()
 
-    for i in range(istart, iend, istep):
-        for j in range(jstart, jend, jstep):
+    for i in range(istart, iend, step):
+        for j in range(jstart, jend, step):
             goal = i, j
             print(f"goal {goal}")
             # check if robot is goal reachable or not
@@ -428,6 +450,6 @@ if __name__ == '__main__':
 
             robot_main(start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter,
                        robot_vision=robot_vision, open_points_type=open_pts_type,
-                       picking_strategy=picking_strategy, sample_size=sample_size,
+                       picking_strategy=picking_strategy, node_density=node_density,
                        experiment_title=experiment_title)
     print("DONE!")
