@@ -57,13 +57,7 @@ if __name__ == '__main__':
     elif 'n' in picking_strategy:
         picking_strategy = Robot_base.Picking_strategy.neighbor_first
 
-    ranking_function = Ranking_function.RHS_RRT_base
-
-    csv_head = ["start", "goal", "range",
-                "our_global_reached", "our_global_cost",
-                "our_lobal_reached", "our_lobal_cost",
-                "RRTX_reached", "RRTX_cost", ]
-    
+    ranking_function = Ranking_function.RHS_RRT_base 
 
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
 
@@ -71,22 +65,47 @@ if __name__ == '__main__':
 
     start = 0, 0
     num_iter = 150
-    #map_name = '_map_forest.csv' # 500x500 size
-    node_density = 10
-    
-    map_name = '_map_deadend.csv' # 100x100 size
-    node_density = 5
-    istart, iend = 20, 100 
-    jstart, jend = 20, 100
-    step = 10
-    # map_name = '_map_bugtrap.csv' # 200x200 size
-    # map_name = '_map_blocks.csv' # 300X 350 size
+
+    map_case = 2
+
+    if map_case == 0:
+        map_name = '_map_forest.csv' # 500x500 size
+        node_density = 50
+        istart, iend = 20, 500 
+        jstart, jend = 20, 500
+        step = 50
+    elif map_case == 1:
+        map_name = '_map_deadend.csv' # 100x100 size
+        node_density = 5
+        istart, iend = 20, 100 
+        jstart, jend = 20, 100
+        step = 10
+    elif map_case == 2:
+        map_name = '_map_bugtrap.csv' # 200x200 size
+        node_density = 5
+        istart, iend = 20, 200 
+        jstart, jend = 20, 200
+        step = 20
+    elif map_case == 3:
+        map_name = '_map_blocks.csv' # 300X 350 size
+        node_density = 5
+        istart, iend = 20, 100 
+        jstart, jend = 20, 100
+        step = 10
+    else:
+        node_density = 5
+        istart, iend = 0, 0 
+        jstart, jend = 0, 0
+        step = 0
     obstacles_check.read(map_name=map_name)
     obstacles_check.line_segments()
 
+    csv_head = ["start", "goal", "range",
+                "[our]_reached_goal_global_pick", "[our]_path_cost_global_pick",
+                "[our]_reached_goal_neighbor_pick", "[our]_path_cost_neighbor_pick",
+                "[RRTX]_reached_goal", "[RRTX]_path_cost"]
     result = Result_Log(header_csv=csv_head)
-    nm = map_name.replace('.csv', '')
-
+    resultpath = result_logpath(map_name=map_name)
 
     for i in range(istart, iend, step):
         for j in range(jstart, jend, step):
@@ -117,9 +136,10 @@ if __name__ == '__main__':
                                    robotB.reach_goal, robotB.cost,
                                    robotC.reach_goal, robotC.cost])
     
-    resultpath = result_logpath(map_name=map_name)
-    result_full_path = os.path.join(resultpath, f"_g({istart}-{iend}_{jstart}-{jend})_OUR_RRTX.csv")
-    result.set_file_name(result_full_path)
-    result.write_csv()
+        
+            result_full_path = os.path.join(resultpath, f"_g({goal[0]}_{goal[1]})_OUR_RRTX.csv")
+            result.set_file_name(result_full_path)
+            result.write_csv()
+            result.clear_data()
 
     print("DONE!")
