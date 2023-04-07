@@ -3,6 +3,7 @@ ROS_odom_imagePixel_converter/__pycache__/*
 *~
 venv/*
 *test.*
+test/
 note.*
 Paper_plot/*
 .idea/csv-plugin.xml
