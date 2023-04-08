@@ -5,6 +5,7 @@ venv/*
 *test.*
 test/
 note.*
+result/experiment*/
 Paper_plot/*
 .idea/csv-plugin.xml
 .idea/misc.xml
