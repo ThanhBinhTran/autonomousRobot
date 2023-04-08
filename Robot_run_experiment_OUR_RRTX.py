@@ -64,8 +64,6 @@ if __name__ == '__main__':
     obstacles_check = Obstacles()
 
     start = 0, 0
-    num_iter = 150
-
     map_case = 2
 
     if map_case == 0:
@@ -126,18 +124,19 @@ if __name__ == '__main__':
                                    open_points_type=Robot_base.Open_points_type.RRTstar,
                                    picking_strategy=Robot_base.Picking_strategy.neighbor_first, node_density=node_density,
                                    experiment=True, save_image=True, experiment_title=experiment_title)
-                robotC = robot_RRTX(start_cooridinate=start, goal_coordinate=goal, map_name=map_name,
-                                    num_iter=num_iter, robot_vision=robot_vision,
-                                    RRT_radius=5, RRT_step_size=5, RRT_node_density=node_density,
-                                    experiment=True, save_image=True, experiment_title=experiment_title)
+                #robotC = robot_RRTX(start_cooridinate=start, goal_coordinate=goal, map_name=map_name,
+                #                    num_iter=num_iter, robot_vision=robot_vision,
+                #                    RRT_radius=5, RRT_step_size=5, RRT_node_density=node_density,
+                #                    experiment=True, save_image=True, experiment_title=experiment_title)
                 # Log the result, careful with the data order (start, goal, vision....)
+                
                 result.add_result([start, goal, robot_vision,
                                    robotA.reach_goal, robotA.cost,
                                    robotB.reach_goal, robotB.cost,
-                                   robotC.reach_goal, robotC.cost])
+                                   0, 0])
     
         
-            result_full_path = os.path.join(resultpath, f"_g({goal[0]}_{goal[1]})_OUR_RRTX.csv")
+            result_full_path = os.path.join(resultpath, f"_g({goal[0]}_{goal[1]})_OUR_RRTX_improve.csv")
             result.set_file_name(result_full_path)
             result.write_csv()
             result.clear_data()

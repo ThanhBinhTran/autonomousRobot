@@ -400,8 +400,6 @@ if __name__ == '__main__':
         picking_strategy = Robot_base.Picking_strategy.neighbor_first
 
     start = 0, 0
-    num_iter = 150
-
     map_case = 1
 
 
