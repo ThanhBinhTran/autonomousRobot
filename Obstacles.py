@@ -5,7 +5,7 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn
 """
 
 import csv
-from Robot_world_lib import World
+#from Robot_world_lib import World
 from Robot_math_lib import *
 
 FAR_POINT = (0, 20000)
@@ -39,13 +39,13 @@ class Obstacles:
 
     ''' read map from world or csv data (default) '''
 
-    def read(self, world_name=None, map_name=None):
+    def read(self, map_name=None):
         # read world map then get obstacles information
-        if world_name is not None:
-            World().read_map_from_world(world_name)
-            self.read_csv(world_name + ".csv")
-        else:
-            self.read_csv(map_name)
+        #if world_name is not None:
+        #    World().read_map_from_world(world_name)
+        #    self.read_csv(world_name + ".csv")
+        #else:
+        self.read_csv(map_name)
 
     '''
         read map_csv (in form the list of vertix of obstacles)
