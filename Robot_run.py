@@ -20,7 +20,7 @@ from Tree import Node
 from logging_ranking import Logging_ranking
 
 
-def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_iter=1,
+def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
                robot_vision=20, robot_type=Robot_base.RobotType.circle, robot_radius=0.5,
                open_points_type=Robot_base.Open_points_type.Open_Arcs,
                picking_strategy=Robot_base.Picking_strategy.neighbor_first,
@@ -41,7 +41,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
 
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
-    obstacles.read(world_name, map_name)
+    obstacles.read(map_name=map_name)
     obstacles.line_segments()
     # obstacles.find_configuration_space(robot.radius)
 
@@ -181,12 +181,10 @@ if __name__ == '__main__':
     menu_result = robot_user_input()
     num_iter = menu_result.n
     map_name = menu_result.m
-    world_name = menu_result.w
     start = menu_result.sx, menu_result.sy
     goal = menu_result.gx, menu_result.gy
     robot_vision = menu_result.r
-    sample_size = menu_result.ss
-
+    node_density = menu_result.d
     open_pts_type = menu_result.open_pts_type
     if 'o' in open_pts_type:
         open_pts_type = Robot_base.Open_points_type.Open_Arcs
@@ -200,8 +198,6 @@ if __name__ == '__main__':
         picking_strategy = Robot_base.Picking_strategy.neighbor_first
 
     # run robot
-    robot_main(start=start, goal=goal, map_name=map_name, world_name=world_name,
-               num_iter=num_iter, robot_vision=robot_vision,
-               open_points_type=open_pts_type,
-               picking_strategy=picking_strategy, sample_size=sample_size,
+    robot_main(start=start, goal=goal, map_name=map_name, num_iter=num_iter, robot_vision=robot_vision,
+               open_points_type=open_pts_type, picking_strategy=picking_strategy, node_density=node_density,
                experiment=True, save_log=True)

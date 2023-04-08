@@ -39,7 +39,6 @@ if __name__ == '__main__':
     menu_result = robot_user_input()
     num_iter = menu_result.n
     map_name = menu_result.m
-    world_name = menu_result.w
     start = menu_result.sx, menu_result.sy
     goal = menu_result.gx, menu_result.gy
     robot_vision = menu_result.r
