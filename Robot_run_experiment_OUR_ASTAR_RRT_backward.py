@@ -383,8 +383,8 @@ if __name__ == '__main__':
     num_iter = menu_result.n
     map_name = menu_result.m
     world_name = menu_result.w
-    start = menu_result.sx, menu_result.sy
-    goal = menu_result.gx, menu_result.gy
+    start = menu_result.s
+    goal = menu_result.g
     robot_vision = menu_result.r
     node_density = menu_result.d
     open_pts_type = menu_result.open_pts_type

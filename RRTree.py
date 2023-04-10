@@ -128,9 +128,8 @@ if __name__ == '__main__':
     # get user input
     menu_result = RRTree_user_input()
     # get start_cooridinate and goal_coordinate
-    start_cooridinate = menu_result.sx, menu_result.sy
-    goal_coordinate = menu_result.gx, menu_result.gy
-
+    start_cooridinate = menu_result.s
+    goal_coordinate = menu_result.g
     step_size = menu_result.step_size
     radius = menu_result.radius
     node_density = menu_result.d
@@ -145,7 +144,7 @@ if __name__ == '__main__':
 
     obstacles = Obstacles()
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
-    obstacles.read(world_name, map_name)
+    obstacles.read(map_name=map_name)
     obstacles.line_segments()
 
     robot = Robot(start=start_cooridinate, goal=goal_coordinate, vision_range=vision_range)

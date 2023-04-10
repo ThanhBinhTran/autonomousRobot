@@ -181,8 +181,8 @@ if __name__ == '__main__':
     menu_result = robot_user_input()
     num_iter = menu_result.n
     map_name = menu_result.m
-    start = menu_result.sx, menu_result.sy
-    goal = menu_result.gx, menu_result.gy
+    start = menu_result.s
+    goal = menu_result.g
     robot_vision = menu_result.r
     node_density = menu_result.d
     open_pts_type = menu_result.open_pts_type

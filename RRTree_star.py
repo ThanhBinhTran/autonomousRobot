@@ -100,16 +100,16 @@ if __name__ == '__main__':
     # get user input
     menu_result = RRTree_user_input()
     # get start_coordinate and goal_coordinate
-    start_cooridinate = menu_result.sx, menu_result.sy
-    goal_coordinate = menu_result.gx, menu_result.gy
-    goal_coordinate = 60, 5
+    start_coordinate = menu_result.s
+    goal_coordinate = menu_result.g
     step_size = menu_result.step_size
     radius = menu_result.radius
     node_density = menu_result.d
     map_name = menu_result.m
-    world_name = None
     vision_range = menu_result.r
 
+    print (start_coordinate)
+    print (goal_coordinate)
     ''' Running '''
     # set same window size to capture pictures
     plotter = Plotter(title="Rapidly-exploring Random Tree Star (RRT*)")
@@ -117,18 +117,18 @@ if __name__ == '__main__':
 
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
-    obstacles.read(world_name, map_name)
+    obstacles.read(map_name=map_name)
     obstacles.line_segments()
 
     # find working space boundary
-    robot = Robot(start=start_cooridinate, goal=goal_coordinate, vision_range=vision_range)
+    robot = Robot(start=start_coordinate, goal=goal_coordinate, vision_range=vision_range)
     # find working space boundary
     boundary_area = robot.find_working_space_boundaries(obstacles=obstacles)
     RRT_sample_size = int( (boundary_area[0][1]-boundary_area[0][0]) * (boundary_area[1][1]-boundary_area[1][0])/node_density)
 
 
     ''' build tree '''
-    start_node = Node(start_cooridinate, cost=0)  # initial root node, cost to root = 0
+    start_node = Node(start_coordinate, cost=0)  # initial root node, cost to root = 0
     RRT_star = RRTree_star(root=start_node, step_size=step_size, radius=radius,
                            random_area=boundary_area, sample_size=RRT_sample_size)
     RRT_star.build(goal_coordinate=goal_coordinate, plotter=plotter, obstacles=obstacles, robot=robot)
