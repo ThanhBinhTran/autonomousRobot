@@ -1,6 +1,7 @@
 from collections import defaultdict
 import heapq
 from Robot_math_lib import point_dist
+from queue import PriorityQueue
 
 
 class Graph:
@@ -34,7 +35,7 @@ class Graph:
         return self.graph[tuple(node)]
 
     # path between two nodes of a graph
-    def BFS_skeleton_path(self, start, goal):
+    def BFS_skeleton_path_old(self, start, goal):
 
         # print("BFS_skeleton_path: Current {0}, Next {1}".format(start, goal))
         explored = []
@@ -102,3 +103,21 @@ class Graph:
             current_node = previous_nodes[current_node]
         path.reverse()
         return path
+
+    def BFS_skeleton_path(self, start, goal):
+        visited = set()
+        queue = PriorityQueue()
+        queue.put((0, start, [start]))
+
+        while not queue.empty():
+            cost, current, path = queue.get()
+            if current == goal:
+                return path
+            if current not in visited:
+                visited.add(current)
+                for neighbor in self.graph[current]:
+                    weight = point_dist(current, neighbor)
+                    if neighbor not in visited:
+                        new_path = path + [neighbor]
+                        queue.put((cost + weight, neighbor, new_path))
+        return []

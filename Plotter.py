@@ -87,7 +87,7 @@ class Plotter(Plot_base):
             osights = visited_sights.open_sights[center]
             self.vision(center, vision_range, csights, osights)
 
-    def animation(self, Robot: Robot, world_name, iter_count, obstacles: Obstacles,
+    def animation(self, Robot: Robot, iter_count, obstacles: Obstacles,
                   show_grid=True, hide_axis=False, set_equal=True, experiment=False):
         # clear plot
         self.clear()
@@ -100,7 +100,7 @@ class Plotter(Plot_base):
         ''' draw map obstacles/world '''
         # prepare title
         status_title = self.prepare_title(iter_count, Robot.cost)
-        self.show_map(world_name=world_name, obstacles=obstacles, plot_title=status_title)
+        self.show_map(obstacles=obstacles, plot_title=status_title)
         if obstacles.enable_config_space:
             self.show_configuration_space(obstacles.config_space)
 

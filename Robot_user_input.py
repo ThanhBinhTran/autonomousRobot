@@ -19,6 +19,6 @@ def robot_user_input():
                         help='input : (g) for global first, (n) for neighbor first', default='g')
 
     parser.add_argument('-open_pts_type', metavar="open points type ", type=str,
-                        help='input: (r) for get open points from RRTreeStar; (o) for get from open arcs', default='r')
+                        help='input: (r) for get open points from RRTreeStar; (o) for get from open arcs', default='o')
     args = parser.parse_args()
     return args

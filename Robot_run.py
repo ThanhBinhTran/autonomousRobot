@@ -199,4 +199,4 @@ if __name__ == '__main__':
     # run robot
     robot_main(start=start, goal=goal, map_name=map_name, num_iter=num_iter, robot_vision=robot_vision,
                open_points_type=open_pts_type, picking_strategy=picking_strategy, node_density=node_density,
-               experiment=True, save_log=True)
+               experiment=False, save_log=False, save_image=False)
