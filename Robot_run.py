@@ -22,10 +22,9 @@ from logging_ranking import Logging_ranking
 
 def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
                robot_vision=20, robot_type=Robot_base.RobotType.circle, robot_radius=0.5,
-               open_points_type=Robot_base.Open_points_type.Open_Arcs,
+               open_points_type=Robot_base.Open_points_type.Open_Arcs, node_density=6, 
                picking_strategy=Robot_base.Picking_strategy.neighbor_first,
-               node_density=4, experiment=False, save_image=False,
-               save_log=False, experiment_title=None):
+               experiment=False, save_image=False, save_log=False, experiment_title=None):
     # robot ojbect
     robot = Robot(start=start, goal=goal, vision_range=robot_vision, robot_type=robot_type, robot_radius=robot_radius)
 
@@ -148,7 +147,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
             robot.next_coordinate = tuple(robot.next_point)
 
         if show_animation and not experiment:
-            plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count,
+            plotter.animation(Robot=robot, iter_count=iter_count,
                               obstacles=obstacles, experiment=experiment)
             # plotter.tree_all_nodes(RRTx)
             # if open_points_type == Robot_base.Open_points_type.RRTstar:
@@ -168,7 +167,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
             result_log.write_csv()
         if save_image:
             # showing the final result (for save image and display as well)
-            plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count,
+            plotter.animation(Robot=robot, iter_count=iter_count,
                               obstacles=obstacles, experiment=experiment)
             plotter.save_figure(fig_name=result_filename)
 
