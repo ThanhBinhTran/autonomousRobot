@@ -16,3 +16,6 @@ Paper_plot/*
 .idea/autonomousRobot.iml
 .idea/.gitignore
 *.lprof
+draw_paper_temp/__pycache__/Robot_user_input.cpython-310.pyc
+draw_paper_temp/__pycache__/Program_config.cpython-310.pyc
+_paper_connect_visibility_graph.csv

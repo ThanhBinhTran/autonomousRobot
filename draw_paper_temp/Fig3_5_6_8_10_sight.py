@@ -38,7 +38,7 @@ figure6_local_sight = False
 figure8_step_by_step = False
 figure10_connect_visibility_graph = True
 
-enable_improve = False
+enable_improve = True
 
 def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
                robot_vision=20, robot_type=Robot_base.RobotType.circle, robot_radius=0.5,
@@ -56,7 +56,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
     ranker = Ranker(alpha=0.9, beta=0.1, ranking_function=ranking_function)
 
     # declare plotter
-    plotter = Plotter(title="Path Planning for Autonomous Robot{0}".format(map_name))
+    plotter = Plotter(size =(5,5), title="Path Planning for Autonomous Robot{0}".format(map_name))
 
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
@@ -135,6 +135,10 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
 
         # pick next point to make a move
         robot.next_point = robot.pick_next_point(goal, picking_strategy=picking_strategy)
+        
+        if platform.system() == 'Linux':
+            if enable_improve:
+                robot.bridge_visibility_graph(robot.coordinate, open_sights)
         if robot.next_point is not None:
             # find the shortest skeleton path from current position (center) to next point
             if tuple(robot.next_point) == tuple(goal):
@@ -180,6 +184,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
             break
     
     print (f"pass {num_iter}")
+    
     show_grid = False
     hide_axis = True
     if figure8_step_by_step:
@@ -197,7 +202,13 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
         for idx, cpt in enumerate(all_centers):
             text = "$C_{" + str(idx) + "}$"
             plotter.text(cpt, text)
-    plotter.show()
+        plotter.plt.axis("off")   # turns off axes
+        plotter.plt.axis("tight")  # gets rid of white border    
+        plotter.plt.axis("equal")
+        #plotter.plt.xlim(x_min, x_max + space_add)
+        #plotter.plt.ylim(y_min, y_max)
+    	#plt.show()
+        plotter.save_figure(fig_name="improve_paper",file_extension='.png')
         
     return robot
 

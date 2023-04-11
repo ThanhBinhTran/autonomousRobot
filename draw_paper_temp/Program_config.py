@@ -10,17 +10,17 @@ show_visitedSights = True
 
 show_openSight = True
 show_closedSight = True
-show_circleRange = True
+show_circleRange = False
 
 show_sketelonPath = True
 show_approximately_shortest_path = True
 show_critical_line_segments = True
-show_cls_orderednumber = True  # show ordered number of critical line segments
+show_cls_orderednumber = False  # show ordered number of critical line segments
 
-show_visitedPath = True
+show_visitedPath = False
 show_visibilityGraph = True
 
-show_local_openpt = True
+show_local_openpt = False
 show_active_openpt = True
 show_next_point = True
 
@@ -29,7 +29,7 @@ show_goal = True
 show_start = True
 show_text_goal = True
 
-show_plot_title = True
+show_plot_title = False
 ################################################
 # LINE STYLE for Assumption of Hoai An Theory.
 ################################################
