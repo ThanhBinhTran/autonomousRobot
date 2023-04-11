@@ -2,42 +2,43 @@ from enum import Enum
 ################################################
 # Parameters to show/hide element(s) of animation 
 ################################################
-show_animation = False
+show_animation = True
 show_map = True
-show_world = False
+show_world = True
 
 show_visitedSights = True
 
 show_openSight = True
 show_closedSight = True
-show_circleRange = False
+show_circleRange = True
 
 show_sketelonPath = True
 show_approximately_shortest_path = True
 show_critical_line_segments = True
-show_cls_orderednumber = False  # show ordered number of critical line segments
+show_cls_orderednumber = True  # show ordered number of critical line segments
 
-show_visitedPath = False
+show_visitedPath = True
 show_visibilityGraph = True
 
-show_local_openpt = False
+show_local_openpt = True
 show_active_openpt = True
 show_next_point = True
 
 show_robot = True
 show_goal = True
-show_start = False
+show_start = True
 show_text_goal = True
 
+show_plot_title = True
 ################################################
-# LINE STYPE for Assumption of Hoai An Theory.
+# LINE STYLE for Assumption of Hoai An Theory.
 ################################################
-show_active_openpt_HA_Assumption = False         # active open points (HA Assumption)
-show_activeArc_HA_Assumption = False             # arc points (HA Assumption)
-show_parentArc_HA_Assumption = False             # parent arc points (HA Assumption)
-show_boundaryPts_HA_Assumption = False           # boundary points intersection between circle and obstacles
-show_circleGoal_HA_Assumption = False            # big circle (at goal within radius = dist(goal, robot center))
-show_activeArcPts_order_HA_Assumption = False    # show order of arc points according to its angles
+show_active_openpt_HA_Assumption = True         # active open points (HA Assumption)
+show_activeArc_HA_Assumption = True             # arc points (HA Assumption)
+show_parentArc_HA_Assumption = True             # parent arc points (HA Assumption)
+show_boundaryPts_HA_Assumption = True           # boundary points intersection between circle and obstacles
+show_circleGoal_HA_Assumption = True            # big circle (at goal within radius = dist(goal, robot center))
+show_activeArcPts_order_HA_Assumption = True    # show order of arc points according to its angles
 # line styles
 ls_bp_HA = "k."     # boundary points (HA Assumption)
 ls_aap_HA = "c."    # active arc points (HA Assumption)
@@ -46,37 +47,38 @@ ls_pap_HA = "go"    # parent arc points (HA Assumption)
 transparent = 0.1   # closed sights
 
 ################################################
-# parementers to hide/show information
+# parameters to hide/show information
 ################################################
-print_closed_sights = False
-print_open_sights = False
-print_visited_path = False
+print_closed_sights = True
+print_open_sights = True
+print_visited_path = True
 
 ################################################
 # LINE STYPE for robot
 ################################################
-ls_ts = "-"         # False sight
-cl_ts = "m"         # color False sight
+ls_ts = "-"         # true sight
+cl_ts = "m"         # color true sight
 ls_goal = "*r"      # goal
 ls_start = "*b"     # start
 ls_nextpt = ".r"    # next points
-ls_lopt = ".r"      # local open_point
+ls_lopt = ".k"      # local open_point
 ls_aopt = ".b"      # active open points
 ls_vg = ":k"        # visibility graph
 ls_vp = "-r"        # visited path
 ls_goingp = "-1g"   # going path
 ls_cls = '--g'      # critical line segment
-ls_sp = "-r"        # shortest skeleton path
-ls_asp = "-m"       # approximately shortest path
+ls_sp = "-b"        # shortest skeleton path
+ls_asp = "-r"       # approximately shortest path
 ls_cspace = "-r"    # configuration space
 
 ################################################
 # path for results
 ################################################
 result_repo = "result"
+treedata_repo = "treedata"
 
 ################################################
-# LINE STYPE for RRTree family
+# LINE STYLE for RRTree family
 ################################################
 ls_tree_node_active = ".b"      # tree's node (active)
 ls_tree_node_inactive = ".r"    # tree's node (inactive)
@@ -86,7 +88,7 @@ ls_goal_path_edge = "-g"        # path to goal edge
 ls_goal_path_node = "or"        # path to goal node
 ls_rand_coordinates = '.g'      # random coordinates
 ls_ls_to_nn = ':k'              # line segment from random coordinates to the nearest node.
-ls_random_node = '.r'           # the acpected random node 
+ls_random_node = '.r'           # the accepted random node
 ls_nearest_n_node = '.b'        # the nearest neighbour node
 ls_neighbour_node = '1c'        # the neighbour nodes
 ls_visited_path = 'r'           # visited path
@@ -98,9 +100,9 @@ class TreeColor(Enum):
     no = 0
     by_cost = 1
     by_lmc = 2
-    
+
 ################################################
-# Note: in case there is no obstracles:
-# the system will create 6 open points if divide_6 = False
-# if divide_6 = False, 3 open points will be created
+# Note: in case there is no obstacles:
+# the system will create 6 open points if divide_6 = True
+# if divide_6 = True, 3 open points will be created
 divide_6 = True
