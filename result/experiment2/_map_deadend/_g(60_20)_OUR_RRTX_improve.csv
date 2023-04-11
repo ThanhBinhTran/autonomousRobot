@@ -1,0 +1,6 @@
+start,goal,range,[our]_reached_goal_global_pick,[our]_path_cost_global_pick,[our]_reached_goal_neighbor_pick,[our]_path_cost_neighbor_pick,[RRTX]_reached_goal,[RRTX]_path_cost
+"(0, 0)","(60, 20)",10,False,1449.9143228748014,False,1256.5540925482721,0,0
+"(0, 0)","(60, 20)",15,False,2687.610064928072,False,1549.4489938605932,0,0
+"(0, 0)","(60, 20)",20,True,3206.9756838784124,True,613.8573226915215,0,0
+"(0, 0)","(60, 20)",25,False,3254.061523198266,False,2827.768807050112,0,0
+"(0, 0)","(60, 20)",30,False,4421.501397484155,False,4805.846243508764,0,0

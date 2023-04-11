@@ -38,7 +38,7 @@ figure6_local_sight = False
 figure8_step_by_step = False
 figure10_connect_visibility_graph = True
 
-enable_improve = True
+enable_improve = False
 
 def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
                robot_vision=20, robot_type=Robot_base.RobotType.circle, robot_radius=0.5,
@@ -208,7 +208,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
         #plotter.plt.xlim(x_min, x_max + space_add)
         #plotter.plt.ylim(y_min, y_max)
     	#plt.show()
-        plotter.save_figure(fig_name="improve_paper",file_extension='.png')
+        plotter.save_figure(fig_name="beforce_improve_paper_01",file_extension='.png')
         
     return robot
 

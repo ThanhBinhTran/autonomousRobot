@@ -186,7 +186,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
 
     ''' get obstacles data whether from world (if indicated) or map (by default)'''
     obstacles = Obstacles()
-    obstacles.read(world_name, map_name)
+    obstacles.read(map_name=map_name)
     obstacles.line_segments()
     # obstacles.find_configuration_space(robot.radius)
 
@@ -319,7 +319,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
             RRTstar_path_turn = get_path_turn(RRTstar_path)
             if save_image:
                 # showing the final result (for save image and display as well)
-                plotter.animation(Robot=robot, world_name=world_name, iter_count=iter_count,
+                plotter.animation(Robot=robot, iter_count=iter_count,
                                   obstacles=obstacles, experiment=experiment)
 
                 # draw some fig for paper
@@ -382,7 +382,6 @@ if __name__ == '__main__':
     menu_result = robot_user_input()
     num_iter = menu_result.n
     map_name = menu_result.m
-    world_name = menu_result.w
     start = menu_result.s
     goal = menu_result.g
     robot_vision = menu_result.r
@@ -446,7 +445,7 @@ if __name__ == '__main__':
                 print(f"invalid start {start} or goal {goal}")
                 continue
 
-            robot_main(start=start, goal=goal, map_name=map_name, world_name=world_name, num_iter=num_iter,
+            robot_main(start=start, goal=goal, num_iter=num_iter, map_name=map_name,
                        robot_vision=robot_vision, open_points_type=open_pts_type,
                        picking_strategy=picking_strategy, node_density=node_density,
                        experiment_title=experiment_title)

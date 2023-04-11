@@ -169,7 +169,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
             # showing the final result (for save image and display as well)
             plotter.animation(Robot=robot, iter_count=iter_count,
                               obstacles=obstacles, experiment=experiment)
-            plotter.save_figure(fig_name=result_filename)
+            plotter.save_figure(fig_name=result_filename + "_improve")
 
     return robot
 
