@@ -27,6 +27,7 @@ class Logging_ranking:
             os.makedirs(paths)
         
         fname = f"s({start[0]}_{start[1]})_g({goal[0]}_{goal[1]})_radius{radius}_step{step_size}_sample{sample_size}.csv"
+        #fname = f"s({start[0]}_{start[1]})_g({goal[0]}_{goal[1]})_radius{radius}_step{step_size}_sample{sample_size}.pkl"
         return os.path.join(paths, fname)
         
     @staticmethod

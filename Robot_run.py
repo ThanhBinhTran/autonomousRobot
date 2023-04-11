@@ -18,7 +18,7 @@ from Robot_sight_lib import *
 from Robot_user_input import robot_user_input
 from Tree import Node
 from logging_ranking import Logging_ranking
-
+import platform
 
 def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
                robot_vision=20, robot_type=Robot_base.RobotType.circle, robot_radius=0.5,
@@ -72,10 +72,10 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
                                                   radius=robot_vision, step_size=step_size, sample_size=sample_size)
 
         if rank_logger.is_existed_log_file(rrtx_fname):
-            print("load existed-RRTreeStart_rank: ", rrtx_fname)
+            print("Loading exist RRTree star: ", rrtx_fname)
             RRT_star = rank_logger.load(rrtx_fname)
         else:
-            print("Generating new RRTree star then save to: ", rrtx_fname)
+            print("Generating new RRTree star: ", rrtx_fname)
             RRT_star = RRTree_star(root=start_node, step_size=step_size, radius=robot.vision_range,
                                    random_area=boundary_area, sample_size=sample_size)
             RRT_star.build(goal_coordinate=start, plotter=plotter, obstacles=obstacles, ignore_obstacles=True)
@@ -169,7 +169,11 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
             # showing the final result (for save image and display as well)
             plotter.animation(Robot=robot, iter_count=iter_count,
                               obstacles=obstacles, experiment=experiment)
-            plotter.save_figure(fig_name=result_filename + "_improve")
+            
+            img_name = result_filename 
+            if platform.system() == 'Linux':
+                img_name += "_improve"
+            plotter.save_figure(fig_name=img_name)
 
     return robot
 

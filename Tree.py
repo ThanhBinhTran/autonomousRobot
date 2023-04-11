@@ -7,7 +7,8 @@ author: Binh Tran Thanh / email:thanhbinh@hcmut.edu.vn or thanhbinh.hcmut@gmail.
 
 from Queue_class import Priority_queue
 from Obstacles import *
-
+import pickle
+import sys
 delta_consistency = 0
 
 """ Node class """
@@ -507,3 +508,15 @@ class Tree:
                 self.update_LMC(node=top_node)
                 self.rewire_RRTx(node=top_node, rrt_queue=rrtx_queue)
             top_node.cost = top_node.lmc
+
+    """ save tree to file """
+    def save_treefile (self, tree_fname):
+        sys.setrecursionlimit(300000)
+        with open(tree_fname, 'wb') as f:
+            pickle.dump(self, f)
+     
+    """ load tree from file """
+    @staticmethod
+    def load_treefile(tree_fname):
+        with open(tree_fname, 'rb') as f:
+            return pickle.load(f)

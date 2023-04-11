@@ -131,11 +131,11 @@ if __name__ == '__main__':
                 
                 result.add_result([start, goal, robot_vision,
                                    robotA.reach_goal, robotA.cost,
-                                   robotB.reach_goal, robotB.cost,
+                                   robotA.reach_goal, robotA.cost,
                                    0, 0])
     
         
-            result_full_path = os.path.join(resultpath, f"_g({goal[0]}_{goal[1]})_OUR_RRTX_improve.csv")
+            result_full_path = os.path.join(resultpath, f"_g({goal[0]}_{goal[1]})_OUR_ONLY.csv")
             result.set_file_name(result_full_path)
             result.write_csv()
             result.clear_data()
