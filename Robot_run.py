@@ -115,6 +115,9 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
 
         # pick next point to make a move
         robot.next_point = robot.pick_next_point(goal, picking_strategy=picking_strategy)
+        if platform.system() == 'Linux':
+                robot.bridge_visibility_graph(robot.coordinate, open_sights)
+                
         if robot.next_point is not None:
             # find the shortest skeleton path from current position (center) to next point
             if tuple(robot.next_point) == tuple(goal):

@@ -282,6 +282,9 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
 
         # pick next point to make a move
         robot.next_point = robot.pick_next_point(goal, picking_strategy=picking_strategy)
+        if platform.system() == 'Linux':
+            if enable_improve:
+                robot.bridge_visibility_graph(robot.coordinate, open_sights)
         if robot.next_point is not None:
             # find the shortest skeleton path from current position (center) to next point
             if tuple(robot.next_point) == tuple(goal):
@@ -299,9 +302,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
             RRTstar = RRTStar_expand(RRTstar=RRTstar, robot=robot, plotter=plotter, obstacles=obstacles,
                                      goal=robot.goal)
 
-        if platform.system() == 'Linux':
-            if enable_improve:
-                robot.bridge_visibility_graph(robot.coordinate, open_sights)
+
 
         # robot.asp, robot.ls, l_stime, a_time = approximately_shortest_path(robot.skeleton_path,
         # robot.visited_sights, robot.vision_range)
