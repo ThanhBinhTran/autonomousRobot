@@ -28,8 +28,8 @@ enable_compare_AStar = True
 enable_compare_RRTStar = True
 enable_improve = False
 if platform.system() == 'Linux':
-    enable_compare_AStar = False
-    enable_compare_RRTStar = False
+    enable_compare_AStar = True
+    enable_compare_RRTStar = True
     enable_improve = True
 
 sample_size_each_cell = 100
@@ -198,9 +198,9 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
     csv_head_turn = []
     if platform.system() == 'Linux':
         if enable_improve:
-            csv_head_time = ["ASP_improve_time", "ASP_improve_time", "Astar_time", "RRTStar_time"]
-            csv_head_cost = ["ASP_improve_path_cost", "ASP_improve_path_cost", "Astar_path_cost", "RRTStar_path_cost"]
-            csv_head_turn = ["ASP_improve_path_turn", "ASP_improve_path_turn", "Astar_path_turn", "RRTStar_path_turn"]
+            csv_head_time = ["ASP_improve_time", "Astar_time", "RRTStar_time"]
+            csv_head_cost = ["ASP_improve_path_cost", "Astar_path_cost", "RRTStar_path_cost"]
+            csv_head_turn = ["ASP_improve_path_turn", "Astar_path_turn", "RRTStar_path_turn"]
         else:
             csv_head_time = ["ASP_time", "ASP_time", "Astar_time", "RRTStar_time"]
             csv_head_cost = ["ASP_path_cost", "ASP_path_cost", "Astar_path_cost", "RRTStar_path_cost"]
@@ -312,7 +312,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
 
         if len(robot.skeleton_path) > 2:
             if case_count > 10:
-            	break
+                break
             (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time) = \
                 compare_Astar_RRTstar(robot=robot, plotter=plotter, obstacles=obstacles,
                                       save_image=save_image, case_count=case_count,
