@@ -63,7 +63,7 @@ if __name__ == '__main__':
     obstacles_check = Obstacles()
 
     start = 0, 0
-    map_case = 2
+    map_case = 1
 
     if map_case == 0:
         map_name = '_map_forest.csv' # 500x500 size
