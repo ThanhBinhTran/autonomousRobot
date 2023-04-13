@@ -405,30 +405,25 @@ if __name__ == '__main__':
 
     if map_case == 0:
         map_name = '_map_forest.csv' # 500x500 size
-        node_density = 50
         istart, iend = 20, 500 
         jstart, jend = 20, 500
         step = 50
     elif map_case == 1:
         map_name = '_map_deadend.csv' # 100x100 size
-        node_density = 5
         istart, iend = 20, 100 
         jstart, jend = 20, 100
         step = 10
     elif map_case == 2:
         map_name = '_map_bugtrap.csv' # 200x200 size
-        node_density = 5
         istart, iend = 20, 200 
         jstart, jend = 20, 200
         step = 20
     elif map_case == 3:
         map_name = '_map_blocks.csv' # 300X 350 size
-        node_density = 5
         istart, iend = 20, 100 
         jstart, jend = 20, 100
         step = 10
     else:
-        node_density = 5
         istart, iend = 0, 0 
         jstart, jend = 0, 0
         step = 0
