@@ -63,7 +63,7 @@ if __name__ == '__main__':
     obstacles_check = Obstacles()
 
     start = 0, 0
-    map_case = 1
+    map_case = 2
 
     if map_case == 0:
         map_name = '_map_forest.csv' # 500x500 size
@@ -137,7 +137,7 @@ if __name__ == '__main__':
                                    robotC.reach_goal, robotC.cost
                                    ])
         
-            result_full_path = os.path.join(resultpath, f"_g({goal[0]}_{goal[1]})_OUR_RRTX_improve.csv")
+            result_full_path = os.path.join(resultpath, f"g({goal[0]}_{goal[1]})_OUR_RRTX_improve.csv")
             result.set_file_name(result_full_path)
             result.write_csv()
             result.clear_data()
