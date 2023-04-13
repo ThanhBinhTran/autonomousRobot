@@ -80,13 +80,13 @@ if __name__ == '__main__':
     elif map_case == 2:
         map_name = '_map_bugtrap.csv' # 200x200 size
         node_density = 5
-        istart, iend = 20, 200 
+        istart, iend = 20, 200
         jstart, jend = 20, 200
         step = 20
     elif map_case == 3:
         map_name = '_map_blocks.csv' # 300X 350 size
         node_density = 5
-        istart, iend = 20, 100 
+        istart, iend = 20, 100
         jstart, jend = 20, 100
         step = 10
     else:
@@ -98,8 +98,8 @@ if __name__ == '__main__':
     obstacles_check.line_segments()
 
     csv_head = ["start", "goal", "range",
-                "[our]_reached_goal_global_pick", "[our]_path_cost_global_pick",
-                "[our]_reached_goal_neighbor_pick", "[our]_path_cost_neighbor_pick",
+                "[our]_reached_goal_global_pick_improved", "[our]_path_cost_global_pick_improved",
+                "[our]_reached_goal_neighbor_pick_improved", "[our]_path_cost_neighbor_pick_improved",
                 "[RRTX]_reached_goal", "[RRTX]_path_cost"]
     result = Result_Log(header_csv=csv_head)
     resultpath = result_logpath(map_name=map_name)
@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
             if not obstacles_check.valid_start_goal(start=start, goal=goal):
                 continue
-            for r in range(10, 35, 5):
+            for r in range(10, 36, 5):
                 robot_vision = r
                 robotA = robot_OUR(start=start, goal=goal, map_name=map_name, num_iter=num_iter,
                                    robot_vision=robot_vision,
@@ -123,19 +123,19 @@ if __name__ == '__main__':
                                    open_points_type=Robot_base.Open_points_type.RRTstar,
                                    picking_strategy=Robot_base.Picking_strategy.neighbor_first, node_density=node_density,
                                    experiment=True, save_image=True, experiment_title=experiment_title)
-                #robotC = robot_RRTX(start_cooridinate=start, goal_coordinate=goal, map_name=map_name,
-                #                    num_iter=num_iter, robot_vision=robot_vision,
-                #                    RRT_radius=5, RRT_step_size=5, RRT_node_density=node_density,
-                #                    experiment=True, save_image=True, experiment_title=experiment_title)
-                # Log the result, careful with the data order (start, goal, vision....)
+                robotC = robot_RRTX(start_cooridinate=start, goal_coordinate=goal, map_name=map_name,
+                                    num_iter=num_iter, robot_vision=robot_vision,
+                                    RRT_radius=5, RRT_step_size=5, RRT_node_density=node_density,
+                                    experiment=True, save_image=True, experiment_title=experiment_title)
                 
+                # Log the result, careful with the data order (start, goal, vision....)
                 result.add_result([start, goal, robot_vision,
                                    robotA.reach_goal, robotA.cost,
-                                   robotA.reach_goal, robotA.cost,
-                                   0, 0])
-    
+                                   robotB.reach_goal, robotB.cost,
+                                   robotC.reach_goal, robotC.cost
+                                   ])
         
-            result_full_path = os.path.join(resultpath, f"_g({goal[0]}_{goal[1]})_OUR_ONLY.csv")
+            result_full_path = os.path.join(resultpath, f"_g({goal[0]}_{goal[1]})_OUR_RRTX_improve.csv")
             result.set_file_name(result_full_path)
             result.write_csv()
             result.clear_data()

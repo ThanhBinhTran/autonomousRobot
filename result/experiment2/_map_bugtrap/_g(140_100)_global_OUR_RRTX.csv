@@ -1,6 +1,0 @@
-start,goal,range,[our]_reached_goal_global_pick,[our]_path_cost_global_pick,[our]_reached_goal_neighbor_pick,[our]_path_cost_neighbor_pick,[RRTX]_reached_goal,[RRTX]_path_cost
-"(0, 0)","(140, 100)",10,True,527.6412384598367,0,0,0,0
-"(0, 0)","(140, 100)",15,False,1011.005091231676,0,0,0,0
-"(0, 0)","(140, 100)",20,False,2138.090552813549,0,0,0,0
-"(0, 0)","(140, 100)",25,True,352.6722340387418,0,0,0,0
-"(0, 0)","(140, 100)",30,True,341.08630899876584,0,0,0,0
