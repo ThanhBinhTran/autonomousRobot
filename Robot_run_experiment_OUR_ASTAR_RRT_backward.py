@@ -412,7 +412,7 @@ if __name__ == '__main__':
         step = 50
     elif map_case == 1:
         map_name = '_map_deadend.csv' # 100x100 size
-        istart, iend = 20, 100 
+        istart, iend = 20, 21 
         jstart, jend = 20, 100
         step = 10
     elif map_case == 2:
