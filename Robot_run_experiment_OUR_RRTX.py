@@ -80,8 +80,8 @@ if __name__ == '__main__':
     elif map_case == 2:
         map_name = '_map_bugtrap.csv' # 200x200 size
         node_density = 5
-        istart, iend = 80, 81
-        jstart, jend = 120, 200
+        istart, iend = 160, 200
+        jstart, jend = 20, 200
         # 80 100 already
         step = 20
     elif map_case == 3:
