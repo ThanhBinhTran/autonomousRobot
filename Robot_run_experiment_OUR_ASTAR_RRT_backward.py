@@ -436,7 +436,7 @@ if __name__ == '__main__':
     obstacles_check = Obstacles()
     obstacles_check.read(map_name=map_name)
     obstacles_check.line_segments()
-
+    num_iter = 50
     for i in range(istart, iend, step):
         for j in range(jstart, jend, step):
             goal = i, j

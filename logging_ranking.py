@@ -27,9 +27,21 @@ class Logging_ranking:
             os.makedirs(paths)
         
         fname = f"s({start[0]}_{start[1]})_g({goal[0]}_{goal[1]})_radius{radius}_step{step_size}_sample{sample_size}.csv"
-        #fname = f"s({start[0]}_{start[1]})_g({goal[0]}_{goal[1]})_radius{radius}_step{step_size}_sample{sample_size}.pkl"
         return os.path.join(paths, fname)
+    
+    @staticmethod
+    def set_logging_name_pkl(map_name, start, goal, radius=10, step_size=5, sample_size=10):
+        if map_name is None:
+            return None
         
+        mn = map_name.replace(".csv", '')
+        paths = os.path.join(Program_config.result_repo, Program_config.treedata_repo, mn)
+        if not os.path.exists(paths):
+            os.makedirs(paths)
+        
+        fname = f"s({start[0]}_{start[1]})_g({goal[0]}_{goal[1]})_radius{radius}_step{step_size}_sample{sample_size}.pkl"
+        return os.path.join(paths, fname)
+    
     @staticmethod
     def is_existed_log_file(file_name):
         return os.path.exists(file_name)
