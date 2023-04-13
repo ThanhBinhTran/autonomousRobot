@@ -156,7 +156,7 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, num_iter=1,
             # if open_points_type == Robot_base.Open_points_type.RRTstar:
             #    plotter.tree(RRT_star,color_mode=TreeColor.by_cost)
 
-        robot.print_infomation()
+        #robot.print_infomation()
 
         # Run n times for debugging
         if iter_count == num_iter or robot.finish():

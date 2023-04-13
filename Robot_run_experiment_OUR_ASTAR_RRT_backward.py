@@ -311,6 +311,8 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
         asp_path_cost = path_cost(robot.asp)
 
         if len(robot.skeleton_path) > 2:
+            if case_count > 10:
+            	break
             (Astar_path, Astar_path_cost, Astar_time), (RRTstar_path, RRTstar_path_cost, RRTstar_time) = \
                 compare_Astar_RRTstar(robot=robot, plotter=plotter, obstacles=obstacles,
                                       save_image=save_image, case_count=case_count,
@@ -431,7 +433,7 @@ if __name__ == '__main__':
     obstacles_check = Obstacles()
     obstacles_check.read(map_name=map_name)
     obstacles_check.line_segments()
-    num_iter = 50
+    num_iter = 100
     for i in range(istart, iend, step):
         for j in range(jstart, jend, step):
             goal = i, j

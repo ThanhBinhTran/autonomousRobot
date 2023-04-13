@@ -74,14 +74,15 @@ if __name__ == '__main__':
     elif map_case == 1:
         map_name = '_map_deadend.csv' # 100x100 size
         node_density = 5
-        istart, iend = 60, 61 
-        jstart, jend = 70, 100
+        istart, iend = 20, 100 
+        jstart, jend = 20, 100
         step = 10
     elif map_case == 2:
         map_name = '_map_bugtrap.csv' # 200x200 size
         node_density = 5
-        istart, iend = 20, 200
+        istart, iend = 160, 200
         jstart, jend = 20, 200
+        # 80 100 already
         step = 20
     elif map_case == 3:
         map_name = '_map_blocks.csv' # 300X 350 size
