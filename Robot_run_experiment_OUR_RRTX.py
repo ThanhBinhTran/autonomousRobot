@@ -74,14 +74,14 @@ if __name__ == '__main__':
     elif map_case == 1:
         map_name = '_map_deadend.csv' # 100x100 size
         node_density = 5
-        istart, iend = 60, 61 
-        jstart, jend = 70, 100
+        istart, iend = 20, 100 
+        jstart, jend = 20, 100
         step = 10
     elif map_case == 2:
         map_name = '_map_bugtrap.csv' # 200x200 size
         node_density = 5
-        istart, iend = 20, 200
-        jstart, jend = 20, 200
+        istart, iend = 20, 21
+        jstart, jend = 60, 200
         step = 20
     elif map_case == 3:
         map_name = '_map_blocks.csv' # 300X 350 size
@@ -137,7 +137,7 @@ if __name__ == '__main__':
                                    robotC.reach_goal, robotC.cost
                                    ])
         
-            result_full_path = os.path.join(resultpath, f"g({goal[0]}_{goal[1]})_OUR_RRTX_improve.csv")
+            result_full_path = os.path.join(resultpath, f"_g({goal[0]}_{goal[1]})_OUR_RRTX_improve.csv")
             result.set_file_name(result_full_path)
             result.write_csv()
             result.clear_data()
