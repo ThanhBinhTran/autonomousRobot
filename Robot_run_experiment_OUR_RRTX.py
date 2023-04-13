@@ -74,8 +74,8 @@ if __name__ == '__main__':
     elif map_case == 1:
         map_name = '_map_deadend.csv' # 100x100 size
         node_density = 5
-        istart, iend = 20, 100 
-        jstart, jend = 20, 100
+        istart, iend = 60, 61 
+        jstart, jend = 70, 100
         step = 10
     elif map_case == 2:
         map_name = '_map_bugtrap.csv' # 200x200 size
@@ -111,8 +111,9 @@ if __name__ == '__main__':
 
             if not obstacles_check.valid_start_goal(start=start, goal=goal):
                 continue
-            for r in range(10, 36, 5):
+            for r in range(10, 35, 5):
                 robot_vision = r
+                num_iter = 50
                 robotA = robot_OUR(start=start, goal=goal, map_name=map_name, num_iter=num_iter,
                                    robot_vision=robot_vision,
                                    open_points_type=Robot_base.Open_points_type.RRTstar,
@@ -123,6 +124,7 @@ if __name__ == '__main__':
                                    open_points_type=Robot_base.Open_points_type.RRTstar,
                                    picking_strategy=Robot_base.Picking_strategy.neighbor_first, node_density=node_density,
                                    experiment=True, save_image=True, experiment_title=experiment_title)
+                num_iter = 200
                 robotC = robot_RRTX(start_cooridinate=start, goal_coordinate=goal, map_name=map_name,
                                     num_iter=num_iter, robot_vision=robot_vision,
                                     RRT_radius=5, RRT_step_size=5, RRT_node_density=node_density,
