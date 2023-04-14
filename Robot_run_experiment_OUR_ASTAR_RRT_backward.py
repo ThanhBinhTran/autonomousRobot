@@ -399,7 +399,7 @@ if __name__ == '__main__':
         picking_strategy = Robot_base.Picking_strategy.neighbor_first
 
     start = 0, 0
-    map_case = 1
+    map_case = 2
 
 
     if map_case == 0:
