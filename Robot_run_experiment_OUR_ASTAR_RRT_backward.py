@@ -119,6 +119,7 @@ def compare_Astar_RRTstar(robot: Robot, plotter: Plotter, obstacles: Obstacles, 
             plotter.point(robot.next_point, ls_nextpt)
         plotter.path(Astar_path, "-r")
         plotter.goal(robot.goal)
+        plotter.show_grid()
         if save_image:
             plotter.save_figure(f"{result_fname}_case{case_count}_Astar", file_extension=".png")
 
@@ -159,6 +160,7 @@ def compare_Astar_RRTstar(robot: Robot, plotter: Plotter, obstacles: Obstacles, 
             RRTstar_path_cost = -10  # return invalid value
             RRTstar_time = -10
         plotter.goal(robot.goal)
+        plotter.show_grid()
         if save_image:
             plotter.save_figure(f"{result_fname}_case{case_count}_RRTstar", file_extension=".png")
 
@@ -196,19 +198,14 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
     csv_head_time = []
     csv_head_cost = []
     csv_head_turn = []
-    if platform.system() == 'Linux':
-        if enable_improve:
-            csv_head_time = ["ASP_improve_time", "Astar_time", "RRTStar_time"]
-            csv_head_cost = ["ASP_improve_path_cost", "Astar_path_cost", "RRTStar_path_cost"]
-            csv_head_turn = ["ASP_improve_path_turn", "Astar_path_turn", "RRTStar_path_turn"]
-        else:
-            csv_head_time = ["ASP_time", "ASP_time", "Astar_time", "RRTStar_time"]
-            csv_head_cost = ["ASP_path_cost", "ASP_path_cost", "Astar_path_cost", "RRTStar_path_cost"]
-            csv_head_turn = ["ASP_path_turn", "ASP_path_turn", "Astar_path_turn", "RRTStar_path_turn"]
+    if platform.system() == 'Linux' and enable_improve:
+        csv_head_time = ["start", "goal", "range", "ASP_improve_time", "Astar_time", "RRTStar_time"]
+        csv_head_cost = ["start", "goal", "range", "ASP_improve_path_cost", "Astar_path_cost", "RRTStar_path_cost"]
+        csv_head_turn = ["start", "goal", "range", "ASP_improve_path_turn", "Astar_path_turn", "RRTStar_path_turn"]
     else:
-        csv_head_time = ["ASP_time", "Astar_time", "RRTStar_time"]
-        csv_head_cost = ["ASP_path_cost", "Astar_path_cost", "RRTStar_path_cost"]
-        csv_head_turn = ["ASP_path_turn", "Astar_path_turn", "RRTStar_path_turn"]
+        csv_head_time = ["start", "goal", "range", "ASP_time", "Astar_time", "RRTStar_time"]
+        csv_head_cost = ["start", "goal", "range", "ASP_path_cost", "Astar_path_cost", "RRTStar_path_cost"]
+        csv_head_turn = ["start", "goal", "range", "ASP_path_turn", "Astar_path_turn", "RRTStar_path_turn"]
 
     result_fname = Result_Log.prepare_name(experiment_title=experiment_title, map_name=map_name,
                                            start=start, goal=goal,range=robot_vision)
@@ -337,9 +334,9 @@ def robot_main(start=(0, 0), goal=(0, 1), map_name=None, world_name=None, num_it
             Astar_path_turn = get_path_turn(Astar_path)
             RRTstar_path_turn = get_path_turn(RRTstar_path)
 
-            result_time.add_result([l_stime + a_time, Astar_time, RRTstar_time])
-            result_cost.add_result([asp_path_cost, Astar_path_cost, RRTstar_path_cost])
-            result_turn.add_result([ASP_path_turn, Astar_path_turn, RRTstar_path_turn])
+            result_time.add_result([start, goal, robot_vision, l_stime + a_time, Astar_time, RRTstar_time])
+            result_cost.add_result([start, goal, robot_vision, asp_path_cost, Astar_path_cost, RRTstar_path_cost])
+            result_turn.add_result([start, goal, robot_vision, ASP_path_turn, Astar_path_turn, RRTstar_path_turn])
 
             case_count += 1
 
@@ -412,7 +409,7 @@ if __name__ == '__main__':
         step = 50
     elif map_case == 1:
         map_name = '_map_deadend.csv' # 100x100 size
-        istart, iend = 20, 21 
+        istart, iend = 70, 100 
         jstart, jend = 20, 100
         step = 10
     elif map_case == 2:
@@ -440,7 +437,6 @@ if __name__ == '__main__':
             print(f"goal {goal}")
             # check if robot is goal reachable or not
             if not obstacles_check.valid_start_goal(start=start, goal=goal):
-                print(f"invalid start {start} or goal {goal}")
                 continue
 
             robot_main(start=start, goal=goal, num_iter=num_iter, map_name=map_name,
